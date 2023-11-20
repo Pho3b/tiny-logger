@@ -1,0 +1,13 @@
+stages:
+  - test
+
+run:tests:
+  stage: test
+  image: golang:1
+  rules:
+    - if: $CI_MERGE_REQUEST_IID || $CI_COMMIT_BRANCH == "main"
+      when: always
+  before_script:
+    - go mod vendor
+  script:
+    - go test ./...

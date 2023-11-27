@@ -6,37 +6,37 @@ var packageLogLvl = LogLevel{
 	envVariable: "",
 }
 
-// Debug checks whether the packageLogLvl is sufficiently high and calls the debug() method from the package if it is.
+// Debug checks whether the packageLogLvl is sufficiently high and calls the logDebug() method from the package if it is.
 func Debug(args ...interface{}) {
 	if packageLogLvl.lvl >= DebugLvl {
-		debug(args...)
+		logDebug(args...)
 	}
 }
 
-// Info checks whether the packageLogLvl is sufficiently high and calls the info() method from the package if it is.
+// Info checks whether the packageLogLvl is sufficiently high and calls the logInfo() method from the package if it is.
 func Info(args ...interface{}) {
 	if packageLogLvl.lvl >= InfoLvl {
-		info(args...)
+		logInfo(args...)
 	}
 }
 
-// Warn checks whether the packageLogLvl is sufficiently high and calls the warn() method from the package if it is.
+// Warn checks whether the packageLogLvl is sufficiently high and calls the logWarn() method from the package if it is.
 func Warn(args ...interface{}) {
 	if packageLogLvl.lvl >= WarnLvl {
-		warn(args...)
+		logWarn(args...)
 	}
 }
 
-// Error checks whether the packageLogLvl is sufficiently high and calls the error() method from the package if it is.
+// Error checks whether the packageLogLvl is sufficiently high and calls the logError() method from the package if it is.
 func Error(args ...interface{}) {
 	if packageLogLvl.lvl >= ErrorLvl {
-		error(args...)
+		logError(args...)
 	}
 }
 
-// FatalError calls the fatalError() package method, see its method documentation for more info.
+// FatalError calls the logFatalError() package method, see its method documentation for more logInfo.
 func FatalError(args ...interface{}) {
-	fatalError(args...)
+	logFatalError(args...)
 }
 
 // LogLvlName returns the package Logger Log Level Name.

@@ -76,7 +76,7 @@ func TestPackageLogger_InfoNotLogging(t *testing.T) {
 	_ = w.Close()
 	_, _ = io.Copy(&buf, r)
 	os.Stdout = originalStdOut
-	assert.NotContainsf(t, buf.String(), testLog, "error-msg")
+	assert.NotContainsf(t, buf.String(), testLog, "logError-msg")
 }
 
 func TestPackageLogger_Debug(t *testing.T) {

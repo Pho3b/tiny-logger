@@ -4,37 +4,37 @@ type Logger struct {
 	logLvl LogLevel
 }
 
-// Debug checks whether the instance logLvl is sufficiently high and calls the debug() method accordingly.
+// Debug checks whether the instance logLvl is sufficiently high and calls the logDebug() method accordingly.
 func (l *Logger) Debug(args ...interface{}) {
 	if l.logLvl.lvl >= DebugLvl {
-		debug(args...)
+		logDebug(args...)
 	}
 }
 
-// Info checks whether the instance logLvl is sufficiently high and calls the info() method accordingly.
+// Info checks whether the instance logLvl is sufficiently high and calls the logInfo() method accordingly.
 func (l *Logger) Info(args ...interface{}) {
 	if l.logLvl.lvl >= InfoLvl {
-		info(args...)
+		logInfo(args...)
 	}
 }
 
-// Warn checks whether the instance logLvl is sufficiently high and calls the warn() method accordingly.
+// Warn checks whether the instance logLvl is sufficiently high and calls the logWarn() method accordingly.
 func (l *Logger) Warn(args ...interface{}) {
 	if l.logLvl.lvl >= WarnLvl {
-		warn(args...)
+		logWarn(args...)
 	}
 }
 
-// Error checks whether the instance logLvl is sufficiently high and calls the error() method accordingly.
+// Error checks whether the instance logLvl is sufficiently high and calls the logError() method accordingly.
 func (l *Logger) Error(args ...interface{}) {
 	if l.logLvl.lvl >= ErrorLvl {
-		error(args...)
+		logError(args...)
 	}
 }
 
-// FatalError calls the fatalError() package method, see its method documentation for more info.
+// FatalError calls the logFatalError() package method, see its method documentation for more logInfo.
 func (l *Logger) FatalError(args ...interface{}) {
-	fatalError(args...)
+	logFatalError(args...)
 }
 
 // LogLvlName returns the Logger current set Log Level Name.

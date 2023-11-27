@@ -38,43 +38,43 @@ var logLvlNameToInt = map[string]int8{
 	DebugLvlName: DebugLvl,
 }
 
-// debug prints the given objects as strings to the 'standard output' and colors the prefix in GREY if
+// logDebug prints the given objects as strings to the 'standard output' and colors the prefix in GREY if
 // supported by the operating system.
-func debug(args ...interface{}) {
+func logDebug(args ...interface{}) {
 	if len(args) > 0 {
 		_, _ = fmt.Fprintln(os.Stdout, fmt.Sprintf("%vDEBUG:%v %s", gray, reset, buildMsg(args...)))
 	}
 }
 
-// info prints the given objects as strings to the 'standard output' and colors the prefix in CYAN in
+// logInfo prints the given objects as strings to the 'standard output' and colors the prefix in CYAN in
 // supported by the operating system.
-func info(args ...interface{}) {
+func logInfo(args ...interface{}) {
 	if len(args) > 0 {
 		_, _ = fmt.Fprintln(os.Stdout, fmt.Sprintf("%vINFO:%v %s", cyan, reset, buildMsg(args...)))
 	}
 }
 
-// warn prints the given objects as strings to the 'standard output' and colors the prefix in YELLOW if
+// logWarn prints the given objects as strings to the 'standard output' and colors the prefix in YELLOW if
 // supported by the operating system.
-func warn(args ...interface{}) {
+func logWarn(args ...interface{}) {
 	if len(args) > 0 {
 		_, _ = fmt.Fprintln(os.Stdout, fmt.Sprintf("%vWARNING:%v %s", yellow, reset, buildMsg(args...)))
 	}
 }
 
-// error prints the given objects as strings to the 'standard error' and colors the prefix in RED if
+// logError prints the given objects as strings to the 'standard logError' and colors the prefix in RED if
 // supported by the operating system.
 // It does not print anything if all the given args result to be nil.
-func error(args ...interface{}) {
+func logError(args ...interface{}) {
 	if len(args) > 0 && !areAllNil(args...) {
 		_, _ = fmt.Fprintln(os.Stderr, fmt.Sprintf("%vERROR:%v %s", red, reset, buildMsg(args...)))
 	}
 }
 
-// fatalError prints the given objects as strings to the 'standard error' and colors the prefix in MAGENTA if
+// logFatalError prints the given objects as strings to the 'standard logError' and colors the prefix in MAGENTA if
 // supported by the operating system, it also exits the current process.
-// fatalError does not print anything and does not exit the current process if all the given args result to be nil.
-func fatalError(args ...interface{}) {
+// logFatalError does not print anything and does not exit the current process if all the given args result to be nil.
+func logFatalError(args ...interface{}) {
 	if len(args) > 0 && !areAllNil(args...) {
 		_, _ = fmt.Fprintln(os.Stderr, fmt.Sprintf("%vFATAL ERROR:%v %s", lightMagenta, reset, buildMsg(args...)))
 		os.Exit(1)

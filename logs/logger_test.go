@@ -140,4 +140,5 @@ func TestLogger_BuildingMethods(t *testing.T) {
 	assert.IsType(t, &Logger{}, logger)
 	assert.IsType(t, &Logger{}, logger.SetLogLvl(DebugLvlName))
 	assert.IsType(t, &Logger{}, logger.SetLogLvlEnvVariable(InfoLvlName))
+	assert.IsType(t, &Logger{}, nil)
 }

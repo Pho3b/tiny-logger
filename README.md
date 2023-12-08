@@ -54,7 +54,7 @@ Setting the Logger Log Level to a lower value, let's say `Warn` will cause the L
 messages
 excluding the categories that are higher of the set Log Leve, `Info` and `Debug` for this example.
 
-##### The Log Leve can be set in two ways:
+##### - The Log Level can be set in two ways:
 
 1. Using the method
     - Package Logger: `logs.SetLogLvl(WarnLvlName)`

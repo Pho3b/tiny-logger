@@ -37,28 +37,32 @@ func (l *Logger) FatalError(args ...interface{}) {
 	logFatalError(args...)
 }
 
-// LogLvlName returns the Logger current set Log Level Name.
-func (l *Logger) LogLvlName() string {
+// GetLogLvlName returns the Logger current set Log Level Name.
+func (l *Logger) GetLogLvlName() string {
 	return logLvlIntToName[l.logLvl.lvl]
 }
 
-// LogLvlIntValue returns the Logger current set Log Level int8 value.
-func (l *Logger) LogLvlIntValue() int8 {
+// GetLogLvlIntValue returns the Logger current set Log Level int8 value.
+func (l *Logger) GetLogLvlIntValue() int8 {
 	return l.logLvl.lvl
 }
 
 // SetLogLvl updates the Logger instance logLvl.lvl property if the given logLvlName is valid,
 // otherwise sets the logLvl.lvl to DebugLvlName.
-func (l *Logger) SetLogLvl(logLvlName string) {
+func (l *Logger) SetLogLvl(logLvlName string) *Logger {
 	l.logLvl.lvl = retrieveLogLvlIntFromName(logLvlName)
+
+	return l
 }
 
-// SetLogLvlEnvVariable updates the Logger instance logLvl.lvl property attempting to
+// SetLogLvlEnvVariable updates the Logger instance logLvl.lvl property  attempting to
 // retrieve the log level value of the given envVariableName.
 // If the env variable is not found sets DebugLvlName.
-func (l *Logger) SetLogLvlEnvVariable(envVariableName string) {
+func (l *Logger) SetLogLvlEnvVariable(envVariableName string) *Logger {
 	l.logLvl.envVariable = envVariableName
 	l.logLvl.lvl = retrieveLogLvlFromEnv(l.logLvl.envVariable)
+
+	return l
 }
 
 // NewLogger returns a new logger with the logLvl set to 'DebugLvl' by default.

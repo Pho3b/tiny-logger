@@ -17,13 +17,13 @@ func TestPackageLoggerLogLvl(t *testing.T) {
 
 	_ = os.Setenv(testLogsLvlVar1, WarnLvlName)
 	SetLogLvlEnvVariable(testLogsLvlVar1)
-	assert.Equal(t, WarnLvl, LogLvlIntValue())
-	assert.Equal(t, WarnLvlName, LogLvlName())
+	assert.Equal(t, WarnLvl, GetLogLvlIntValue())
+	assert.Equal(t, WarnLvlName, GetLogLvlName())
 
 	_ = os.Setenv(testLogsLvlVar2, InfoLvlName)
 	SetLogLvlEnvVariable(testLogsLvlVar2)
-	assert.Equal(t, InfoLvl, LogLvlIntValue())
-	assert.NotEqual(t, WarnLvl, LogLvlIntValue())
+	assert.Equal(t, InfoLvl, GetLogLvlIntValue())
+	assert.NotEqual(t, WarnLvl, GetLogLvlIntValue())
 
 	SetLogLvl(DebugLvlName)
 	_ = os.Unsetenv(testLogsLvlVar1)
@@ -31,15 +31,15 @@ func TestPackageLoggerLogLvl(t *testing.T) {
 }
 
 func TestPackageLoggerGetLogLvlIntValue(t *testing.T) {
-	assert.Equal(t, DebugLvl, LogLvlIntValue())
+	assert.Equal(t, DebugLvl, GetLogLvlIntValue())
 
 	SetLogLvl(ErrorLvlName)
-	assert.Equal(t, ErrorLvl, LogLvlIntValue())
+	assert.Equal(t, ErrorLvl, GetLogLvlIntValue())
 
 	testLogsLvlVar1 := "MY_INSTANCE_LOGS_LVL"
 	_ = os.Setenv(testLogsLvlVar1, InfoLvlName)
 	SetLogLvlEnvVariable(testLogsLvlVar1)
-	assert.Equal(t, InfoLvl, LogLvlIntValue())
+	assert.Equal(t, InfoLvl, GetLogLvlIntValue())
 
 	SetLogLvl(DebugLvlName)
 	_ = os.Unsetenv(testLogsLvlVar1)

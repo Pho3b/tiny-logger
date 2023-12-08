@@ -39,13 +39,13 @@ func FatalError(args ...interface{}) {
 	logFatalError(args...)
 }
 
-// LogLvlName returns the package Logger Log Level Name.
-func LogLvlName() string {
+// GetLogLvlName returns the package Logger Log Level Name.
+func GetLogLvlName() string {
 	return packageLogLvl.LvlName()
 }
 
-// LogLvlIntValue returns the package Logger Log Level int8 value.
-func LogLvlIntValue() int8 {
+// GetLogLvlIntValue returns the package Logger Log Level int8 value.
+func GetLogLvlIntValue() int8 {
 	return packageLogLvl.lvl
 }
 

@@ -32,30 +32,30 @@ func TestLoggerLogLvl(t *testing.T) {
 func TestLogger_GetLogLvlIntValue(t *testing.T) {
 	testLogsLvlVar1 := "MY_INSTANCE_LOGS_LVL"
 	logger := NewLogger()
-	assert.Equal(t, DebugLvl, logger.LogLvlIntValue())
+	assert.Equal(t, DebugLvl, logger.GetLogLvlIntValue())
 
 	logger.SetLogLvl(WarnLvlName)
-	assert.Equal(t, WarnLvlName, logger.LogLvlName())
+	assert.Equal(t, WarnLvlName, logger.GetLogLvlName())
 
 	_ = os.Setenv(testLogsLvlVar1, InfoLvlName)
 	logger.SetLogLvlEnvVariable(testLogsLvlVar1)
-	assert.Equal(t, InfoLvlName, logger.LogLvlName())
+	assert.Equal(t, InfoLvlName, logger.GetLogLvlName())
 
 	_ = os.Unsetenv(testLogsLvlVar1)
 }
 
 func TestLogger_SetLogLvl(t *testing.T) {
 	logger := NewLogger()
-	assert.Equal(t, DebugLvlName, logger.LogLvlName())
+	assert.Equal(t, DebugLvlName, logger.GetLogLvlName())
 
 	logger.SetLogLvl(WarnLvlName)
-	assert.Equal(t, WarnLvlName, logger.LogLvlName())
+	assert.Equal(t, WarnLvlName, logger.GetLogLvlName())
 
 	logger.SetLogLvl(ErrorLvlName)
-	assert.Equal(t, ErrorLvlName, logger.LogLvlName())
+	assert.Equal(t, ErrorLvlName, logger.GetLogLvlName())
 
 	logger.SetLogLvl("invalid log level string")
-	assert.Equal(t, DebugLvlName, logger.LogLvlName())
+	assert.Equal(t, DebugLvlName, logger.GetLogLvlName())
 }
 
 func TestLogger_Info(t *testing.T) {
@@ -133,4 +133,11 @@ func TestLogger_Error(t *testing.T) {
 	_, _ = io.Copy(&buf, r)
 	os.Stderr = originalStdErr
 	assert.Contains(t, buf.String(), testLog)
+}
+
+func TestLogger_BuildingMethods(t *testing.T) {
+	logger := NewLogger()
+	assert.IsType(t, &Logger{}, logger)
+	assert.IsType(t, &Logger{}, logger.SetLogLvl(DebugLvlName))
+	assert.IsType(t, &Logger{}, logger.SetLogLvlEnvVariable(InfoLvlName))
 }

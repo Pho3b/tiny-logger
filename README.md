@@ -52,7 +52,7 @@ printed to the
 output since `Debug` is the highest in the hierarchy.    
 Setting the Logger Log Level to a lower value, let's say `Warn` will cause the Logger to print only `Warn` and `Error`
 messages
-excluding the categories that are higher of the set Log Leve, `Info` and `Debug` for this example.
+excluding the categories that are higher of the set Log Level, `Info` and `Debug` for this example.
 
 #### The Log Level can be set in two ways:
 

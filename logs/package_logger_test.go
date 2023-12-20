@@ -3,6 +3,7 @@ package logs
 import (
 	"bytes"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/docebo/libraries/go/tiny-logger/colors"
 	"io"
 	"os"
 	"testing"
@@ -122,4 +123,23 @@ func TestPackageLogger_Error(t *testing.T) {
 	_, _ = io.Copy(&buf, r)
 	os.Stderr = originalStdErr
 	assert.Contains(t, buf.String(), testLog)
+}
+
+func TestPackageLogger_Log(t *testing.T) {
+	var buf bytes.Buffer
+	testLog := "my GENERIC log test"
+	originalStdOut := os.Stdout
+	r, w, _ := os.Pipe()
+
+	os.Stdout = w
+	Log("jldfald", testLog)
+	Log(colors.Black, testLog)
+	Log(colors.Cyan, testLog)
+
+	_ = w.Close()
+	_, _ = io.Copy(&buf, r)
+	os.Stdout = originalStdOut
+	assert.Contains(t, buf.String(), colors.White)
+	assert.Contains(t, buf.String(), colors.Black)
+	assert.Contains(t, buf.String(), colors.Cyan)
 }

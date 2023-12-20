@@ -1,7 +1,15 @@
 package logs
 
+import "gitlab.com/docebo/libraries/go/tiny-logger/colors"
+
 type Logger struct {
 	logLvl LogLevel
+}
+
+// Log calls the underlying log() method from the package.
+// It always prints the given messages because it does not take the packageLogLvl into account.
+func (l *Logger) Log(color colors.Color, args ...interface{}) {
+	log(color, args...)
 }
 
 // Debug checks whether the instance logLvl is sufficiently high and calls the logDebug() method accordingly.

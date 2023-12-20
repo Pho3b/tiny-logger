@@ -2,6 +2,7 @@ package logs
 
 import (
 	"fmt"
+	"gitlab.com/docebo/libraries/go/tiny-logger/colors"
 	"os"
 	"strings"
 )
@@ -38,11 +39,25 @@ var logLvlNameToInt = map[string]int8{
 	DebugLvlName: DebugLvl,
 }
 
+// log prints the given objects to the 'standard output' coloring the messages with the given Color.
+// If the given color is not valid, the message is printed in WHITE by default.
+//
+// HINT: Colors can be retrieved from the 'colors' package
+func log(color colors.Color, args ...interface{}) {
+	if len(args) > 0 {
+		if !colors.IsColorValid(color) {
+			color = colors.White
+		}
+
+		_, _ = fmt.Fprintln(os.Stdout, fmt.Sprintf("%v%s%v ", color, buildMsg(args...), colors.Reset))
+	}
+}
+
 // logDebug prints the given objects as strings to the 'standard output' and colors the prefix in GREY if
 // supported by the operating system.
 func logDebug(args ...interface{}) {
 	if len(args) > 0 {
-		_, _ = fmt.Fprintln(os.Stdout, fmt.Sprintf("%vDEBUG:%v %s", gray, reset, buildMsg(args...)))
+		_, _ = fmt.Fprintln(os.Stdout, fmt.Sprintf("%vDEBUG:%v %s", colors.Gray, colors.Reset, buildMsg(args...)))
 	}
 }
 
@@ -50,7 +65,7 @@ func logDebug(args ...interface{}) {
 // supported by the operating system.
 func logInfo(args ...interface{}) {
 	if len(args) > 0 {
-		_, _ = fmt.Fprintln(os.Stdout, fmt.Sprintf("%vINFO:%v %s", cyan, reset, buildMsg(args...)))
+		_, _ = fmt.Fprintln(os.Stdout, fmt.Sprintf("%vINFO:%v %s", colors.Cyan, colors.Reset, buildMsg(args...)))
 	}
 }
 
@@ -58,7 +73,7 @@ func logInfo(args ...interface{}) {
 // supported by the operating system.
 func logWarn(args ...interface{}) {
 	if len(args) > 0 {
-		_, _ = fmt.Fprintln(os.Stdout, fmt.Sprintf("%vWARNING:%v %s", yellow, reset, buildMsg(args...)))
+		_, _ = fmt.Fprintln(os.Stdout, fmt.Sprintf("%vWARNING:%v %s", colors.Yellow, colors.Reset, buildMsg(args...)))
 	}
 }
 
@@ -67,7 +82,7 @@ func logWarn(args ...interface{}) {
 // It does not print anything if all the given args result to be nil.
 func logError(args ...interface{}) {
 	if len(args) > 0 && !areAllNil(args...) {
-		_, _ = fmt.Fprintln(os.Stderr, fmt.Sprintf("%vERROR:%v %s", red, reset, buildMsg(args...)))
+		_, _ = fmt.Fprintln(os.Stderr, fmt.Sprintf("%vERROR:%v %s", colors.Red, colors.Reset, buildMsg(args...)))
 	}
 }
 
@@ -76,7 +91,7 @@ func logError(args ...interface{}) {
 // logFatalError does not print anything and does not exit the current process if all the given args result to be nil.
 func logFatalError(args ...interface{}) {
 	if len(args) > 0 && !areAllNil(args...) {
-		_, _ = fmt.Fprintln(os.Stderr, fmt.Sprintf("%vFATAL ERROR:%v %s", lightMagenta, reset, buildMsg(args...)))
+		_, _ = fmt.Fprintln(os.Stderr, fmt.Sprintf("%vFATAL ERROR:%v %s", colors.Magenta, colors.Reset, buildMsg(args...)))
 		os.Exit(1)
 	}
 }

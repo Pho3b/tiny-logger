@@ -6,7 +6,7 @@ Logging with this library can be achieved in two main ways:
 1. Using the Package Level Logger
 2. Instantiating and using a new Logger struct
 
-Both of them implement the same features and methods, it just depends on wether you need
+Both of them implement the same features and methods, it just depends on whether you need
 a new Logger instance struct or not.
 
 ### Package Logger
@@ -18,6 +18,7 @@ logs.Warn("my warning test") // stdout: 'WARN: my warning test'
 logs.Info("my", "into", "test", 2) // stdout: 'INFO: my info test 2'
 logs.Debug("hey", "check this", "debug") // stdout: 'DEBUG: hey check this debug'
 logs.Error("here is the error") // stderr: 'ERROR: here is the error'
+logs.Log(colors.Red, "Here is a Red Msg") // stdout: 'Here is a Red Msg' (Colored Red)
 ```
 
 ### Struct Logger
@@ -31,6 +32,7 @@ logger.Warn("my warning test") // stdout: 'WARN: my warning test'
 logger.Info("my", "into", "test", 2) // stdout: 'INFO: my info test 2'
 logger.Debug("hey", "check this", "debug") // stdout: 'DEBUG: hey check this debug'
 logger.Error("here is the error") // stderr: 'ERROR: here is the error'
+logger.Log(colors.Red, "Here is a Red Msg") // stdout: 'Here is a Red Msg' (Colored Red)
 ```
 
 ### Log Levels

@@ -1,74 +1,79 @@
 package logs
 
-import "gitlab.com/docebo/libraries/go/tiny-logger/colors"
+import (
+	"gitlab.com/docebo/libraries/go/tiny-logger/internal/shared"
+	"gitlab.com/docebo/libraries/go/tiny-logger/logs/colors"
+	"gitlab.com/docebo/libraries/go/tiny-logger/logs/configs"
+	"gitlab.com/docebo/libraries/go/tiny-logger/logs/log_level"
+)
 
 type Logger struct {
-	logLvl LogLevel
+	conf *configs.TLConfigs
 }
 
 // Log calls the underlying log() method from the package.
 // It always prints the given messages because it does not take the packageLogLvl into account.
 func (l *Logger) Log(color colors.Color, args ...interface{}) {
-	log(color, args...)
+	shared.Log(color, args...)
 }
 
 // Debug checks whether the instance logLvl is sufficiently high and calls the logDebug() method accordingly.
 func (l *Logger) Debug(args ...interface{}) {
-	if l.logLvl.lvl >= DebugLvl {
-		logDebug(args...)
+	if l.conf.LogLvl.Lvl >= log_level.DebugLvl {
+		shared.LogDebug(args...)
 	}
 }
 
 // Info checks whether the instance logLvl is sufficiently high and calls the logInfo() method accordingly.
 func (l *Logger) Info(args ...interface{}) {
-	if l.logLvl.lvl >= InfoLvl {
-		logInfo(args...)
+	if l.conf.LogLvl.Lvl >= log_level.InfoLvl {
+		shared.LogInfo(args...)
 	}
 }
 
 // Warn checks whether the instance logLvl is sufficiently high and calls the logWarn() method accordingly.
 func (l *Logger) Warn(args ...interface{}) {
-	if l.logLvl.lvl >= WarnLvl {
-		logWarn(args...)
+	if l.conf.LogLvl.Lvl >= log_level.WarnLvl {
+		shared.LogWarn(args...)
 	}
 }
 
 // Error checks whether the instance logLvl is sufficiently high and calls the logError() method accordingly.
 func (l *Logger) Error(args ...interface{}) {
-	if l.logLvl.lvl >= ErrorLvl {
-		logError(args...)
+	if l.conf.LogLvl.Lvl >= log_level.ErrorLvl {
+		shared.LogError(args...)
 	}
 }
 
 // FatalError calls the logFatalError() package method, see its method documentation for more logInfo.
 func (l *Logger) FatalError(args ...interface{}) {
-	logFatalError(args...)
+	shared.LogFatalError(args...)
 }
 
 // GetLogLvlName returns the Logger current set Log Level Name.
-func (l *Logger) GetLogLvlName() LogLvlName {
-	return logLvlIntToName[l.logLvl.lvl]
+func (l *Logger) GetLogLvlName() log_level.LogLvlName {
+	return log_level.LogLvlIntToName[l.conf.LogLvl.Lvl]
 }
 
 // GetLogLvlIntValue returns the Logger current set Log Level int8 value.
 func (l *Logger) GetLogLvlIntValue() int8 {
-	return l.logLvl.lvl
+	return l.conf.LogLvl.Lvl
 }
 
-// SetLogLvl updates the Logger instance logLvl.lvl property if the given logLvlName is valid,
-// otherwise sets the logLvl.lvl to DebugLvlName.
-func (l *Logger) SetLogLvl(logLvlName LogLvlName) *Logger {
-	l.logLvl.lvl = retrieveLogLvlIntFromName(logLvlName)
+// SetLogLvl updates the Logger instance logLvl.Lvl property if the given logLvlName is valid,
+// otherwise sets the logLvl.Lvl to DebugLvlName.
+func (l *Logger) SetLogLvl(logLvlName log_level.LogLvlName) *Logger {
+	l.conf.LogLvl.Lvl = log_level.RetrieveLogLvlIntFromName(logLvlName)
 
 	return l
 }
 
-// SetLogLvlEnvVariable updates the Logger instance logLvl.lvl property  attempting to
+// SetLogLvlEnvVariable updates the Logger instance logLvl.Lvl property  attempting to
 // retrieve the log level value of the given envVariableName.
 // If the env variable is not found sets DebugLvlName.
 func (l *Logger) SetLogLvlEnvVariable(envVariableName string) *Logger {
-	l.logLvl.envVariable = envVariableName
-	l.logLvl.lvl = retrieveLogLvlFromEnv(l.logLvl.envVariable)
+	l.conf.LogLvl.EnvVariable = envVariableName
+	l.conf.LogLvl.Lvl = log_level.RetrieveLogLvlFromEnv(l.conf.LogLvl.EnvVariable)
 
 	return l
 }
@@ -76,9 +81,6 @@ func (l *Logger) SetLogLvlEnvVariable(envVariableName string) *Logger {
 // NewLogger returns a new logger with the logLvl set to 'DebugLvl' by default.
 func NewLogger() *Logger {
 	return &Logger{
-		logLvl: LogLevel{
-			lvl:         retrieveLogLvlIntFromName(DebugLvlName),
-			envVariable: "",
-		},
+		conf: configs.NewDefaultTLConfigs(),
 	}
 }

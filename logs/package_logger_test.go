@@ -3,46 +3,47 @@ package logs
 import (
 	"bytes"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/docebo/libraries/go/tiny-logger/colors"
+	"gitlab.com/docebo/libraries/go/tiny-logger/logs/colors"
+	"gitlab.com/docebo/libraries/go/tiny-logger/logs/log_level"
 	"io"
 	"os"
 	"testing"
 )
 
 func TestPackageLoggerLogLvl(t *testing.T) {
-	assert.Equal(t, DebugLvl, packageLogLvl.lvl)
-	assert.Equal(t, DebugLvlName, packageLogLvl.LvlName())
+	assert.Equal(t, log_level.DebugLvl, packageLoggerConfigs.LogLvl.Lvl)
+	assert.Equal(t, log_level.DebugLvlName, packageLoggerConfigs.LogLvl.LvlName())
 
 	testLogsLvlVar1 := "MY_INSTANCE_LOGS_LVL"
 	testLogsLvlVar2 := "MY_INSTANCE_LOGS_LVL_2"
 
-	_ = os.Setenv(testLogsLvlVar1, string(WarnLvlName))
+	_ = os.Setenv(testLogsLvlVar1, string(log_level.WarnLvlName))
 	SetLogLvlEnvVariable(testLogsLvlVar1)
-	assert.Equal(t, WarnLvl, GetLogLvlIntValue())
-	assert.Equal(t, WarnLvlName, GetLogLvlName())
+	assert.Equal(t, log_level.WarnLvl, GetLogLvlIntValue())
+	assert.Equal(t, log_level.WarnLvlName, GetLogLvlName())
 
-	_ = os.Setenv(testLogsLvlVar2, string(InfoLvlName))
+	_ = os.Setenv(testLogsLvlVar2, string(log_level.InfoLvlName))
 	SetLogLvlEnvVariable(testLogsLvlVar2)
-	assert.Equal(t, InfoLvl, GetLogLvlIntValue())
-	assert.NotEqual(t, WarnLvl, GetLogLvlIntValue())
+	assert.Equal(t, log_level.InfoLvl, GetLogLvlIntValue())
+	assert.NotEqual(t, log_level.WarnLvl, GetLogLvlIntValue())
 
-	SetLogLvl(DebugLvlName)
+	SetLogLvl(log_level.DebugLvlName)
 	_ = os.Unsetenv(testLogsLvlVar1)
 	_ = os.Unsetenv(testLogsLvlVar2)
 }
 
 func TestPackageLoggerGetLogLvlIntValue(t *testing.T) {
-	assert.Equal(t, DebugLvl, GetLogLvlIntValue())
+	assert.Equal(t, log_level.DebugLvl, GetLogLvlIntValue())
 
-	SetLogLvl(ErrorLvlName)
-	assert.Equal(t, ErrorLvl, GetLogLvlIntValue())
+	SetLogLvl(log_level.ErrorLvlName)
+	assert.Equal(t, log_level.ErrorLvl, GetLogLvlIntValue())
 
 	testLogsLvlVar1 := "MY_INSTANCE_LOGS_LVL"
-	_ = os.Setenv(testLogsLvlVar1, string(InfoLvlName))
+	_ = os.Setenv(testLogsLvlVar1, string(log_level.InfoLvlName))
 	SetLogLvlEnvVariable(testLogsLvlVar1)
-	assert.Equal(t, InfoLvl, GetLogLvlIntValue())
+	assert.Equal(t, log_level.InfoLvl, GetLogLvlIntValue())
 
-	SetLogLvl(DebugLvlName)
+	SetLogLvl(log_level.DebugLvlName)
 	_ = os.Unsetenv(testLogsLvlVar1)
 }
 
@@ -69,7 +70,7 @@ func TestPackageLogger_InfoNotLogging(t *testing.T) {
 
 	os.Stdout = w
 	logger := NewLogger()
-	logger.SetLogLvl(ErrorLvlName)
+	logger.SetLogLvl(log_level.ErrorLvlName)
 	logger.Info(testLog)
 	logger.Warn(testLog)
 	logger.Debug(testLog)

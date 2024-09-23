@@ -7,38 +7,6 @@ import (
 	"strings"
 )
 
-// Log Level STRING Constants
-const (
-	ErrorLvlName = "ERROR"
-	WarnLvlName  = "WARN"
-	InfoLvlName  = "INFO"
-	DebugLvlName = "DEBUG"
-)
-
-// Log Level INT8 Constants
-const (
-	ErrorLvl = int8(0)
-	WarnLvl  = int8(1)
-	InfoLvl  = int8(2)
-	DebugLvl = int8(3)
-)
-
-// Log Level INT to STRING map
-var logLvlIntToName = map[int8]string{
-	ErrorLvl: ErrorLvlName,
-	WarnLvl:  WarnLvlName,
-	InfoLvl:  InfoLvlName,
-	DebugLvl: DebugLvlName,
-}
-
-// Log Level STRING to INT map
-var logLvlNameToInt = map[string]int8{
-	ErrorLvlName: ErrorLvl,
-	WarnLvlName:  WarnLvl,
-	InfoLvlName:  InfoLvl,
-	DebugLvlName: DebugLvl,
-}
-
 // log prints the given objects to the 'standard output' coloring the messages with the given Color.
 // If the given color is not valid, the message is printed in WHITE by default.
 //
@@ -122,13 +90,15 @@ func areAllNil(args ...interface{}) bool {
 // If the given variable is not found, 'DebugLvl' is returned by default.
 func retrieveLogLvlFromEnv(logLvlEnvVariable string) int8 {
 	return retrieveLogLvlIntFromName(
-		strings.ToUpper(os.Getenv(logLvlEnvVariable)),
+		LogLvlName(
+			strings.ToUpper(os.Getenv(logLvlEnvVariable)),
+		),
 	)
 }
 
 // retrieveLogLvlIntFromName given a logLvlName returns its int8 constant value.
 // If the given logLvlName is not valid, DebugLvl is returned by default.
-func retrieveLogLvlIntFromName(logLvlName string) int8 {
+func retrieveLogLvlIntFromName(logLvlName LogLvlName) int8 {
 	if _, found := logLvlNameToInt[logLvlName]; !found {
 		logLvlName = DebugLvlName
 	}

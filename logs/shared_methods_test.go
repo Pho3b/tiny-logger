@@ -2,7 +2,6 @@ package logs
 
 import (
 	"github.com/stretchr/testify/assert"
-	"os"
 	"testing"
 )
 
@@ -11,15 +10,6 @@ func TestAreAllNil(t *testing.T) {
 	assert.False(t, areAllNil(nil, 3, nil, nil))
 	assert.True(t, areAllNil())
 	assert.False(t, areAllNil("test", 43, nil))
-}
-
-func TestRetrieveLogLvlFromEnv(t *testing.T) {
-	assert.Equal(t, DebugLvl, retrieveLogLvlFromEnv(""))
-
-	testEnvVar := "MY_INSTANCE_LOGS_LVL_2"
-	_ = os.Setenv(testEnvVar, InfoLvlName)
-	assert.Equal(t, InfoLvl, retrieveLogLvlFromEnv(testEnvVar))
-	assert.NotEqual(t, DebugLvl, retrieveLogLvlFromEnv(testEnvVar))
 }
 
 func TestRetrieveLogLvlIntFromName(t *testing.T) {

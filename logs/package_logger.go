@@ -48,7 +48,7 @@ func FatalError(args ...interface{}) {
 }
 
 // GetLogLvlName returns the package Logger Log Level Name.
-func GetLogLvlName() string {
+func GetLogLvlName() LogLvlName {
 	return packageLogLvl.LvlName()
 }
 
@@ -59,8 +59,8 @@ func GetLogLvlIntValue() int8 {
 
 // SetLogLvl updates the package Logger log level property if the given logLvlName is valid,
 // otherwise it sets the log level to DebugLvlName.
-func SetLogLvl(logLvlName string) {
-	packageLogLvl.lvl = retrieveLogLvlIntFromName(logLvlName)
+func SetLogLvl(lvlName LogLvlName) {
+	packageLogLvl.lvl = retrieveLogLvlIntFromName(lvlName)
 }
 
 // SetLogLvlEnvVariable updates the package Logger log level property attempting to

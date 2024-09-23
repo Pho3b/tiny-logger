@@ -46,7 +46,7 @@ func (l *Logger) FatalError(args ...interface{}) {
 }
 
 // GetLogLvlName returns the Logger current set Log Level Name.
-func (l *Logger) GetLogLvlName() string {
+func (l *Logger) GetLogLvlName() LogLvlName {
 	return logLvlIntToName[l.logLvl.lvl]
 }
 
@@ -57,7 +57,7 @@ func (l *Logger) GetLogLvlIntValue() int8 {
 
 // SetLogLvl updates the Logger instance logLvl.lvl property if the given logLvlName is valid,
 // otherwise sets the logLvl.lvl to DebugLvlName.
-func (l *Logger) SetLogLvl(logLvlName string) *Logger {
+func (l *Logger) SetLogLvl(logLvlName LogLvlName) *Logger {
 	l.logLvl.lvl = retrieveLogLvlIntFromName(logLvlName)
 
 	return l

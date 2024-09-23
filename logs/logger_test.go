@@ -15,12 +15,12 @@ func TestLoggerLogLvl(t *testing.T) {
 	logger := NewLogger()
 	assert.Equal(t, DebugLvl, logger.logLvl.lvl)
 
-	_ = os.Setenv(testLogsLvlVar1, WarnLvlName)
+	_ = os.Setenv(testLogsLvlVar1, string(WarnLvlName))
 	logger = NewLogger()
 	logger.SetLogLvlEnvVariable(testLogsLvlVar1)
 	assert.Equal(t, WarnLvl, logger.logLvl.lvl)
 
-	_ = os.Setenv(testLogsLvlVar2, InfoLvlName)
+	_ = os.Setenv(testLogsLvlVar2, string(InfoLvlName))
 	logger = NewLogger()
 	logger.SetLogLvlEnvVariable(testLogsLvlVar2)
 	assert.NotEqual(t, WarnLvl, logger.logLvl)
@@ -38,7 +38,7 @@ func TestLogger_GetLogLvlIntValue(t *testing.T) {
 	logger.SetLogLvl(WarnLvlName)
 	assert.Equal(t, WarnLvlName, logger.GetLogLvlName())
 
-	_ = os.Setenv(testLogsLvlVar1, InfoLvlName)
+	_ = os.Setenv(testLogsLvlVar1, string(InfoLvlName))
 	logger.SetLogLvlEnvVariable(testLogsLvlVar1)
 	assert.Equal(t, InfoLvlName, logger.GetLogLvlName())
 
@@ -160,5 +160,5 @@ func TestLogger_BuildingMethods(t *testing.T) {
 	logger := NewLogger()
 	assert.IsType(t, &Logger{}, logger)
 	assert.IsType(t, &Logger{}, logger.SetLogLvl(DebugLvlName))
-	assert.IsType(t, &Logger{}, logger.SetLogLvlEnvVariable(InfoLvlName))
+	assert.IsType(t, &Logger{}, logger.SetLogLvlEnvVariable("test-env-var"))
 }

@@ -19,7 +19,7 @@ func Log(color colors.Color, args ...interface{}) {
 // Debug checks whether the packageLogLvl is sufficiently high and calls the logDebug() method from the package if it is.
 func Debug(args ...interface{}) {
 	if packageLoggerConfigs.LogLvl.Lvl >= log_level.DebugLvl {
-		shared.LogDebug(args...)
+		shared.LogDebug(packageLoggerConfigs, args...)
 	}
 }
 

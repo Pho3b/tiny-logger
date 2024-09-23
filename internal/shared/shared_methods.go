@@ -2,7 +2,9 @@ package shared
 
 import (
 	"fmt"
+	"gitlab.com/docebo/libraries/go/tiny-logger/internal/services"
 	"gitlab.com/docebo/libraries/go/tiny-logger/logs/colors"
+	"gitlab.com/docebo/libraries/go/tiny-logger/logs/configs"
 	"os"
 	"strings"
 )
@@ -23,9 +25,15 @@ func Log(color colors.Color, args ...interface{}) {
 
 // LogDebug prints the given objects as strings to the 'standard output' and colors the prefix in GREY if
 // supported by the operating system.
-func LogDebug(args ...interface{}) {
+func LogDebug(conf *configs.TLConfigs, args ...interface{}) {
 	if len(args) > 0 {
-		_, _ = fmt.Fprintln(os.Stdout, fmt.Sprintf("%vDEBUG:%v %s", colors.Gray, colors.Reset, buildMsg(args...)))
+		printer := services.DateTimePrinterImpl{}
+		dateTime := printer.PrintDateTime(conf)
+
+		_, _ = fmt.Fprintln(
+			os.Stdout,
+			fmt.Sprintf("%vDEBUG%s:%v %s", colors.Gray, dateTime, colors.Reset, buildMsg(args...)),
+		)
 	}
 }
 

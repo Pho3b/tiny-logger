@@ -20,7 +20,7 @@ func (l *Logger) Log(color colors.Color, args ...interface{}) {
 // Debug checks whether the instance logLvl is sufficiently high and calls the logDebug() method accordingly.
 func (l *Logger) Debug(args ...interface{}) {
 	if l.conf.LogLvl.Lvl >= log_level.DebugLvl {
-		shared.LogDebug(args...)
+		shared.LogDebug(l.conf, args...)
 	}
 }
 
@@ -74,6 +74,12 @@ func (l *Logger) SetLogLvl(logLvlName log_level.LogLvlName) *Logger {
 func (l *Logger) SetLogLvlEnvVariable(envVariableName string) *Logger {
 	l.conf.LogLvl.EnvVariable = envVariableName
 	l.conf.LogLvl.Lvl = log_level.RetrieveLogLvlFromEnv(l.conf.LogLvl.EnvVariable)
+
+	return l
+}
+
+func (l *Logger) SetConfigs(tlConfigs *configs.TLConfigs) *Logger {
+	l.conf = tlConfigs
 
 	return l
 }

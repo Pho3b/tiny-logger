@@ -13,7 +13,7 @@ const (
 )
 
 type TLConfigs struct {
-	AddTimeStamp bool
+	AddDateTime  bool
 	EnableColors bool
 	Parser       ParserType
 	LogLvl       log_level.LogLevel
@@ -21,7 +21,7 @@ type TLConfigs struct {
 
 func NewDefaultTLConfigs() *TLConfigs {
 	return &TLConfigs{
-		AddTimeStamp: false,
+		AddDateTime:  false,
 		EnableColors: true,
 		Parser:       DefaultParser,
 		LogLvl: log_level.LogLevel{

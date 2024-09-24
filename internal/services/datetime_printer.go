@@ -6,12 +6,10 @@ import (
 	"time"
 )
 
-type Printer interface{}
-
-type DateTimePrinterImpl struct {
+type DateTimePrinter struct {
 }
 
-func (d *DateTimePrinterImpl) PrintDateTime(conf *configs.TLConfigs) string {
+func (d *DateTimePrinter) PrintDateTime(conf *configs.TLConfigs) string {
 	dateTime := ""
 
 	if conf.AddDateTime {

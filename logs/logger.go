@@ -68,6 +68,18 @@ func (l *Logger) SetLogLvl(logLvlName log_level.LogLvlName) *Logger {
 	return l
 }
 
+func (l *Logger) SetEnableColors(enable bool) *Logger {
+	l.conf.EnableColors = enable
+
+	return l
+}
+
+func (l *Logger) SetAddDateTime(addDateTime bool) *Logger {
+	l.conf.AddDateTime = addDateTime
+
+	return l
+}
+
 // SetLogLvlEnvVariable updates the Logger instance logLvl.Lvl property  attempting to
 // retrieve the log level value of the given envVariableName.
 // If the env variable is not found sets DebugLvlName.

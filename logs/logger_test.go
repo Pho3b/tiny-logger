@@ -3,7 +3,6 @@ package logs
 import (
 	"bytes"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/docebo/libraries/go/tiny-logger/logs/colors"
 	"gitlab.com/docebo/libraries/go/tiny-logger/logs/log_level"
 	"io"
 	"os"
@@ -14,18 +13,18 @@ func TestLoggerLogLvl(t *testing.T) {
 	testLogsLvlVar1 := "MY_INSTANCE_LOGS_LVL"
 	testLogsLvlVar2 := "MY_INSTANCE_LOGS_LVL_2"
 	logger := NewLogger()
-	assert.Equal(t, log_level.DebugLvl, logger.conf.LogLvl.Lvl)
+	assert.Equal(t, log_level.DebugLvl, logger.logLvl.Lvl)
 
 	_ = os.Setenv(testLogsLvlVar1, string(log_level.WarnLvlName))
 	logger = NewLogger()
 	logger.SetLogLvlEnvVariable(testLogsLvlVar1)
-	assert.Equal(t, log_level.WarnLvl, logger.conf.LogLvl.Lvl)
+	assert.Equal(t, log_level.WarnLvl, logger.logLvl.Lvl)
 
 	_ = os.Setenv(testLogsLvlVar2, string(log_level.InfoLvlName))
 	logger = NewLogger()
 	logger.SetLogLvlEnvVariable(testLogsLvlVar2)
-	assert.NotEqual(t, log_level.WarnLvl, logger.conf.LogLvl.Lvl)
-	assert.Equal(t, log_level.InfoLvl, logger.conf.LogLvl.Lvl)
+	assert.NotEqual(t, log_level.WarnLvl, logger.logLvl.Lvl)
+	assert.Equal(t, log_level.InfoLvl, logger.logLvl.Lvl)
 
 	_ = os.Unsetenv(testLogsLvlVar1)
 	_ = os.Unsetenv(testLogsLvlVar2)
@@ -134,26 +133,6 @@ func TestLogger_Error(t *testing.T) {
 	_, _ = io.Copy(&buf, r)
 	os.Stderr = originalStdErr
 	assert.Contains(t, buf.String(), testLog)
-}
-
-func TestLogger_Log(t *testing.T) {
-	var buf bytes.Buffer
-	testLog := "my GENERIC log test"
-	originalStdOut := os.Stdout
-	r, w, _ := os.Pipe()
-
-	os.Stdout = w
-	logger := NewLogger()
-	logger.Log("jldfald", testLog)
-	logger.Log(colors.Black, testLog)
-	logger.Log(colors.Cyan, testLog)
-
-	_ = w.Close()
-	_, _ = io.Copy(&buf, r)
-	os.Stdout = originalStdOut
-	assert.Contains(t, buf.String(), colors.White)
-	assert.Contains(t, buf.String(), colors.Black)
-	assert.Contains(t, buf.String(), colors.Cyan)
 }
 
 func TestLogger_BuildingMethods(t *testing.T) {

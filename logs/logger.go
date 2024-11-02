@@ -2,22 +2,16 @@ package logs
 
 import (
 	"gitlab.com/docebo/libraries/go/tiny-logger/interfaces"
-	"gitlab.com/docebo/libraries/go/tiny-logger/logs/colors"
 	"gitlab.com/docebo/libraries/go/tiny-logger/logs/encoders"
 	"gitlab.com/docebo/libraries/go/tiny-logger/logs/log_level"
 )
 
 type Logger struct {
-	dateTimeEnabled bool
-	colorsEnabled   bool
-	encoder         interfaces.Encoder
-	logLvl          log_level.LogLevel
-}
-
-// Log calls the underlying log() method from the package.
-// It always prints the given messages because it does not take the packageLogLvl into account.
-func (l *Logger) Log(color colors.Color, args ...interface{}) {
-	Log(color, args...)
+	dateEnabled   bool
+	timeEnabled   bool
+	colorsEnabled bool
+	encoder       interfaces.Encoder
+	logLvl        log_level.LogLevel
 }
 
 // Debug checks whether the instance logLvl is sufficiently high and calls the logDebug() method accordingly.
@@ -30,31 +24,31 @@ func (l *Logger) Debug(args ...interface{}) {
 // Info checks whether the instance logLvl is sufficiently high and calls the logInfo() method accordingly.
 func (l *Logger) Info(args ...interface{}) {
 	if l.logLvl.Lvl >= log_level.InfoLvl {
-		logInfo(args...)
+		l.encoder.LogInfo(l, args...)
 	}
 }
 
 // Warn checks whether the instance logLvl is sufficiently high and calls the logWarn() method accordingly.
 func (l *Logger) Warn(args ...interface{}) {
 	if l.logLvl.Lvl >= log_level.WarnLvl {
-		logWarn(args...)
+		l.encoder.LogWarn(l, args...)
 	}
 }
 
 // Error checks whether the instance logLvl is sufficiently high and calls the logError() method accordingly.
 func (l *Logger) Error(args ...interface{}) {
 	if l.logLvl.Lvl >= log_level.ErrorLvl {
-		logError(args...)
+		l.encoder.LogError(l, args...)
 	}
 }
 
 // FatalError calls the logFatalError() package method, see its method documentation for more logInfo.
 func (l *Logger) FatalError(args ...interface{}) {
-	logFatalError(args...)
+	l.encoder.LogFatalError(l, args...)
 }
 
-func (l *Logger) GetDateTimeEnabled() bool {
-	return l.dateTimeEnabled
+func (l *Logger) GetDateTimeEnabled() (dateEnabled bool, timeEnabled bool) {
+	return l.dateEnabled, l.timeEnabled
 }
 
 func (l *Logger) GetColorsEnabled() bool {
@@ -79,21 +73,34 @@ func (l *Logger) SetLogLvl(logLvlName log_level.LogLvlName) interfaces.LoggerInt
 	return l
 }
 
-func (l *Logger) SetEnableColors(enable bool) interfaces.LoggerInterface {
+func (l *Logger) EnableColors(enable bool) interfaces.LoggerInterface {
 	l.colorsEnabled = enable
 
 	return l
 }
 
-func (l *Logger) SetAddDateTime(addDateTime bool) interfaces.LoggerInterface {
-	l.dateTimeEnabled = addDateTime
+func (l *Logger) AddDateTime(addDateTime bool) interfaces.LoggerInterface {
+	l.dateEnabled = addDateTime
+	l.timeEnabled = addDateTime
+
+	return l
+}
+
+func (l *Logger) AddDate(addDate bool) interfaces.LoggerInterface {
+	l.dateEnabled = addDate
+
+	return l
+}
+
+func (l *Logger) AddTime(addTime bool) interfaces.LoggerInterface {
+	l.timeEnabled = addTime
 
 	return l
 }
 
 // SetLogLvlEnvVariable updates the Logger instance logLvl.Lvl property  attempting to
 // retrieve the log level value of the given envVariableName.
-// If the env variable is not found sets DebugLvlName.
+// If the env variable is not found sets DebugLvlName by default.
 func (l *Logger) SetLogLvlEnvVariable(envVariableName string) interfaces.LoggerInterface {
 	l.logLvl.EnvVariable = envVariableName
 	l.logLvl.Lvl = log_level.RetrieveLogLvlFromEnv(l.logLvl.EnvVariable)
@@ -103,13 +110,14 @@ func (l *Logger) SetLogLvlEnvVariable(envVariableName string) interfaces.LoggerI
 
 // NewLogger returns a new logger with the logLvl set to 'DebugLvl' by default.
 func NewLogger() *Logger {
-	return &Logger{
-		dateTimeEnabled: false,
-		colorsEnabled:   false,
-		encoder:         encoders.NewDefaultEncoder(),
-		logLvl: log_level.LogLevel{
-			Lvl:         2,
-			EnvVariable: "LOGGLY_LOG_LVL",
-		},
+	logger := &Logger{
+		dateEnabled:   false,
+		timeEnabled:   false,
+		colorsEnabled: false,
+		encoder:       encoders.NewDefaultEncoder(),
 	}
+
+	logger.SetLogLvlEnvVariable(log_level.DefaultEnvLogLvlVar)
+
+	return logger
 }

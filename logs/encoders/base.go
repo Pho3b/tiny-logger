@@ -2,10 +2,12 @@ package encoders
 
 import (
 	"fmt"
+	"gitlab.com/docebo/libraries/go/tiny-logger/internal/services"
 	"strings"
 )
 
 type BaseEncoder struct {
+	servicesWrapper services.Wrapper
 }
 
 // buildMsg returns a string containing all the given arguments cast to strings concatenated with a white space.

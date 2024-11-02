@@ -8,6 +8,10 @@ import (
 // LogLvlName is the Enum representing the possible Log Levels.
 type LogLvlName string
 
+// DefaultEnvLogLvlVar is the default ENV variable that any new logger will try to
+// retrieve the loge level from by default.
+const DefaultEnvLogLvlVar = "TINY_LOGGER_LVL"
+
 const (
 	ErrorLvlName LogLvlName = "ERROR"
 	WarnLvlName  LogLvlName = "WARN"

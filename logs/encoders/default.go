@@ -13,7 +13,7 @@ type DefaultEncoder struct {
 
 // LogDebug formats and prints a debug-level log message to stdout.
 // It includes date and/or time if enabled, with the text in gray if colors are enabled.
-func (d *DefaultEncoder) LogDebug(logger interfaces.LoggerInterface, args ...interface{}) {
+func (d *DefaultEncoder) LogDebug(logger interfaces.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
 		dateTime := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
 		colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), c.Gray)
@@ -27,7 +27,7 @@ func (d *DefaultEncoder) LogDebug(logger interfaces.LoggerInterface, args ...int
 
 // LogInfo formats and prints an info-level log message to stdout.
 // It includes date and/or time if enabled, with the text in cyan if colors are enabled.
-func (d *DefaultEncoder) LogInfo(logger interfaces.LoggerInterface, args ...interface{}) {
+func (d *DefaultEncoder) LogInfo(logger interfaces.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
 		dateTime := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
 		colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), c.Cyan)
@@ -41,7 +41,7 @@ func (d *DefaultEncoder) LogInfo(logger interfaces.LoggerInterface, args ...inte
 
 // LogWarn formats and prints a warning-level log message to stdout.
 // It includes date and/or time if enabled, with the text in yellow if colors are enabled.
-func (d *DefaultEncoder) LogWarn(logger interfaces.LoggerInterface, args ...interface{}) {
+func (d *DefaultEncoder) LogWarn(logger interfaces.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
 		dateTime := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
 		colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), c.Yellow)
@@ -55,7 +55,7 @@ func (d *DefaultEncoder) LogWarn(logger interfaces.LoggerInterface, args ...inte
 
 // LogError formats and prints an error-level log message to stderr.
 // It includes date and/or time if enabled, with the text in red if colors are enabled.
-func (d *DefaultEncoder) LogError(logger interfaces.LoggerInterface, args ...interface{}) {
+func (d *DefaultEncoder) LogError(logger interfaces.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
 		dateTime := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
 		colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), c.Red)
@@ -70,7 +70,7 @@ func (d *DefaultEncoder) LogError(logger interfaces.LoggerInterface, args ...int
 // LogFatalError formats and prints a fatal error-level log message to stderr and terminates the program.
 // It includes date and/or time if enabled, with the text in magenta if colors are enabled.
 // NOTE: the LogFatalError also Terminates the program with a non-zero exit code.
-func (d *DefaultEncoder) LogFatalError(logger interfaces.LoggerInterface, args ...interface{}) {
+func (d *DefaultEncoder) LogFatalError(logger interfaces.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
 		dateTime := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
 		colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), c.Magenta)

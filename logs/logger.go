@@ -10,7 +10,7 @@ type Logger struct {
 	dateEnabled   bool
 	timeEnabled   bool
 	colorsEnabled bool
-	encoder       interfaces.Encoder
+	encoder       interfaces.EncoderInterface
 	logLvl        log_level.LogLevel
 }
 

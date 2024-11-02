@@ -2,7 +2,6 @@ package logs
 
 import (
 	"gitlab.com/docebo/libraries/go/tiny-logger/interfaces"
-	"gitlab.com/docebo/libraries/go/tiny-logger/logs/colors"
 	"gitlab.com/docebo/libraries/go/tiny-logger/logs/encoders"
 	"gitlab.com/docebo/libraries/go/tiny-logger/logs/log_level"
 )
@@ -20,12 +19,6 @@ var (
 
 func init() {
 	packageLoggerInstance = NewLogger()
-}
-
-// log calls the underlying log() method from the package.
-// It always prints the given messages because it does not take the packageLogLvl into account.
-func Log(color colors.Color, args ...interface{}) {
-	Log(color, args...)
 }
 
 // Debug checks whether the packageLogLvl is sufficiently high and calls the logDebug() method from the package if it is.

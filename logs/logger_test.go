@@ -141,3 +141,35 @@ func TestLogger_BuildingMethods(t *testing.T) {
 	assert.IsType(t, &Logger{}, logger.SetLogLvl(log_level.DebugLvlName))
 	assert.IsType(t, &Logger{}, logger.SetLogLvlEnvVariable("test-env-var"))
 }
+
+func TestLogger_AddDateTime(t *testing.T) {
+	logger := NewLogger()
+	logger.AddDate(true)
+	assert.True(t, logger.dateEnabled)
+
+	logger.AddDate(false)
+	assert.False(t, logger.dateEnabled)
+
+	logger.AddTime(true)
+	assert.True(t, logger.timeEnabled)
+
+	logger.AddTime(false)
+	assert.False(t, logger.timeEnabled)
+
+	logger.AddDateTime(true)
+	assert.True(t, logger.dateEnabled)
+	assert.True(t, logger.timeEnabled)
+
+	logger.AddDateTime(false)
+	assert.False(t, logger.dateEnabled)
+	assert.False(t, logger.timeEnabled)
+}
+
+func TestLogger_EnableColors(t *testing.T) {
+	logger := NewLogger()
+	logger.EnableColors(true)
+	assert.True(t, logger.GetColorsEnabled())
+
+	logger.EnableColors(false)
+	assert.False(t, logger.GetColorsEnabled())
+}

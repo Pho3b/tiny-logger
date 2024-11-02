@@ -8,6 +8,10 @@ import (
 type DateTimePrinter struct {
 }
 
+// PrintDateTime returns a formatted date and/or time string based on the provided flags.
+// If addDate is true, the current date is included in "DD/MM/YYYY" format.
+// If addTime is true, the current time is included in "HH:MM:SS" format.
+// If neither addDate nor addTime is true, an empty string is returned.
 func (d *DateTimePrinter) PrintDateTime(addDate bool, addTime bool) string {
 	if !addDate && !addTime {
 		return ""

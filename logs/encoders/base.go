@@ -7,7 +7,8 @@ import (
 )
 
 type BaseEncoder struct {
-	servicesWrapper services.Wrapper
+	DateTimePrinter services.DateTimePrinter
+	ColorsPrinter   services.ColorsPrinter
 }
 
 // buildMsg returns a string containing all the given arguments cast to strings concatenated with a white space.

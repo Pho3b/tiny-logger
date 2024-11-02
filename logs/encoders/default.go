@@ -13,8 +13,8 @@ type DefaultEncoder struct {
 
 func (d *DefaultEncoder) LogDebug(logger interfaces.LoggerInterface, args ...interface{}) {
 	if len(args) > 0 {
-		dateTime := d.servicesWrapper.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
-		colors := d.servicesWrapper.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), c.Gray)
+		dateTime := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
+		colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), c.Gray)
 
 		_, _ = fmt.Fprintln(
 			os.Stdout,
@@ -25,8 +25,8 @@ func (d *DefaultEncoder) LogDebug(logger interfaces.LoggerInterface, args ...int
 
 func (d *DefaultEncoder) LogInfo(logger interfaces.LoggerInterface, args ...interface{}) {
 	if len(args) > 0 {
-		dateTime := d.servicesWrapper.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
-		colors := d.servicesWrapper.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), c.Cyan)
+		dateTime := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
+		colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), c.Cyan)
 
 		_, _ = fmt.Fprintln(
 			os.Stdout,
@@ -37,8 +37,8 @@ func (d *DefaultEncoder) LogInfo(logger interfaces.LoggerInterface, args ...inte
 
 func (d *DefaultEncoder) LogWarn(logger interfaces.LoggerInterface, args ...interface{}) {
 	if len(args) > 0 {
-		dateTime := d.servicesWrapper.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
-		colors := d.servicesWrapper.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), c.Yellow)
+		dateTime := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
+		colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), c.Yellow)
 
 		_, _ = fmt.Fprintln(
 			os.Stdout,
@@ -49,8 +49,8 @@ func (d *DefaultEncoder) LogWarn(logger interfaces.LoggerInterface, args ...inte
 
 func (d *DefaultEncoder) LogError(logger interfaces.LoggerInterface, args ...interface{}) {
 	if len(args) > 0 {
-		dateTime := d.servicesWrapper.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
-		colors := d.servicesWrapper.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), c.Red)
+		dateTime := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
+		colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), c.Red)
 
 		_, _ = fmt.Fprintln(
 			os.Stderr,
@@ -61,8 +61,8 @@ func (d *DefaultEncoder) LogError(logger interfaces.LoggerInterface, args ...int
 
 func (d *DefaultEncoder) LogFatalError(logger interfaces.LoggerInterface, args ...interface{}) {
 	if len(args) > 0 {
-		dateTime := d.servicesWrapper.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
-		colors := d.servicesWrapper.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), c.Magenta)
+		dateTime := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
+		colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), c.Magenta)
 
 		_, _ = fmt.Fprintln(
 			os.Stderr,

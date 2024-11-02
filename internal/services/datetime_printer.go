@@ -2,17 +2,16 @@ package services
 
 import (
 	"fmt"
-	"gitlab.com/docebo/libraries/go/tiny-logger/logs/configs"
 	"time"
 )
 
 type DateTimePrinter struct {
 }
 
-func (d *DateTimePrinter) PrintDateTime(conf *configs.TLConfigs) string {
+func (d *DateTimePrinter) PrintDateTime(addDatetime bool) string {
 	dateTime := ""
 
-	if conf.AddDateTime {
+	if addDatetime {
 		dateTime = fmt.Sprintf("[%s]", time.Now().Format("02/01/2006 15:04:05"))
 	}
 

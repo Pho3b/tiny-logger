@@ -1,4 +1,4 @@
-package configs
+package encoders
 
 type EncoderType string
 

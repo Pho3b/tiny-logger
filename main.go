@@ -9,7 +9,7 @@ func main() {
 	logger := logs.NewLogger().
 		SetLogLvl(ll.DebugLvlName).
 		SetAddDateTime(true).
-		SetEnableColors(false)
+		SetEnableColors(true)
 
-	logger.Debug("This is my Debug Log", "Esitating")
+	logger.Debug("This is my Debug log", "Esitating")
 }

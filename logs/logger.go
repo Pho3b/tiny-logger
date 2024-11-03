@@ -1,84 +1,145 @@
 package logs
 
-import "gitlab.com/docebo/libraries/go/tiny-logger/colors"
+import (
+	"gitlab.com/docebo/libraries/go/tiny-logger/logs/encoders"
+	"gitlab.com/docebo/libraries/go/tiny-logger/logs/log_level"
+	"gitlab.com/docebo/libraries/go/tiny-logger/shared"
+)
 
 type Logger struct {
-	logLvl LogLevel
+	dateEnabled   bool
+	timeEnabled   bool
+	colorsEnabled bool
+	encoder       shared.EncoderInterface
+	logLvl        log_level.LogLevel
 }
 
-// Log calls the underlying log() method from the package.
-// It always prints the given messages because it does not take the packageLogLvl into account.
-func (l *Logger) Log(color colors.Color, args ...interface{}) {
-	log(color, args...)
-}
-
-// Debug checks whether the instance logLvl is sufficiently high and calls the logDebug() method accordingly.
+// Debug logs a debug-level message if the logger's log level allows it.
 func (l *Logger) Debug(args ...interface{}) {
-	if l.logLvl.lvl >= DebugLvl {
-		logDebug(args...)
+	if l.logLvl.Lvl >= log_level.DebugLvl {
+		l.encoder.LogDebug(l, args...)
 	}
 }
 
-// Info checks whether the instance logLvl is sufficiently high and calls the logInfo() method accordingly.
+// Info logs an informational-level message if the logger's log level allows it.
 func (l *Logger) Info(args ...interface{}) {
-	if l.logLvl.lvl >= InfoLvl {
-		logInfo(args...)
+	if l.logLvl.Lvl >= log_level.InfoLvl {
+		l.encoder.LogInfo(l, args...)
 	}
 }
 
-// Warn checks whether the instance logLvl is sufficiently high and calls the logWarn() method accordingly.
+// Warn logs a warning-level message if the logger's log level allows it.
 func (l *Logger) Warn(args ...interface{}) {
-	if l.logLvl.lvl >= WarnLvl {
-		logWarn(args...)
+	if l.logLvl.Lvl >= log_level.WarnLvl {
+		l.encoder.LogWarn(l, args...)
 	}
 }
 
-// Error checks whether the instance logLvl is sufficiently high and calls the logError() method accordingly.
+// Error logs an error-level message if the logger's log level allows it.
 func (l *Logger) Error(args ...interface{}) {
-	if l.logLvl.lvl >= ErrorLvl {
-		logError(args...)
+	if l.logLvl.Lvl >= log_level.ErrorLvl {
+		l.encoder.LogError(l, args...)
 	}
 }
 
-// FatalError calls the logFatalError() package method, see its method documentation for more logInfo.
+// FatalError logs a fatal error message and typically terminates the application.
 func (l *Logger) FatalError(args ...interface{}) {
-	logFatalError(args...)
+	l.encoder.LogFatalError(l, args...)
 }
 
-// GetLogLvlName returns the Logger current set Log Level Name.
-func (l *Logger) GetLogLvlName() string {
-	return logLvlIntToName[l.logLvl.lvl]
+// SetLogLvl sets the log level of the logger based on a provided log level name.
+// If the provided name is invalid, it defaults to DebugLvlName.
+func (l *Logger) SetLogLvl(logLvlName log_level.LogLvlName) shared.LoggerInterface {
+	l.logLvl.Lvl = log_level.RetrieveLogLvlIntFromName(logLvlName)
+
+	return l
 }
 
-// GetLogLvlIntValue returns the Logger current set Log Level int8 value.
+// SetLogLvlEnvVariable sets the log level based on an environment variable. If the variable is not found,
+// defaults to DebugLvlName.
+// NOTE: The environment variable value must be a valid log_level.LogLvlName string.
+func (l *Logger) SetLogLvlEnvVariable(envVariableName string) shared.LoggerInterface {
+	l.logLvl.EnvVariable = envVariableName
+	l.logLvl.Lvl = log_level.RetrieveLogLvlFromEnv(l.logLvl.EnvVariable)
+
+	return l
+}
+
+// GetLogLvlName returns the current log level name as a string.
+func (l *Logger) GetLogLvlName() log_level.LogLvlName {
+	return log_level.LogLvlIntToName[l.logLvl.Lvl]
+}
+
+// GetLogLvlIntValue returns the current log level as an int8 value.
 func (l *Logger) GetLogLvlIntValue() int8 {
-	return l.logLvl.lvl
+	return l.logLvl.Lvl
 }
 
-// SetLogLvl updates the Logger instance logLvl.lvl property if the given logLvlName is valid,
-// otherwise sets the logLvl.lvl to DebugLvlName.
-func (l *Logger) SetLogLvl(logLvlName string) *Logger {
-	l.logLvl.lvl = retrieveLogLvlIntFromName(logLvlName)
+// EnableColors enables or disables color output in the logger based on the given parameter.
+func (l *Logger) EnableColors(enable bool) shared.LoggerInterface {
+	l.colorsEnabled = enable
 
 	return l
 }
 
-// SetLogLvlEnvVariable updates the Logger instance logLvl.lvl property  attempting to
-// retrieve the log level value of the given envVariableName.
-// If the env variable is not found sets DebugLvlName.
-func (l *Logger) SetLogLvlEnvVariable(envVariableName string) *Logger {
-	l.logLvl.envVariable = envVariableName
-	l.logLvl.lvl = retrieveLogLvlFromEnv(l.logLvl.envVariable)
+// GetColorsEnabled returns true if color output is enabled, false otherwise.
+func (l *Logger) GetColorsEnabled() bool {
+	return l.colorsEnabled
+}
+
+// AddDateTime enables or disables both date and time in log output.
+func (l *Logger) AddDateTime(addDateTime bool) shared.LoggerInterface {
+	l.dateEnabled = addDateTime
+	l.timeEnabled = addDateTime
 
 	return l
 }
 
-// NewLogger returns a new logger with the logLvl set to 'DebugLvl' by default.
-func NewLogger() *Logger {
-	return &Logger{
-		logLvl: LogLevel{
-			lvl:         retrieveLogLvlIntFromName(DebugLvlName),
-			envVariable: "",
-		},
+// AddDate enables or disables date in log output based on the provided parameter.
+func (l *Logger) AddDate(addDate bool) shared.LoggerInterface {
+	l.dateEnabled = addDate
+
+	return l
+}
+
+// AddTime enables or disables time in log output based on the provided parameter.
+func (l *Logger) AddTime(addTime bool) shared.LoggerInterface {
+	l.timeEnabled = addTime
+
+	return l
+}
+
+// GetDateTimeEnabled returns the current date and time settings of the logger.
+func (l *Logger) GetDateTimeEnabled() (dateEnabled bool, timeEnabled bool) {
+	return l.dateEnabled, l.timeEnabled
+}
+
+// SetEncoder sets the Encoder that will be used to print logs.
+func (l *Logger) SetEncoder(encoderType shared.EncoderType) {
+	switch encoderType {
+	case shared.DefaultEncoderType:
+		l.encoder = encoders.NewDefaultEncoder()
+	case shared.JsonEncoderType:
+		l.encoder = encoders.NewJSONEncoder()
+	case shared.YamlEncoderType:
+		l.encoder = encoders.NewYAMLEncoder()
 	}
+}
+
+// GetCurrentEncoder returns the currently set Encoder type.
+func (l *Logger) GetCurrentEncoder(encoder shared.EncoderInterface) {
+	l.encoder = encoder
+}
+
+// NewLogger creates and returns a new Logger instance with default settings.
+func NewLogger() *Logger {
+	logger := &Logger{
+		dateEnabled:   false,
+		timeEnabled:   false,
+		colorsEnabled: false,
+		encoder:       encoders.NewDefaultEncoder(),
+	}
+	logger.SetLogLvlEnvVariable(log_level.DefaultEnvLogLvlVar)
+
+	return logger
 }

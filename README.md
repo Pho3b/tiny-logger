@@ -1,30 +1,12 @@
 ## Tiny Logger
 
-A lightweight logger library implementing standard logging methods with the addition of some colors.    
-Logging with this library can be achieved in two main ways:
+A lightweight logging library with standard logging methods,
+supporting customizable log levels, color-coding, and optional date/time formatting.
 
-1. Using the Package Level Logger
-2. Instantiating and using a new Logger struct
+### Usage
 
-Both of them implement the same features and methods, it just depends on whether you need
-a new Logger instance struct or not.
-
-### Package Logger
-
-The Package logger does not need to be instantiated and is unique when using the library.
-
-```go
-logs.Warn("my warning test") // stdout: 'WARN: my warning test'
-logs.Info("my", "into", "test", 2) // stdout: 'INFO: my info test 2'
-logs.Debug("hey", "check this", "debug") // stdout: 'DEBUG: hey check this debug'
-logs.Error("here is the error") // stderr: 'ERROR: here is the error'
-logs.Log(colors.Red, "Here is a Red Msg") // stdout: 'Here is a Red Msg' (Colored Red)
-```
-
-### Struct Logger
-
-To instantiate a new Logger struct you just need to call the `logs.NewLogger()` method, it will return a pointer
-to the newly created Logger.
+To get started, instantiate a Logger by calling logs.NewLogger(). This method returns a pointer to a new Logger
+instance:
 
 ```go
 logger := logs.NewLogger()
@@ -35,12 +17,38 @@ logger.Error("here is the error") // stderr: 'ERROR: here is the error'
 logger.Log(colors.Red, "Here is a Red Msg") // stdout: 'Here is a Red Msg' (Colored Red)
 ```
 
+The Logger struct implements the [Builder design pattern](https://refactoring.guru/design-patterns/builder) allowing you
+to configure various settings dynamically.     
+Below are examples of customizable features.
+
+### Configuration Options
+
+Use builder methods to customize logging behavior, such as setting the log level, enabling colors, or adding date/time
+stamps.
+
+```go
+ logger := logs.NewLogger().
+SetLogLvl(ll.WarnLvlName).
+EnableColors(true).
+AddTime(true).AddDate(true)
+
+logger.Warn("This is my Warn log", "Test arg")
+// OUTPUT: WARN[03/11/2024 18:35:43]: This is my Warn log Test arg
+
+logger.SetEncoder(shared.JsonEncoderType)
+logger.Debug("This is my Debug log", "Test arg")
+// OUTPUT: {"level":"DEBUG","date":"03/11/2024","time":"18:35:43","message":"This is my Debug log Test arg"}
+
+logger.AddTime(false)
+logger.Debug("This is my Debug log", "Test arg")
+// OUTPUT: {"level":"DEBUG","date":"03/11/2024","message":"This is my Debug log Test second arg"}
+```
+
 ### Log Levels
 
-Every Logger (Package one included) will have a Log Level property reference.    
-This property will tell the Loggers which message categories we want to actually print, based on an internal
-hierarchy.    
-The logging levels hierarchy is organized as follows:
+Each `Logger` has a `Log Level` property that determines which message categories to print, based on a priority
+hierarchy.
+The log levels are ordered as follows:
 
 ```go
 Error: 0
@@ -49,19 +57,21 @@ Info:  2
 Debug: 3
 ```
 
-Every Logger when firstly generated will have the Log Level set to `Debug` by default, therefore all the logs will be
-printed to the
-output since `Debug` is the highest in the hierarchy.    
-Setting the Logger Log Level to a lower value, let's say `Warn` will cause the Logger to print only `Warn` and `Error`
-messages
-excluding the categories that are higher of the set Log Level, `Info` and `Debug` for this example.
+By default, the `Logger` is set to the `Debug` level, so all log levels will be printed to the output.
+Adjusting the `Log Level` to a lower setting, such as `Warn`, will limit output to only `Warn` and `Error` messages,
+filtering out `Info` and `Debug`.
 
-#### The Log Level can be set in two ways:
+### The Log Level can be set in two ways:
 
 1. Using the method
-    - Package Logger: `logs.SetLogLvl(WarnLvlName)`
-    - Logger Struct: `logs.NewLogger().SetLogLvl(WarnLvlName)`
-2. Setting an ENV variable reference. In this case the Logger will retrieve the Log Level from the specified environment
-   variable when calling the `SetLogLvlEnvVariable()` method.
-    - Package Logger: `SetLogLvlEnvVariable("MY_LOGLVL_ENV_VAR_NAME")`
-    - Logger Struct: `logs.NewLogger().SetLogLvlEnvVariable("MY_LOGLVL_ENV_VAR_NAME")`
+
+```go
+logs.NewLogger().SetLogLvl(WarnLvlName)
+```
+
+2. Using an Environment Variable: Set the log level through an environment variable and configure the Logger to retrieve
+   it:   variable when calling the `SetLogLvlEnvVariable()` method.
+
+```go
+logs.NewLogger().SetLogLvlEnvVariable("MY_LOGLVL_ENV_VAR_NAME")
+```

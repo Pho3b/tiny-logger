@@ -1,6 +1,8 @@
 package interfaces
 
-import "gitlab.com/docebo/libraries/go/tiny-logger/logs/log_level"
+import (
+	"gitlab.com/docebo/libraries/go/tiny-logger/logs/log_level"
+)
 
 type EncoderInterface interface {
 	LogDebug(logger LoggerConfigsInterface, args ...interface{})
@@ -22,6 +24,8 @@ type LoggerInterface interface {
 	AddDate(addDate bool) LoggerInterface
 	AddTime(addTime bool) LoggerInterface
 	SetLogLvlEnvVariable(envVariableName string) LoggerInterface
+	SetEncoder(encoderType EncoderType)
+	GetCurrentEncoder(encoder EncoderInterface)
 }
 
 type LoggerConfigsInterface interface {

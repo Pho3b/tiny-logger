@@ -2,13 +2,12 @@ package encoders
 
 import (
 	"fmt"
-	"gitlab.com/docebo/libraries/go/tiny-logger/internal/services"
+	"gitlab.com/docebo/libraries/go/tiny-logger/interfaces"
 	"strings"
 )
 
 type BaseEncoder struct {
-	DateTimePrinter services.DateTimePrinter
-	ColorsPrinter   services.ColorsPrinter
+	encoderType interfaces.EncoderType
 }
 
 // buildMsg returns a string containing all the given arguments cast to strings concatenated with a white space.

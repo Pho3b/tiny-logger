@@ -114,6 +114,21 @@ func (l *Logger) GetDateTimeEnabled() (dateEnabled bool, timeEnabled bool) {
 	return l.dateEnabled, l.timeEnabled
 }
 
+// SetEncoder sets the Encoder that will be used to print logs.
+func (l *Logger) SetEncoder(encoderType interfaces.EncoderType) {
+	switch encoderType {
+	case interfaces.DefaultEncoderType:
+		l.encoder = encoders.NewDefaultEncoder()
+	case interfaces.JsonEncoderType:
+		l.encoder = encoders.NewJSONEncoder()
+	}
+}
+
+// GetCurrentEncoder returns the currently set Encoder type.
+func (l *Logger) GetCurrentEncoder(encoder interfaces.EncoderInterface) {
+	l.encoder = encoder
+}
+
 // NewLogger creates and returns a new Logger instance with default settings.
 func NewLogger() *Logger {
 	logger := &Logger{

@@ -1,47 +1,41 @@
 package services
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPrintDateTime_AddDateOnly(t *testing.T) {
-	printer := DateTimePrinter{}
-	mockDate := time.Now().Format("02/01/2006")
+func TestDateTimePrinter_PrintDateTime(t *testing.T) {
+	// Create a DateTimePrinter instance with mocked timeNow function.
+	dateTimePrinter := &DateTimePrinter{
+		timeNow: func() time.Time { // mock time.Now to return a fixed time
+			return time.Date(2023, time.November, 1, 15, 30, 45, 0, time.UTC)
+		},
+	}
 
-	result := printer.PrintDateTime(true, false)
+	t.Run("Return both date and time", func(t *testing.T) {
+		dateRes, timeRes := dateTimePrinter.PrintDateTime(true, true)
+		assert.Equal(t, "01/11/2023", dateRes)
+		assert.Equal(t, " 15:30:45", timeRes)
+	})
 
-	expected := fmt.Sprintf("[%s]", mockDate)
-	assert.Equal(t, expected, result, "Expected result to include only the date in [DD/MM/YYYY] format")
-}
+	t.Run("Return date only", func(t *testing.T) {
+		dateRes, timeRes := dateTimePrinter.PrintDateTime(true, false)
+		assert.Equal(t, "01/11/2023", dateRes)
+		assert.Equal(t, "", timeRes)
+	})
 
-func TestPrintDateTime_AddTimeOnly(t *testing.T) {
-	printer := DateTimePrinter{}
-	mockT := time.Now().Format("15:04:05")
+	t.Run("Return time only", func(t *testing.T) {
+		dateRes, timeRes := dateTimePrinter.PrintDateTime(false, true)
+		assert.Equal(t, "", dateRes)
+		assert.Equal(t, "15:30:45", timeRes)
+	})
 
-	result := printer.PrintDateTime(false, true)
-
-	expected := fmt.Sprintf("[%s]", mockT)
-	assert.Equal(t, expected, result, "Expected result to include only the time in [HH:MM:SS] format")
-}
-
-func TestPrintDateTime_AddDateAndTime(t *testing.T) {
-	printer := DateTimePrinter{}
-	mockDate := time.Now().Format("02/01/2006")
-	mockT := time.Now().Format("15:04:05")
-
-	result := printer.PrintDateTime(true, true)
-
-	expected := fmt.Sprintf("[%s %s]", mockDate, mockT)
-	assert.Equal(t, expected, result, "Expected result to include both date and time in [DD/MM/YYYY HH:MM:SS] format")
-}
-
-func TestPrintDateTime_NoDateNoTime(t *testing.T) {
-	printer := DateTimePrinter{}
-	result := printer.PrintDateTime(false, false)
-
-	assert.Equal(t, "", result, "Expected result to be an empty string when both addDate and addTime are false")
+	t.Run("Return empty string when both flags are false", func(t *testing.T) {
+		dateRes, timeRes := dateTimePrinter.PrintDateTime(false, false)
+		assert.Equal(t, "", dateRes)
+		assert.Equal(t, "", timeRes)
+	})
 }

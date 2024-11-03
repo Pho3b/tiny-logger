@@ -1,4 +1,4 @@
-package interfaces
+package shared
 
 import (
 	"gitlab.com/docebo/libraries/go/tiny-logger/logs/log_level"

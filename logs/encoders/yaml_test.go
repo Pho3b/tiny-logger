@@ -1,75 +1,74 @@
 package encoders
 
 import (
-	"encoding/json"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
 	"os"
 	"os/exec"
 	"testing"
 )
 
-// decodeLogEntry decodes a JSON-encoded log entry into a jsonLogEntry struct.
-func decodeLogEntry(t *testing.T, logOutput string) jsonLogEntry {
+func decodeYamlLogEntry(t *testing.T, logOutput string) jsonLogEntry {
 	var entry jsonLogEntry
-	err := json.Unmarshal([]byte(logOutput), &entry)
+	err := yaml.Unmarshal([]byte(logOutput), &entry)
 	assert.NoError(t, err)
 	return entry
 }
 
-func TestJSONEncoder_LogDebug(t *testing.T) {
-	encoder := NewJSONEncoder()
+func TestYAMLEncoder_LogDebug(t *testing.T) {
+	encoder := NewYAMLEncoder()
 	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true}
 
 	output := captureOutput(func() {
 		encoder.LogDebug(loggerConfig, "Test debug message")
 	})
 
-	entry := decodeLogEntry(t, output)
+	entry := decodeYamlLogEntry(t, output)
 	assert.Equal(t, "DEBUG", entry.Level)
 	assert.Equal(t, "Test debug message", entry.Message)
 }
 
-func TestJSONEncoder_LogInfo(t *testing.T) {
-	encoder := NewJSONEncoder()
+func TestYAMLEncoder_LogInfo(t *testing.T) {
+	encoder := NewYAMLEncoder()
 	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true}
 
 	output := captureOutput(func() {
 		encoder.LogInfo(loggerConfig, "Test info message")
 	})
 
-	entry := decodeLogEntry(t, output)
+	entry := decodeYamlLogEntry(t, output)
 	assert.Equal(t, "INFO", entry.Level)
 	assert.Equal(t, "Test info message", entry.Message)
 }
 
-func TestJSONEncoder_LogWarn(t *testing.T) {
-	encoder := NewJSONEncoder()
+func TestYAMLEncoder_LogWarn(t *testing.T) {
+	encoder := NewYAMLEncoder()
 	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true}
 
 	output := captureOutput(func() {
 		encoder.LogWarn(loggerConfig, "Test warning message")
 	})
 
-	entry := decodeLogEntry(t, output)
+	entry := decodeYamlLogEntry(t, output)
 	assert.Equal(t, "WARN", entry.Level)
 	assert.Equal(t, "Test warning message", entry.Message)
 }
 
-func TestJSONEncoder_LogError(t *testing.T) {
-	encoder := NewJSONEncoder()
+func TestYAMLEncoder_LogError(t *testing.T) {
+	encoder := NewYAMLEncoder()
 	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true}
 
 	output := captureErrorOutput(func() {
 		encoder.LogError(loggerConfig, "Test error message")
 	})
 
-	entry := decodeLogEntry(t, output)
+	entry := decodeYamlLogEntry(t, output)
 	assert.Equal(t, "ERROR", entry.Level)
 	assert.Equal(t, "Test error message", entry.Message)
 }
 
-func TestJSONEncoder_LogFatalError(t *testing.T) {
-	encoder := NewJSONEncoder()
+func TestYAMLEncoder_LogFatalError(t *testing.T) {
+	encoder := NewYAMLEncoder()
 	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true}
 
 	if os.Getenv("BE_CRASHER") == "1" {

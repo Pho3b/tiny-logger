@@ -17,7 +17,7 @@ func TestDateTimePrinter_PrintDateTime(t *testing.T) {
 	t.Run("Return both date and time", func(t *testing.T) {
 		dateRes, timeRes := dateTimePrinter.PrintDateTime(true, true)
 		assert.Equal(t, "01/11/2023", dateRes)
-		assert.Equal(t, " 15:30:45", timeRes)
+		assert.Equal(t, "15:30:45", timeRes)
 	})
 
 	t.Run("Return date only", func(t *testing.T) {

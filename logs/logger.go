@@ -1,16 +1,16 @@
 package logs
 
 import (
-	"gitlab.com/docebo/libraries/go/tiny-logger/interfaces"
 	"gitlab.com/docebo/libraries/go/tiny-logger/logs/encoders"
 	"gitlab.com/docebo/libraries/go/tiny-logger/logs/log_level"
+	"gitlab.com/docebo/libraries/go/tiny-logger/shared"
 )
 
 type Logger struct {
 	dateEnabled   bool
 	timeEnabled   bool
 	colorsEnabled bool
-	encoder       interfaces.EncoderInterface
+	encoder       shared.EncoderInterface
 	logLvl        log_level.LogLevel
 }
 
@@ -49,7 +49,7 @@ func (l *Logger) FatalError(args ...interface{}) {
 
 // SetLogLvl sets the log level of the logger based on a provided log level name.
 // If the provided name is invalid, it defaults to DebugLvlName.
-func (l *Logger) SetLogLvl(logLvlName log_level.LogLvlName) interfaces.LoggerInterface {
+func (l *Logger) SetLogLvl(logLvlName log_level.LogLvlName) shared.LoggerInterface {
 	l.logLvl.Lvl = log_level.RetrieveLogLvlIntFromName(logLvlName)
 
 	return l
@@ -58,7 +58,7 @@ func (l *Logger) SetLogLvl(logLvlName log_level.LogLvlName) interfaces.LoggerInt
 // SetLogLvlEnvVariable sets the log level based on an environment variable. If the variable is not found,
 // defaults to DebugLvlName.
 // NOTE: The environment variable value must be a valid log_level.LogLvlName string.
-func (l *Logger) SetLogLvlEnvVariable(envVariableName string) interfaces.LoggerInterface {
+func (l *Logger) SetLogLvlEnvVariable(envVariableName string) shared.LoggerInterface {
 	l.logLvl.EnvVariable = envVariableName
 	l.logLvl.Lvl = log_level.RetrieveLogLvlFromEnv(l.logLvl.EnvVariable)
 
@@ -76,7 +76,7 @@ func (l *Logger) GetLogLvlIntValue() int8 {
 }
 
 // EnableColors enables or disables color output in the logger based on the given parameter.
-func (l *Logger) EnableColors(enable bool) interfaces.LoggerInterface {
+func (l *Logger) EnableColors(enable bool) shared.LoggerInterface {
 	l.colorsEnabled = enable
 
 	return l
@@ -88,7 +88,7 @@ func (l *Logger) GetColorsEnabled() bool {
 }
 
 // AddDateTime enables or disables both date and time in log output.
-func (l *Logger) AddDateTime(addDateTime bool) interfaces.LoggerInterface {
+func (l *Logger) AddDateTime(addDateTime bool) shared.LoggerInterface {
 	l.dateEnabled = addDateTime
 	l.timeEnabled = addDateTime
 
@@ -96,14 +96,14 @@ func (l *Logger) AddDateTime(addDateTime bool) interfaces.LoggerInterface {
 }
 
 // AddDate enables or disables date in log output based on the provided parameter.
-func (l *Logger) AddDate(addDate bool) interfaces.LoggerInterface {
+func (l *Logger) AddDate(addDate bool) shared.LoggerInterface {
 	l.dateEnabled = addDate
 
 	return l
 }
 
 // AddTime enables or disables time in log output based on the provided parameter.
-func (l *Logger) AddTime(addTime bool) interfaces.LoggerInterface {
+func (l *Logger) AddTime(addTime bool) shared.LoggerInterface {
 	l.timeEnabled = addTime
 
 	return l
@@ -115,17 +115,19 @@ func (l *Logger) GetDateTimeEnabled() (dateEnabled bool, timeEnabled bool) {
 }
 
 // SetEncoder sets the Encoder that will be used to print logs.
-func (l *Logger) SetEncoder(encoderType interfaces.EncoderType) {
+func (l *Logger) SetEncoder(encoderType shared.EncoderType) {
 	switch encoderType {
-	case interfaces.DefaultEncoderType:
+	case shared.DefaultEncoderType:
 		l.encoder = encoders.NewDefaultEncoder()
-	case interfaces.JsonEncoderType:
+	case shared.JsonEncoderType:
 		l.encoder = encoders.NewJSONEncoder()
+	case shared.YamlEncoderType:
+		l.encoder = encoders.NewYAMLEncoder()
 	}
 }
 
 // GetCurrentEncoder returns the currently set Encoder type.
-func (l *Logger) GetCurrentEncoder(encoder interfaces.EncoderInterface) {
+func (l *Logger) GetCurrentEncoder(encoder shared.EncoderInterface) {
 	l.encoder = encoder
 }
 

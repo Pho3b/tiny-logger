@@ -2,12 +2,12 @@ package encoders
 
 import (
 	"fmt"
-	"gitlab.com/docebo/libraries/go/tiny-logger/interfaces"
+	"gitlab.com/docebo/libraries/go/tiny-logger/shared"
 	"strings"
 )
 
 type BaseEncoder struct {
-	encoderType interfaces.EncoderType
+	encoderType shared.EncoderType
 }
 
 // buildMsg returns a string containing all the given arguments cast to strings concatenated with a white space.

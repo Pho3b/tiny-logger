@@ -27,10 +27,10 @@ Use builder methods to customize logging behavior, such as setting the log level
 stamps.
 
 ```go
- logger := logs.NewLogger().
-SetLogLvl(ll.WarnLvlName).
-EnableColors(true).
-AddTime(true).AddDate(true)
+logger := logs.NewLogger().
+   SetLogLvl(ll.WarnLvlName).
+   EnableColors(true).
+   AddTime(true).AddDate(true)
 
 logger.Warn("This is my Warn log", "Test arg")
 // OUTPUT: WARN[03/11/2024 18:35:43]: This is my Warn log Test arg

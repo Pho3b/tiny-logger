@@ -2,8 +2,8 @@ package encoders
 
 import (
 	"fmt"
-	"gitlab.com/docebo/libraries/go/tiny-logger/internal/services"
-	"gitlab.com/docebo/libraries/go/tiny-logger/shared"
+	"github.com/Pho3b/tiny-logger/internal/services"
+	"github.com/Pho3b/tiny-logger/shared"
 	"gopkg.in/yaml.v3"
 	"os"
 )

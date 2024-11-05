@@ -2,9 +2,9 @@ package encoders
 
 import (
 	"fmt"
-	"gitlab.com/docebo/libraries/go/tiny-logger/internal/services"
-	c "gitlab.com/docebo/libraries/go/tiny-logger/logs/colors"
-	"gitlab.com/docebo/libraries/go/tiny-logger/shared"
+	"github.com/Pho3b/tiny-logger/internal/services"
+	c "github.com/Pho3b/tiny-logger/logs/colors"
+	"github.com/Pho3b/tiny-logger/shared"
 	"os"
 )
 

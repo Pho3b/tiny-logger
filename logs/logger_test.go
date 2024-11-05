@@ -2,8 +2,8 @@ package logs
 
 import (
 	"bytes"
+	"github.com/Pho3b/tiny-logger/logs/log_level"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/docebo/libraries/go/tiny-logger/logs/log_level"
 	"io"
 	"os"
 	"testing"

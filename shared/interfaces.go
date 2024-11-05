@@ -1,7 +1,7 @@
 package shared
 
 import (
-	"gitlab.com/docebo/libraries/go/tiny-logger/logs/log_level"
+	"github.com/Pho3b/tiny-logger/logs/log_level"
 )
 
 type EncoderInterface interface {

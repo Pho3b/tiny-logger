@@ -2,7 +2,7 @@ package encoders
 
 import (
 	"fmt"
-	"gitlab.com/docebo/libraries/go/tiny-logger/shared"
+	"github.com/Pho3b/tiny-logger/shared"
 	"strings"
 )
 

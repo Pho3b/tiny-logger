@@ -3,8 +3,8 @@ package services
 import (
 	"testing"
 
+	c "github.com/Pho3b/tiny-logger/logs/colors"
 	"github.com/stretchr/testify/assert"
-	c "gitlab.com/docebo/libraries/go/tiny-logger/logs/colors"
 )
 
 func TestPrintColors_EnableColorsTrue(t *testing.T) {

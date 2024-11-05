@@ -1,9 +1,9 @@
 package logs
 
 import (
-	"gitlab.com/docebo/libraries/go/tiny-logger/logs/encoders"
-	"gitlab.com/docebo/libraries/go/tiny-logger/logs/log_level"
-	"gitlab.com/docebo/libraries/go/tiny-logger/shared"
+	"github.com/Pho3b/tiny-logger/logs/encoders"
+	"github.com/Pho3b/tiny-logger/logs/log_level"
+	"github.com/Pho3b/tiny-logger/shared"
 )
 
 type Logger struct {

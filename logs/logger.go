@@ -49,7 +49,7 @@ func (l *Logger) FatalError(args ...interface{}) {
 
 // SetLogLvl sets the log level of the logger based on a provided log level name.
 // If the provided name is invalid, it defaults to DebugLvlName.
-func (l *Logger) SetLogLvl(logLvlName log_level.LogLvlName) shared.LoggerInterface {
+func (l *Logger) SetLogLvl(logLvlName log_level.LogLvlName) *Logger {
 	l.logLvl.Lvl = log_level.RetrieveLogLvlIntFromName(logLvlName)
 
 	return l
@@ -58,7 +58,7 @@ func (l *Logger) SetLogLvl(logLvlName log_level.LogLvlName) shared.LoggerInterfa
 // SetLogLvlEnvVariable sets the log level based on an environment variable. If the variable is not found,
 // defaults to DebugLvlName.
 // NOTE: The environment variable value must be a valid log_level.LogLvlName string.
-func (l *Logger) SetLogLvlEnvVariable(envVariableName string) shared.LoggerInterface {
+func (l *Logger) SetLogLvlEnvVariable(envVariableName string) *Logger {
 	l.logLvl.EnvVariable = envVariableName
 	l.logLvl.Lvl = log_level.RetrieveLogLvlFromEnv(l.logLvl.EnvVariable)
 
@@ -76,7 +76,7 @@ func (l *Logger) GetLogLvlIntValue() int8 {
 }
 
 // EnableColors enables or disables color output in the logger based on the given parameter.
-func (l *Logger) EnableColors(enable bool) shared.LoggerInterface {
+func (l *Logger) EnableColors(enable bool) *Logger {
 	l.colorsEnabled = enable
 
 	return l
@@ -88,7 +88,7 @@ func (l *Logger) GetColorsEnabled() bool {
 }
 
 // AddDateTime enables or disables both date and time in log output.
-func (l *Logger) AddDateTime(addDateTime bool) shared.LoggerInterface {
+func (l *Logger) AddDateTime(addDateTime bool) *Logger {
 	l.dateEnabled = addDateTime
 	l.timeEnabled = addDateTime
 
@@ -96,14 +96,14 @@ func (l *Logger) AddDateTime(addDateTime bool) shared.LoggerInterface {
 }
 
 // AddDate enables or disables date in log output based on the provided parameter.
-func (l *Logger) AddDate(addDate bool) shared.LoggerInterface {
+func (l *Logger) AddDate(addDate bool) *Logger {
 	l.dateEnabled = addDate
 
 	return l
 }
 
 // AddTime enables or disables time in log output based on the provided parameter.
-func (l *Logger) AddTime(addTime bool) shared.LoggerInterface {
+func (l *Logger) AddTime(addTime bool) *Logger {
 	l.timeEnabled = addTime
 
 	return l
@@ -115,7 +115,7 @@ func (l *Logger) GetDateTimeEnabled() (dateEnabled bool, timeEnabled bool) {
 }
 
 // SetEncoder sets the Encoder that will be used to print logs.
-func (l *Logger) SetEncoder(encoderType shared.EncoderType) shared.LoggerInterface {
+func (l *Logger) SetEncoder(encoderType shared.EncoderType) *Logger {
 	switch encoderType {
 	case shared.DefaultEncoderType:
 		l.encoder = encoders.NewDefaultEncoder()

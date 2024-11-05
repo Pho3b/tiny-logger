@@ -14,6 +14,7 @@ type EncoderInterface interface {
 }
 
 type LoggerInterface interface {
+	LoggerConfigsInterface
 	Debug(args ...interface{})
 	Info(args ...interface{})
 	Warn(args ...interface{})

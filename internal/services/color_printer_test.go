@@ -3,7 +3,7 @@ package services
 import (
 	"testing"
 
-	c "github.com/Pho3b/tiny-logger/logs/colors"
+	c "github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/stretchr/testify/assert"
 )
 

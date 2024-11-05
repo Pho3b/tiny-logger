@@ -1,7 +1,7 @@
 package encoders
 
 import (
-	"github.com/Pho3b/tiny-logger/logs/log_level"
+	"github.com/pho3b/tiny-logger/logs/log_level"
 )
 
 type LoggerConfigMock struct {

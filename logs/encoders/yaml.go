@@ -2,8 +2,8 @@ package encoders
 
 import (
 	"fmt"
-	"github.com/Pho3b/tiny-logger/internal/services"
-	"github.com/Pho3b/tiny-logger/shared"
+	"github.com/pho3b/tiny-logger/internal/services"
+	"github.com/pho3b/tiny-logger/shared"
 	"gopkg.in/yaml.v3"
 	"os"
 )

@@ -3,8 +3,8 @@ package encoders
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Pho3b/tiny-logger/internal/services"
-	"github.com/Pho3b/tiny-logger/shared"
+	"github.com/pho3b/tiny-logger/internal/services"
+	"github.com/pho3b/tiny-logger/shared"
 	"os"
 )
 

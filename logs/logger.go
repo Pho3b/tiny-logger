@@ -1,9 +1,9 @@
 package logs
 
 import (
-	"github.com/Pho3b/tiny-logger/logs/encoders"
-	"github.com/Pho3b/tiny-logger/logs/log_level"
-	"github.com/Pho3b/tiny-logger/shared"
+	"github.com/pho3b/tiny-logger/logs/encoders"
+	"github.com/pho3b/tiny-logger/logs/log_level"
+	"github.com/pho3b/tiny-logger/shared"
 )
 
 type Logger struct {

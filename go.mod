@@ -1,4 +1,4 @@
-module github.com/Pho3b/tiny-logger
+module github.com/pho3b/tiny-logger
 
 go 1.23
 

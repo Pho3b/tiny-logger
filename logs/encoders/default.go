@@ -2,9 +2,9 @@ package encoders
 
 import (
 	"fmt"
-	"github.com/Pho3b/tiny-logger/internal/services"
-	c "github.com/Pho3b/tiny-logger/logs/colors"
-	"github.com/Pho3b/tiny-logger/shared"
+	"github.com/pho3b/tiny-logger/internal/services"
+	c "github.com/pho3b/tiny-logger/logs/colors"
+	"github.com/pho3b/tiny-logger/shared"
 	"os"
 )
 

@@ -2,7 +2,7 @@ package encoders
 
 import (
 	"fmt"
-	"github.com/Pho3b/tiny-logger/shared"
+	"github.com/pho3b/tiny-logger/shared"
 	"strings"
 )
 

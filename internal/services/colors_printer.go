@@ -1,7 +1,7 @@
 package services
 
 import (
-	c "github.com/Pho3b/tiny-logger/logs/colors"
+	c "github.com/pho3b/tiny-logger/logs/colors"
 )
 
 type ColorsPrinter struct {

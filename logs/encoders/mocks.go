@@ -2,6 +2,7 @@ package encoders
 
 import (
 	"github.com/pho3b/tiny-logger/logs/log_level"
+	"github.com/pho3b/tiny-logger/shared"
 )
 
 type LoggerConfigMock struct {
@@ -23,4 +24,8 @@ func (m *LoggerConfigMock) GetDateTimeEnabled() (dateEnabled bool, timeEnabled b
 }
 func (m *LoggerConfigMock) GetColorsEnabled() bool {
 	return m.ColorsEnabled
+}
+
+func (m *LoggerConfigMock) GetEncoderType() shared.EncoderType {
+	return shared.DefaultEncoderType
 }

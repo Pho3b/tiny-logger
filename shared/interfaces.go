@@ -10,6 +10,7 @@ type EncoderInterface interface {
 	LogWarn(logger LoggerConfigsInterface, args ...interface{})
 	LogError(logger LoggerConfigsInterface, args ...interface{})
 	LogFatalError(logger LoggerConfigsInterface, args ...interface{})
+	GetType() EncoderType
 }
 
 type LoggerInterface interface {
@@ -24,8 +25,7 @@ type LoggerInterface interface {
 	AddDate(addDate bool) LoggerInterface
 	AddTime(addTime bool) LoggerInterface
 	SetLogLvlEnvVariable(envVariableName string) LoggerInterface
-	SetEncoder(encoderType EncoderType)
-	GetCurrentEncoder(encoder EncoderInterface)
+	SetEncoder(encoderType EncoderType) LoggerInterface
 }
 
 type LoggerConfigsInterface interface {
@@ -33,4 +33,5 @@ type LoggerConfigsInterface interface {
 	GetColorsEnabled() bool
 	GetLogLvlName() log_level.LogLvlName
 	GetLogLvlIntValue() int8
+	GetEncoderType() EncoderType
 }

@@ -31,3 +31,7 @@ func (b *BaseEncoder) areAllNil(args ...interface{}) bool {
 
 	return true
 }
+
+func (b *BaseEncoder) GetType() shared.EncoderType {
+	return b.encoderType
+}

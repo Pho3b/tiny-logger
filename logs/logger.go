@@ -115,7 +115,7 @@ func (l *Logger) GetDateTimeEnabled() (dateEnabled bool, timeEnabled bool) {
 }
 
 // SetEncoder sets the Encoder that will be used to print logs.
-func (l *Logger) SetEncoder(encoderType shared.EncoderType) {
+func (l *Logger) SetEncoder(encoderType shared.EncoderType) shared.LoggerInterface {
 	switch encoderType {
 	case shared.DefaultEncoderType:
 		l.encoder = encoders.NewDefaultEncoder()
@@ -124,11 +124,13 @@ func (l *Logger) SetEncoder(encoderType shared.EncoderType) {
 	case shared.YamlEncoderType:
 		l.encoder = encoders.NewYAMLEncoder()
 	}
+
+	return l
 }
 
-// GetCurrentEncoder returns the currently set Encoder type.
-func (l *Logger) GetCurrentEncoder(encoder shared.EncoderInterface) {
-	l.encoder = encoder
+// GetEncoderType returns the currently set Encoder type.
+func (l *Logger) GetEncoderType() shared.EncoderType {
+	return l.encoder.GetType()
 }
 
 // NewLogger creates and returns a new Logger instance with default settings.

@@ -44,14 +44,14 @@ func (y *YAMLEncoder) LogWarn(logger shared.LoggerConfigsInterface, args ...inte
 
 // LogError formats and prints an error-level log message in YAML format.
 func (y *YAMLEncoder) LogError(logger shared.LoggerConfigsInterface, args ...interface{}) {
-	if len(args) > 0 {
+	if len(args) > 0 && !y.areAllNil(args...) {
 		y.printYAMLLog("ERROR", logger, shared.StdErrOutput, args...)
 	}
 }
 
 // LogFatalError formats and prints a fatal error-level log message in YAML format and exits the program.
 func (y *YAMLEncoder) LogFatalError(logger shared.LoggerConfigsInterface, args ...interface{}) {
-	if len(args) > 0 {
+	if len(args) > 0 && !y.areAllNil(args...) {
 		y.printYAMLLog("FATAL", logger, shared.StdErrOutput, args...)
 		os.Exit(1)
 	}

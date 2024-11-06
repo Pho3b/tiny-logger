@@ -44,14 +44,14 @@ func (j *JSONEncoder) LogWarn(logger shared.LoggerConfigsInterface, args ...inte
 
 // LogError formats and prints an error-level log message in JSON format.
 func (j *JSONEncoder) LogError(logger shared.LoggerConfigsInterface, args ...interface{}) {
-	if len(args) > 0 {
+	if len(args) > 0 && !j.areAllNil(args...) {
 		j.printJSONLog("ERROR", logger, shared.StdErrOutput, args...)
 	}
 }
 
 // LogFatalError formats and prints a fatal error-level log message in JSON format and exits the program.
 func (j *JSONEncoder) LogFatalError(logger shared.LoggerConfigsInterface, args ...interface{}) {
-	if len(args) > 0 {
+	if len(args) > 0 && !j.areAllNil(args...) {
 		j.printJSONLog("FATAL", logger, shared.StdErrOutput, args...)
 		os.Exit(1)
 	}

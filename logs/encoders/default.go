@@ -41,7 +41,7 @@ func (d *DefaultEncoder) LogWarn(logger shared.LoggerConfigsInterface, args ...i
 // LogError formats and prints an error-level log message to stderr.
 // It includes date and/or time if enabled, with the text in red if colors are enabled.
 func (d *DefaultEncoder) LogError(logger shared.LoggerConfigsInterface, args ...interface{}) {
-	if len(args) > 0 {
+	if len(args) > 0 && !d.areAllNil(args...) {
 		d.printDefaultLog("ERROR", logger, shared.StdErrOutput, c.Red, d.buildMsg(args...))
 	}
 }
@@ -50,7 +50,7 @@ func (d *DefaultEncoder) LogError(logger shared.LoggerConfigsInterface, args ...
 // It includes date and/or time if enabled, with the text in magenta if colors are enabled.
 // NOTE: the LogFatalError also Terminates the program with a non-zero exit code.
 func (d *DefaultEncoder) LogFatalError(logger shared.LoggerConfigsInterface, args ...interface{}) {
-	if len(args) > 0 {
+	if len(args) > 0 && !d.areAllNil(args...) {
 		d.printDefaultLog("FATAL ERROR", logger, shared.StdErrOutput, c.Magenta, d.buildMsg(args...))
 		os.Exit(1)
 	}

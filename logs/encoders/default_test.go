@@ -105,3 +105,27 @@ func TestLogFatalError(t *testing.T) {
 	exitError, ok := err.(*exec.ExitError)
 	assert.True(t, ok && !exitError.Success())
 }
+
+func TestFormatDateTimeString(t *testing.T) {
+	encoder := NewDefaultEncoder()
+
+	dateTimeStr := encoder.formatDateTimeString("dateTest", "timeTest")
+	assert.Contains(t, dateTimeStr, "[")
+	assert.Contains(t, dateTimeStr, "]")
+	assert.Contains(t, dateTimeStr, " ")
+
+	dateTimeStr = encoder.formatDateTimeString("", "timeTest")
+	assert.Contains(t, dateTimeStr, "[")
+	assert.Contains(t, dateTimeStr, "]")
+	assert.NotContains(t, dateTimeStr, " ")
+
+	dateTimeStr = encoder.formatDateTimeString("dateTest", "")
+	assert.Contains(t, dateTimeStr, "[")
+	assert.Contains(t, dateTimeStr, "]")
+	assert.NotContains(t, dateTimeStr, " ")
+
+	dateTimeStr = encoder.formatDateTimeString("", "")
+	assert.NotContains(t, dateTimeStr, "[")
+	assert.NotContains(t, dateTimeStr, "]")
+	assert.NotContains(t, dateTimeStr, " ")
+}

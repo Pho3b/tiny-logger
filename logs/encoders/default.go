@@ -67,10 +67,7 @@ func (d *DefaultEncoder) printDefaultLog(
 	var output *os.File
 	dateStr, timeStr := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
 	colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), color)
-	whitespace := " "
-	if dateStr == "" {
-		whitespace = ""
-	}
+	dateTimeStr := d.formatDateTimeString(dateStr, timeStr)
 
 	switch outType {
 	case shared.StdOutput:
@@ -82,16 +79,29 @@ func (d *DefaultEncoder) printDefaultLog(
 	_, _ = fmt.Fprintln(
 		output,
 		fmt.Sprintf(
-			"%v%s[%s%s%s]:%v %s",
+			"%v%s%s:%v %s",
 			colors[0],
 			level,
-			dateStr,
-			whitespace,
-			timeStr,
+			dateTimeStr,
 			colors[1],
 			d.buildMsg(args...),
 		),
 	)
+}
+
+// formatDateTimeString correctly formats the dateTime string adding and removing square brackets and white spaces
+// as needed.
+func (d *DefaultEncoder) formatDateTimeString(dateStr string, timeStr string) string {
+	if dateStr == "" && timeStr == "" {
+		return ""
+	}
+
+	whitespace := ""
+	if dateStr != "" && timeStr != "" {
+		whitespace = " "
+	}
+
+	return fmt.Sprintf("[%s%s%s]", dateStr, whitespace, timeStr)
 }
 
 // NewDefaultEncoder initializes and returns a new DefaultEncoder instance.

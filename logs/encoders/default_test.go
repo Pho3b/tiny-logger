@@ -117,12 +117,10 @@ func TestFormatDateTimeString(t *testing.T) {
 	dateTimeStr = encoder.formatDateTimeString("", "timeTest")
 	assert.Contains(t, dateTimeStr, "[")
 	assert.Contains(t, dateTimeStr, "]")
-	assert.NotContains(t, dateTimeStr, " ")
 
 	dateTimeStr = encoder.formatDateTimeString("dateTest", "")
 	assert.Contains(t, dateTimeStr, "[")
 	assert.Contains(t, dateTimeStr, "]")
-	assert.NotContains(t, dateTimeStr, " ")
 
 	dateTimeStr = encoder.formatDateTimeString("", "")
 	assert.NotContains(t, dateTimeStr, "[")

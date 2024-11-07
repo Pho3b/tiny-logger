@@ -79,7 +79,7 @@ func (d *DefaultEncoder) printDefaultLog(
 	_, _ = fmt.Fprintln(
 		output,
 		fmt.Sprintf(
-			"%v%s%s:%v %s",
+			"%v%s:%s%v %s",
 			colors[0],
 			level,
 			dateTimeStr,
@@ -101,7 +101,7 @@ func (d *DefaultEncoder) formatDateTimeString(dateStr string, timeStr string) st
 		whitespace = " "
 	}
 
-	return fmt.Sprintf("[%s%s%s]", dateStr, whitespace, timeStr)
+	return fmt.Sprintf(" [%s%s%s]", dateStr, whitespace, timeStr)
 }
 
 // NewDefaultEncoder initializes and returns a new DefaultEncoder instance.

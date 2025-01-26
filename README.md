@@ -18,8 +18,7 @@ logger.Log(colors.Red, "Here is a Red Msg") // stdout: 'Here is a Red Msg' (Colo
 ```
 
 The Logger struct implements the [Builder design pattern](https://refactoring.guru/design-patterns/builder) allowing you
-to configure various settings dynamically.     
-Below are examples of customizable features.
+to dynamically configure various settings.
 
 ### Configuration Options
 
@@ -70,7 +69,7 @@ logs.NewLogger().SetLogLvl(WarnLvlName)
 ```
 
 2. Using an Environment Variable: Set the log level through an environment variable and configure the Logger to retrieve
-   it:   variable when calling the `SetLogLvlEnvVariable()` method.
+   it using the `SetLogLvlEnvVariable()` method.
 
 ```go
 logs.NewLogger().SetLogLvlEnvVariable("MY_LOGLVL_ENV_VAR_NAME")

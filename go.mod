@@ -3,7 +3,7 @@ module github.com/pho3b/tiny-logger
 go 1.23.2
 
 require (
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 

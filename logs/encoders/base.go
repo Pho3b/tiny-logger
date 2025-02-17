@@ -13,7 +13,7 @@ type BaseEncoder struct {
 // buildMsg returns a string containing all the given arguments cast to strings concatenated with a white space.
 func (b *BaseEncoder) buildMsg(args ...interface{}) string {
 	var res strings.Builder
-	res.Grow(30 * len(args)) // Assuming average word length of 10 chars
+	res.Grow(30 * len(args)) // Assuming average word length of N chars
 
 	for i, arg := range args {
 		res.WriteString(fmt.Sprint(arg))

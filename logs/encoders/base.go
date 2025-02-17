@@ -12,13 +12,18 @@ type BaseEncoder struct {
 
 // buildMsg returns a string containing all the given arguments cast to strings concatenated with a white space.
 func (b *BaseEncoder) buildMsg(args ...interface{}) string {
-	res := strings.Builder{}
+	var res strings.Builder
+	res.Grow(30 * len(args)) // Assuming average word length of 10 chars
 
-	for _, arg := range args {
-		res.WriteString(fmt.Sprintf("%v ", arg))
+	for i, arg := range args {
+		res.WriteString(fmt.Sprint(arg))
+
+		if i < len(args)-1 {
+			res.WriteString(" ")
+		}
 	}
 
-	return strings.TrimSuffix(res.String(), " ")
+	return res.String()
 }
 
 // areAllNil returns true if all the given args are 'nil', false otherwise.

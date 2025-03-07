@@ -83,3 +83,21 @@ func TestJSONEncoder_LogFatalError(t *testing.T) {
 	exitError, ok := err.(*exec.ExitError)
 	assert.True(t, ok && !exitError.Success())
 }
+
+func TestJSONEncoder_ExtraMessages(t *testing.T) {
+	resMap := buildExtraMessages("user", "alice", "ip", "192.168.1.1")
+	assert.NotNil(t, resMap)
+	assert.NotNil(t, resMap["ip"])
+	assert.Len(t, resMap, 2)
+
+	resMap = buildExtraMessages("user", "alice", "ip")
+	assert.Nil(t, resMap["ip"])
+	assert.Len(t, resMap, 2)
+
+	resMap = buildExtraMessages("user", "alice", "ip", "192.168.1.1", "city", "paris", "pass")
+	assert.Len(t, resMap, 4)
+	assert.Equal(t, "alice", resMap["user"])
+	assert.Equal(t, "192.168.1.1", resMap["ip"])
+	assert.Equal(t, "paris", resMap["city"])
+	assert.Equal(t, nil, resMap["pass"])
+}

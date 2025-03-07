@@ -15,10 +15,11 @@ type JSONEncoder struct {
 
 // jsonLogEntry represents the structure of a JSON log entry.
 type jsonLogEntry struct {
-	Level   string `json:"level"`
-	Date    string `json:"date,omitempty"`
-	Time    string `json:"time,omitempty"`
-	Message string `json:"message"`
+	Level   string                 `json:"level"`
+	Date    string                 `json:"date,omitempty"`
+	Time    string                 `json:"time,omitempty"`
+	Message string                 `json:"msg"`
+	Extras  map[string]interface{} `json:"extras,omitempty"`
 }
 
 // LogDebug formats and prints a debug-level log message in JSON format.
@@ -71,7 +72,8 @@ func (j *JSONEncoder) printJSONLog(
 			Level:   level,
 			Date:    dateStr,
 			Time:    timeStr,
-			Message: j.buildMsg(args...),
+			Message: j.buildMsg(args[0]),
+			Extras:  make(map[string]interface{}),
 		},
 	)
 	msgBytes = append(msgBytes, '\n')
@@ -86,6 +88,34 @@ func (j *JSONEncoder) printJSONLog(
 	case shared.StdErrOutput:
 		_, _ = os.Stderr.Write(msgBytes)
 	}
+}
+
+// buildExtraMessages constructs a map from a variadic list of key-value pairs.
+// It expects an even number of arguments, where even indices (0, 2, 4, ...) are keys
+// and odd indices (1, 3, 5, ...) are values. If an odd number of arguments is passed,
+// the last key will be assigned a `nil` value.
+//
+// Example Usage:
+//
+//	extra := b.buildExtraMessages("user", "alice", "ip", "192.168.1.1")
+//	// Result: map[string]interface{}{"user": "alice", "ip": "192.168.1.1"}
+func buildExtraMessages(keyAndValuePairs ...interface{}) map[string]interface{} {
+	if len(keyAndValuePairs) <= 0 {
+		return nil
+	}
+
+	var resMap = make(map[string]interface{})
+
+	for i, keyOrValue := range keyAndValuePairs {
+		if i%2 == 0 {
+			resMap[fmt.Sprint(keyAndValuePairs[i])] = nil
+			continue
+		}
+
+		resMap[fmt.Sprint(keyAndValuePairs[i-1])] = fmt.Sprint(keyOrValue)
+	}
+
+	return resMap
 }
 
 // NewJSONEncoder initializes and returns a new JSONEncoder instance.

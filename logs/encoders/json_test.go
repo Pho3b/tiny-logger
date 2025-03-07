@@ -42,6 +42,31 @@ func TestJSONEncoder_LogInfo(t *testing.T) {
 	assert.Equal(t, "Test info message", entry.Message)
 }
 
+func TestJSONEncoder_LogInfoWithExtras(t *testing.T) {
+	encoder := NewJSONEncoder()
+	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true}
+
+	output := captureOutput(func() {
+		encoder.LogInfo(loggerConfig, "Test info message")
+	})
+
+	entry := decodeLogEntry(t, output)
+	assert.Equal(t, "INFO", entry.Level)
+	assert.Equal(t, "Test info message", entry.Message)
+	assert.IsType(t, make(map[string]interface{}), entry.Extras)
+
+	output = captureOutput(func() {
+		encoder.LogInfo(loggerConfig, "Test info message with extras", "Location", "Italy", "Weather", "sunny", "Mood")
+	})
+
+	entry = decodeLogEntry(t, output)
+	assert.Equal(t, "Test info message with extras", entry.Message)
+	assert.IsType(t, make(map[string]interface{}), entry.Extras)
+	assert.Equal(t, "Italy", entry.Extras["Location"])
+	assert.Equal(t, "sunny", entry.Extras["Weather"])
+	assert.Equal(t, nil, entry.Extras["Mood"])
+}
+
 func TestJSONEncoder_LogWarn(t *testing.T) {
 	encoder := NewJSONEncoder()
 	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true}
@@ -82,6 +107,42 @@ func TestJSONEncoder_LogFatalError(t *testing.T) {
 	err := cmd.Run()
 	exitError, ok := err.(*exec.ExitError)
 	assert.True(t, ok && !exitError.Success())
+}
+
+func TestJSONEncoder_DateTime(t *testing.T) {
+	encoder := NewJSONEncoder()
+	loggerConfig := &LoggerConfigMock{TimeEnabled: true, ColorsEnabled: true}
+	output := captureOutput(func() {
+		encoder.LogWarn(loggerConfig, "Test msg")
+	})
+
+	entry := decodeLogEntry(t, output)
+	assert.Equal(t, "Test msg", entry.Message)
+	assert.Empty(t, entry.Date)
+	assert.Empty(t, entry.DateTime)
+	assert.NotEmpty(t, entry.Time)
+
+	loggerConfig = &LoggerConfigMock{DateEnabled: true, ColorsEnabled: true}
+	output = captureOutput(func() {
+		encoder.LogWarn(loggerConfig, "Test msg")
+	})
+
+	entry = decodeLogEntry(t, output)
+	assert.Equal(t, "Test msg", entry.Message)
+	assert.Empty(t, entry.Time)
+	assert.Empty(t, entry.DateTime)
+	assert.NotEmpty(t, entry.Date)
+
+	loggerConfig = &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true}
+	output = captureOutput(func() {
+		encoder.LogWarn(loggerConfig, "Test msg")
+	})
+
+	entry = decodeLogEntry(t, output)
+	assert.Equal(t, "Test msg", entry.Message)
+	assert.Empty(t, entry.Time)
+	assert.Empty(t, entry.Date)
+	assert.NotEmpty(t, entry.DateTime)
 }
 
 func TestJSONEncoder_ExtraMessages(t *testing.T) {

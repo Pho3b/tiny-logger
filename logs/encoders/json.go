@@ -15,11 +15,12 @@ type JSONEncoder struct {
 
 // jsonLogEntry represents the structure of a JSON log entry.
 type jsonLogEntry struct {
-	Level   string                 `json:"level"`
-	Date    string                 `json:"date,omitempty"`
-	Time    string                 `json:"time,omitempty"`
-	Message string                 `json:"msg"`
-	Extras  map[string]interface{} `json:"extras,omitempty"`
+	Level    string                 `json:"level"`
+	Date     string                 `json:"date,omitempty"`
+	Time     string                 `json:"time,omitempty"`
+	DateTime string                 `json:"datetime,omitempty"`
+	Message  string                 `json:"msg"`
+	Extras   map[string]interface{} `json:"extras,omitempty"`
 }
 
 // LogDebug formats and prints a debug-level log message in JSON format.
@@ -65,15 +66,22 @@ func (j *JSONEncoder) printJSONLog(
 	outType shared.OutputType,
 	args ...interface{},
 ) {
+	dateTimeStr := ""
 	dateStr, timeStr := j.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
+	if dateStr != "" && timeStr != "" {
+		dateTimeStr = fmt.Sprintf("%s %s", dateStr, timeStr)
+		dateStr = ""
+		timeStr = ""
+	}
 
 	msgBytes, err := json.Marshal(
 		jsonLogEntry{
-			Level:   level,
-			Date:    dateStr,
-			Time:    timeStr,
-			Message: j.buildMsg(args[0]),
-			Extras:  make(map[string]interface{}),
+			Level:    level,
+			Date:     dateStr,
+			DateTime: dateTimeStr,
+			Time:     timeStr,
+			Message:  j.buildMsg(args[0]),
+			Extras:   buildExtraMessages(args[1:]...),
 		},
 	)
 	msgBytes = append(msgBytes, '\n')

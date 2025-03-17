@@ -14,7 +14,6 @@ logger.Warn("my warning test") // stdout: 'WARN: my warning test'
 logger.Info("my", "into", "test", 2) // stdout: 'INFO: my info test 2'
 logger.Debug("hey", "check this", "debug") // stdout: 'DEBUG: hey check this debug'
 logger.Error("here is the error") // stderr: 'ERROR: here is the error'
-logger.Log(colors.Red, "Here is a Red Msg") // stdout: 'Here is a Red Msg' (Colored Red)
 ```
 
 The Logger struct implements the [Builder design pattern](https://refactoring.guru/design-patterns/builder) allowing you

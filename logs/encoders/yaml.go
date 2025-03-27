@@ -15,7 +15,7 @@ type YAMLEncoder struct {
 
 // yamlLogEntry represents the structure of a YAML log entry.
 type yamlLogEntry struct {
-	Level   string `yaml:"level"`
+	Level   string `yaml:"level,omitempty"`
 	Date    string `yaml:"date,omitempty"`
 	Time    string `yaml:"time,omitempty"`
 	Message string `yaml:"message"`
@@ -65,6 +65,10 @@ func (y *YAMLEncoder) printYAMLLog(
 	args ...interface{},
 ) {
 	dateStr, timeStr := y.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
+
+	if !logger.GetShowLogLevel() {
+		level = ""
+	}
 
 	msgBytes, err := yaml.Marshal(
 		yamlLogEntry{

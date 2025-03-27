@@ -15,7 +15,7 @@ type JSONEncoder struct {
 
 // jsonLogEntry represents the structure of a JSON log entry.
 type jsonLogEntry struct {
-	Level    string                 `json:"level"`
+	Level    string                 `json:"level,omitempty"`
 	Date     string                 `json:"date,omitempty"`
 	Time     string                 `json:"time,omitempty"`
 	DateTime string                 `json:"datetime,omitempty"`
@@ -72,6 +72,10 @@ func (j *JSONEncoder) printJSONLog(
 		dateTimeStr = fmt.Sprintf("%s %s", dateStr, timeStr)
 		dateStr = ""
 		timeStr = ""
+	}
+
+	if !logger.GetShowLogLevel() {
+		level = ""
 	}
 
 	msgBytes, err := json.Marshal(

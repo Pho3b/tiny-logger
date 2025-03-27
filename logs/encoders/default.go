@@ -76,12 +76,14 @@ func (d *DefaultEncoder) printDefaultLog(
 	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
 	dateTimeStr = d.formatDateTimeString(dateStr, timeStr, dateTimeStr)
 	colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), color)
+	whitespace := " "
 
 	if !logger.GetShowLogLevel() {
 		level = ""
+		whitespace = ""
 	}
 
-	_, _ = fmt.Fprint(output, colors[0], level, dateTimeStr, colors[1], " ", d.buildMsg(args...), "\n")
+	_, _ = fmt.Fprint(output, colors[0], level, dateTimeStr, colors[1], whitespace, d.buildMsg(args...), "\n")
 }
 
 // formatDateTimeString correctly formats the dateTime string adding and removing square brackets

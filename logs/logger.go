@@ -10,6 +10,7 @@ type Logger struct {
 	dateEnabled   bool
 	timeEnabled   bool
 	colorsEnabled bool
+	showLogLevel  bool
 	encoder       shared.EncoderInterface
 	logLvl        log_level.LogLevel
 }
@@ -87,6 +88,18 @@ func (l *Logger) GetColorsEnabled() bool {
 	return l.colorsEnabled
 }
 
+// ShowLogLevel enables/disables the log level visibility of the logger.
+func (l *Logger) ShowLogLevel(enable bool) *Logger {
+	l.showLogLevel = enable
+
+	return l
+}
+
+// GetShowLogLevel returns the showLogLevel value of the logger.
+func (l *Logger) GetShowLogLevel() bool {
+	return l.showLogLevel
+}
+
 // AddDateTime enables or disables both date and time in log output.
 func (l *Logger) AddDateTime(addDateTime bool) *Logger {
 	l.dateEnabled = addDateTime
@@ -139,6 +152,7 @@ func NewLogger() *Logger {
 		dateEnabled:   false,
 		timeEnabled:   false,
 		colorsEnabled: false,
+		showLogLevel:  true,
 		encoder:       encoders.NewDefaultEncoder(),
 	}
 	logger.SetLogLvlEnvVariable(log_level.DefaultEnvLogLvlVar)

@@ -68,6 +68,11 @@ func (d *DefaultEncoder) printDefaultLog(
 	dateStr, timeStr := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
 	colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), color)
 	dateTimeStr := d.formatDateTimeString(dateStr, timeStr)
+	colon := ":"
+
+	if !logger.GetShowLogLevel() {
+		colon, level = "", ""
+	}
 
 	switch outType {
 	case shared.StdOutput:
@@ -79,9 +84,10 @@ func (d *DefaultEncoder) printDefaultLog(
 	_, _ = fmt.Fprintln(
 		output,
 		fmt.Sprintf(
-			"%v%s:%s%v %s",
+			"%v%s%s%s%v %s",
 			colors[0],
 			level,
+			colon,
 			dateTimeStr,
 			colors[1],
 			d.buildMsg(args...),

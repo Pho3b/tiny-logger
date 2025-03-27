@@ -9,6 +9,7 @@ type LoggerConfigMock struct {
 	DateEnabled   bool
 	TimeEnabled   bool
 	ColorsEnabled bool
+	ShowLogLevel  bool
 }
 
 func (m *LoggerConfigMock) GetLogLvlName() log_level.LogLvlName {
@@ -28,4 +29,8 @@ func (m *LoggerConfigMock) GetColorsEnabled() bool {
 
 func (m *LoggerConfigMock) GetEncoderType() shared.EncoderType {
 	return shared.DefaultEncoderType
+}
+
+func (m *LoggerConfigMock) GetShowLogLevel() bool {
+	return m.ShowLogLevel
 }

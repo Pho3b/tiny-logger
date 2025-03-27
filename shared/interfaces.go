@@ -15,6 +15,7 @@ type LoggerInterface interface {
 type LoggerConfigsInterface interface {
 	GetDateTimeEnabled() (dateEnabled bool, timeEnabled bool)
 	GetColorsEnabled() bool
+	GetShowLogLevel() bool
 	GetLogLvlName() log_level.LogLvlName
 	GetLogLvlIntValue() int8
 	GetEncoderType() EncoderType

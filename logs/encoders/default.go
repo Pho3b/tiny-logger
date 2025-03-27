@@ -6,6 +6,7 @@ import (
 	c "github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/shared"
 	"os"
+	"strings"
 )
 
 type DefaultEncoder struct {
@@ -18,7 +19,7 @@ type DefaultEncoder struct {
 // It includes date and/or time if enabled, with the text in gray if colors are enabled.
 func (d *DefaultEncoder) LogDebug(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		d.printDefaultLog("DEBUG", logger, shared.StdOutput, c.Gray, d.buildMsg(args...))
+		d.printDefaultLog("DEBUG:", logger, shared.StdOutput, c.Gray, d.buildMsg(args...))
 	}
 }
 
@@ -26,7 +27,7 @@ func (d *DefaultEncoder) LogDebug(logger shared.LoggerConfigsInterface, args ...
 // It includes date and/or time if enabled, with the text in cyan if colors are enabled.
 func (d *DefaultEncoder) LogInfo(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		d.printDefaultLog("INFO", logger, shared.StdOutput, c.Cyan, d.buildMsg(args...))
+		d.printDefaultLog("INFO:", logger, shared.StdOutput, c.Cyan, d.buildMsg(args...))
 	}
 }
 
@@ -34,7 +35,7 @@ func (d *DefaultEncoder) LogInfo(logger shared.LoggerConfigsInterface, args ...i
 // It includes date and/or time if enabled, with the text in yellow if colors are enabled.
 func (d *DefaultEncoder) LogWarn(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		d.printDefaultLog("WARN", logger, shared.StdOutput, c.Yellow, d.buildMsg(args...))
+		d.printDefaultLog("WARN:", logger, shared.StdOutput, c.Yellow, d.buildMsg(args...))
 	}
 }
 
@@ -42,7 +43,7 @@ func (d *DefaultEncoder) LogWarn(logger shared.LoggerConfigsInterface, args ...i
 // It includes date and/or time if enabled, with the text in red if colors are enabled.
 func (d *DefaultEncoder) LogError(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 && !d.areAllNil(args...) {
-		d.printDefaultLog("ERROR", logger, shared.StdErrOutput, c.Red, d.buildMsg(args...))
+		d.printDefaultLog("ERROR:", logger, shared.StdErrOutput, c.Red, d.buildMsg(args...))
 	}
 }
 
@@ -51,7 +52,7 @@ func (d *DefaultEncoder) LogError(logger shared.LoggerConfigsInterface, args ...
 // NOTE: the LogFatalError also Terminates the program with a non-zero exit code.
 func (d *DefaultEncoder) LogFatalError(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 && !d.areAllNil(args...) {
-		d.printDefaultLog("FATAL ERROR", logger, shared.StdErrOutput, c.Magenta, d.buildMsg(args...))
+		d.printDefaultLog("FATAL ERROR:", logger, shared.StdErrOutput, c.Magenta, d.buildMsg(args...))
 		os.Exit(1)
 	}
 }
@@ -65,15 +66,6 @@ func (d *DefaultEncoder) printDefaultLog(
 	args ...interface{},
 ) {
 	var output *os.File
-	dateStr, timeStr := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
-	colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), color)
-	dateTimeStr := d.formatDateTimeString(dateStr, timeStr)
-	colon := ":"
-
-	if !logger.GetShowLogLevel() {
-		colon, level = "", ""
-	}
-
 	switch outType {
 	case shared.StdOutput:
 		output = os.Stdout
@@ -81,33 +73,44 @@ func (d *DefaultEncoder) printDefaultLog(
 		output = os.Stderr
 	}
 
-	_, _ = fmt.Fprintln(
-		output,
-		fmt.Sprintf(
-			"%v%s%s%s%v %s",
-			colors[0],
-			level,
-			colon,
-			dateTimeStr,
-			colors[1],
-			d.buildMsg(args...),
-		),
-	)
+	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
+	dateTimeStr = d.formatDateTimeString(dateStr, timeStr, dateTimeStr)
+	colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), color)
+	whitespace := " "
+
+	if !logger.GetShowLogLevel() {
+		level = ""
+		whitespace = ""
+	}
+
+	_, _ = fmt.Fprint(output, colors[0], level, dateTimeStr, colors[1], whitespace, d.buildMsg(args...), "\n")
 }
 
-// formatDateTimeString correctly formats the dateTime string adding and removing square brackets and white spaces
-// as needed.
-func (d *DefaultEncoder) formatDateTimeString(dateStr string, timeStr string) string {
-	if dateStr == "" && timeStr == "" {
+// formatDateTimeString correctly formats the dateTime string adding and removing square brackets
+// and white spaces as needed.
+func (d *DefaultEncoder) formatDateTimeString(dateStr, timeStr, dateTimeStr string) string {
+	if dateStr == "" && timeStr == "" && dateTimeStr == "" {
 		return ""
 	}
 
-	whitespace := ""
-	if dateStr != "" && timeStr != "" {
-		whitespace = " "
+	var sb strings.Builder
+	sb.WriteByte('[')
+
+	if dateTimeStr != "" {
+		sb.WriteString(dateTimeStr)
+	} else {
+		sb.WriteString(dateStr)
+
+		if dateStr != "" && timeStr != "" {
+			sb.WriteByte(' ')
+		}
+
+		sb.WriteString(timeStr)
 	}
 
-	return fmt.Sprintf(" [%s%s%s]", dateStr, whitespace, timeStr)
+	sb.WriteByte(']')
+
+	return sb.String()
 }
 
 // NewDefaultEncoder initializes and returns a new DefaultEncoder instance.

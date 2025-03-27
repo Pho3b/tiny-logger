@@ -66,13 +66,7 @@ func (j *JSONEncoder) printJSONLog(
 	outType shared.OutputType,
 	args ...interface{},
 ) {
-	dateTimeStr := ""
-	dateStr, timeStr := j.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
-	if dateStr != "" && timeStr != "" {
-		dateTimeStr = fmt.Sprintf("%s %s", dateStr, timeStr)
-		dateStr = ""
-		timeStr = ""
-	}
+	dateStr, timeStr, dateTimeStr := j.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
 
 	if !logger.GetShowLogLevel() {
 		level = ""
@@ -112,19 +106,22 @@ func (j *JSONEncoder) printJSONLog(
 //	extra := b.buildExtraMessages("user", "alice", "ip", "192.168.1.1")
 //	// Result: map[string]interface{}{"user": "alice", "ip": "192.168.1.1"}
 func buildExtraMessages(keyAndValuePairs ...interface{}) map[string]interface{} {
-	if len(keyAndValuePairs) <= 0 {
+	keyAndValuePairsLen := len(keyAndValuePairs)
+	if keyAndValuePairsLen == 0 {
 		return nil
 	}
 
-	var resMap = make(map[string]interface{})
+	resMap := make(map[string]interface{}, keyAndValuePairsLen/2)
 
-	for i, keyOrValue := range keyAndValuePairs {
-		if i%2 == 0 {
-			resMap[fmt.Sprint(keyAndValuePairs[i])] = nil
-			continue
-		}
+	for i := 0; i < keyAndValuePairsLen-1; i += 2 {
+		key := fmt.Sprint(keyAndValuePairs[i])
+		value := keyAndValuePairs[i+1]
+		resMap[key] = value
+	}
 
-		resMap[fmt.Sprint(keyAndValuePairs[i-1])] = fmt.Sprint(keyOrValue)
+	if keyAndValuePairsLen%2 != 0 {
+		lastKey := fmt.Sprint(keyAndValuePairs[keyAndValuePairsLen-1])
+		resMap[lastKey] = nil
 	}
 
 	return resMap

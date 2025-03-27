@@ -15,26 +15,30 @@ func TestDateTimePrinter_PrintDateTime(t *testing.T) {
 	}
 
 	t.Run("Return both date and time", func(t *testing.T) {
-		dateRes, timeRes := dateTimePrinter.PrintDateTime(true, true)
-		assert.Equal(t, "01/11/2023", dateRes)
-		assert.Equal(t, "15:30:45", timeRes)
+		dateRes, timeRes, dateTimeRes := dateTimePrinter.PrintDateTime(true, true)
+		assert.Empty(t, dateRes)
+		assert.Empty(t, timeRes)
+		assert.Equal(t, "01/11/2023 15:30:45", dateTimeRes)
 	})
 
 	t.Run("Return date only", func(t *testing.T) {
-		dateRes, timeRes := dateTimePrinter.PrintDateTime(true, false)
+		dateRes, timeRes, dateTimeRes := dateTimePrinter.PrintDateTime(true, false)
 		assert.Equal(t, "01/11/2023", dateRes)
 		assert.Equal(t, "", timeRes)
+		assert.Equal(t, "", dateTimeRes)
 	})
 
 	t.Run("Return time only", func(t *testing.T) {
-		dateRes, timeRes := dateTimePrinter.PrintDateTime(false, true)
+		dateRes, timeRes, dateTimeRes := dateTimePrinter.PrintDateTime(false, true)
 		assert.Equal(t, "", dateRes)
 		assert.Equal(t, "15:30:45", timeRes)
+		assert.Equal(t, "", dateTimeRes)
 	})
 
 	t.Run("Return empty string when both flags are false", func(t *testing.T) {
-		dateRes, timeRes := dateTimePrinter.PrintDateTime(false, false)
+		dateRes, timeRes, dateTimeRes := dateTimePrinter.PrintDateTime(false, false)
 		assert.Equal(t, "", dateRes)
 		assert.Equal(t, "", timeRes)
+		assert.Equal(t, "", dateTimeRes)
 	})
 }

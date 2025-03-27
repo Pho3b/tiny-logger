@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -12,18 +11,24 @@ type DateTimePrinter struct {
 // PrintDateTime returns formatted date and/or time strings based on input flags.
 // - If addDate is true, the method returns the current date in "DD/MM/YYYY" format.
 // - If addTime is true, it returns the current time in "HH:MM:SS" format.
-// - If both addDate and addTime are true, both date and time are returned as separate strings.
+// - If both addDate and addTime are true, dateTimeRes is returned as a unified string.
 // - If neither addDate nor addTime is true, empty strings are returned.
-func (d *DateTimePrinter) PrintDateTime(addDate bool, addTime bool) (dateRes string, timeRes string) {
+func (d *DateTimePrinter) PrintDateTime(addDate bool, addTime bool) (dateRes string, timeRes string, dateTimeRes string) {
+	now := d.timeNow()
+
 	if addDate {
-		dateRes = fmt.Sprintf("%s", d.timeNow().Format("02/01/2006"))
+		dateRes = now.Format("02/01/2006")
 	}
 
 	if addTime {
-		timeRes = fmt.Sprintf("%s", d.timeNow().Format("15:04:05"))
+		timeRes = now.Format("15:04:05")
 	}
 
-	return dateRes, timeRes
+	if addDate && addTime {
+		return "", "", dateRes + " " + timeRes
+	}
+
+	return dateRes, timeRes, dateTimeRes
 }
 
 // NewDateTimePrinter initializes DateTimePrinter with default timeNow function.

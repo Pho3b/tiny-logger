@@ -77,6 +77,7 @@ func (l *Logger) GetLogLvlIntValue() int8 {
 }
 
 // EnableColors enables or disables color output in the logger based on the given parameter.
+// Note: Color is only applied to the LogLevel and DateTime parts of the shared.DefaultEncoderType.
 func (l *Logger) EnableColors(enable bool) *Logger {
 	l.colorsEnabled = enable
 

@@ -19,7 +19,7 @@ type DefaultEncoder struct {
 // It includes date and/or time if enabled, with the text in gray if colors are enabled.
 func (d *DefaultEncoder) LogDebug(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		d.printDefaultLog("DEBUG:", logger, shared.StdOutput, c.Gray, d.buildMsg(args...))
+		d.printDefaultLog("DEBUG: ", logger, shared.StdOutput, c.Gray, d.buildMsg(args...))
 	}
 }
 
@@ -27,7 +27,7 @@ func (d *DefaultEncoder) LogDebug(logger shared.LoggerConfigsInterface, args ...
 // It includes date and/or time if enabled, with the text in cyan if colors are enabled.
 func (d *DefaultEncoder) LogInfo(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		d.printDefaultLog("INFO:", logger, shared.StdOutput, c.Cyan, d.buildMsg(args...))
+		d.printDefaultLog("INFO: ", logger, shared.StdOutput, c.Cyan, d.buildMsg(args...))
 	}
 }
 
@@ -35,7 +35,7 @@ func (d *DefaultEncoder) LogInfo(logger shared.LoggerConfigsInterface, args ...i
 // It includes date and/or time if enabled, with the text in yellow if colors are enabled.
 func (d *DefaultEncoder) LogWarn(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		d.printDefaultLog("WARN:", logger, shared.StdOutput, c.Yellow, d.buildMsg(args...))
+		d.printDefaultLog("WARN: ", logger, shared.StdOutput, c.Yellow, d.buildMsg(args...))
 	}
 }
 
@@ -43,7 +43,7 @@ func (d *DefaultEncoder) LogWarn(logger shared.LoggerConfigsInterface, args ...i
 // It includes date and/or time if enabled, with the text in red if colors are enabled.
 func (d *DefaultEncoder) LogError(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 && !d.areAllNil(args...) {
-		d.printDefaultLog("ERROR:", logger, shared.StdErrOutput, c.Red, d.buildMsg(args...))
+		d.printDefaultLog("ERROR: ", logger, shared.StdErrOutput, c.Red, d.buildMsg(args...))
 	}
 }
 
@@ -52,7 +52,7 @@ func (d *DefaultEncoder) LogError(logger shared.LoggerConfigsInterface, args ...
 // NOTE: the LogFatalError also Terminates the program with a non-zero exit code.
 func (d *DefaultEncoder) LogFatalError(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 && !d.areAllNil(args...) {
-		d.printDefaultLog("FATAL ERROR:", logger, shared.StdErrOutput, c.Magenta, d.buildMsg(args...))
+		d.printDefaultLog("FATAL ERROR: ", logger, shared.StdErrOutput, c.Magenta, d.buildMsg(args...))
 		os.Exit(1)
 	}
 }
@@ -76,14 +76,12 @@ func (d *DefaultEncoder) printDefaultLog(
 	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
 	dateTimeStr = d.formatDateTimeString(dateStr, timeStr, dateTimeStr)
 	colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), color)
-	whitespace := " "
 
 	if !logger.GetShowLogLevel() {
 		level = ""
-		whitespace = ""
 	}
 
-	_, _ = fmt.Fprint(output, colors[0], level, dateTimeStr, colors[1], whitespace, d.buildMsg(args...), "\n")
+	_, _ = fmt.Fprint(output, colors[0], level, dateTimeStr, colors[1], d.buildMsg(args...), "\n")
 }
 
 // formatDateTimeString correctly formats the dateTime string adding and removing square brackets
@@ -108,7 +106,7 @@ func (d *DefaultEncoder) formatDateTimeString(dateStr, timeStr, dateTimeStr stri
 		sb.WriteString(timeStr)
 	}
 
-	sb.WriteByte(']')
+	sb.WriteString("] ")
 
 	return sb.String()
 }

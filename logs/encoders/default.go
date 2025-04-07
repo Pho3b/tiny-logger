@@ -73,14 +73,18 @@ func (d *DefaultEncoder) printDefaultLog(
 		output = os.Stderr
 	}
 
-	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
+	dEnabled, tEnabled := logger.GetDateTimeEnabled()
+	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.PrintDateTime(dEnabled, tEnabled)
 	dateTimeStr = d.formatDateTimeString(dateStr, timeStr, dateTimeStr)
 	colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), color)
 	whitespace := " "
 
 	if !logger.GetShowLogLevel() {
 		level = ""
-		whitespace = ""
+
+		if !dEnabled && !tEnabled {
+			whitespace = ""
+		}
 	}
 
 	_, _ = fmt.Fprint(output, colors[0], level, dateTimeStr, colors[1], whitespace, d.buildMsg(args...), "\n")

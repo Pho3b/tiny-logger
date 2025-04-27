@@ -14,8 +14,6 @@ var (
 	Yellow  Color = "\033[33m"
 	Cyan    Color = "\033[36m"
 	Gray    Color = "\033[37m"
-	White   Color = "\033[97m"
-	Black   Color = "\033[30m"
 )
 
 func init() {
@@ -26,14 +24,5 @@ func init() {
 		Magenta = ""
 		Yellow = ""
 		Cyan = ""
-		Gray = ""
-		White = ""
-		Black = ""
 	}
-}
-
-// IsColorValid returns true if the given color is a valid and supported one, false otherwise.
-func IsColorValid(color Color) bool {
-	return color == Red || color == Magenta || color == Yellow ||
-		color == Cyan || color == Gray || color == White || color == Black
 }

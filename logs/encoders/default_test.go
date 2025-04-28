@@ -107,25 +107,26 @@ func TestLogFatalError(t *testing.T) {
 }
 
 func TestFormatDateTimeString(t *testing.T) {
+	var b bytes.Buffer
 	encoder := NewDefaultEncoder()
 
-	dateTimeStr := encoder.formatDateTimeString("dateTest", "timeTest", "")
-	assert.Contains(t, dateTimeStr, "[")
-	assert.Contains(t, dateTimeStr, "]")
-	assert.Contains(t, dateTimeStr, " ")
+	b = encoder.formatDateTimeString("dateTest", "timeTest", "")
+	assert.Contains(t, b.String(), "[")
+	assert.Contains(t, b.String(), "]")
+	assert.Contains(t, b.String(), " ")
 
-	dateTimeStr = encoder.formatDateTimeString("", "timeTest", "")
-	assert.Contains(t, dateTimeStr, "[")
-	assert.Contains(t, dateTimeStr, "]")
+	b = encoder.formatDateTimeString("", "timeTest", "")
+	assert.Contains(t, b.String(), "[")
+	assert.Contains(t, b.String(), "]")
 
-	dateTimeStr = encoder.formatDateTimeString("dateTest", "", "")
-	assert.Contains(t, dateTimeStr, "[")
-	assert.Contains(t, dateTimeStr, "]")
+	b = encoder.formatDateTimeString("dateTest", "", "")
+	assert.Contains(t, b.String(), "[")
+	assert.Contains(t, b.String(), "]")
 
-	dateTimeStr = encoder.formatDateTimeString("", "", "")
-	assert.NotContains(t, dateTimeStr, "[")
-	assert.NotContains(t, dateTimeStr, "]")
-	assert.NotContains(t, dateTimeStr, " ")
+	b = encoder.formatDateTimeString("", "", "")
+	assert.NotContains(t, b.String(), "[")
+	assert.NotContains(t, b.String(), "]")
+	assert.NotContains(t, b.String(), " ")
 }
 
 func TestShowLogLevel(t *testing.T) {

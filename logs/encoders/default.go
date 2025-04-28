@@ -1,12 +1,11 @@
 package encoders
 
 import (
-	"fmt"
+	"bytes"
 	"github.com/pho3b/tiny-logger/internal/services"
 	c "github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/shared"
 	"os"
-	"strings"
 )
 
 type DefaultEncoder struct {
@@ -65,39 +64,50 @@ func (d *DefaultEncoder) printDefaultLog(
 	color c.Color,
 	args ...interface{},
 ) {
-	var output *os.File
-	switch outType {
-	case shared.StdOutput:
-		output = os.Stdout
-	case shared.StdErrOutput:
-		output = os.Stderr
-	}
-
 	dEnabled, tEnabled := logger.GetDateTimeEnabled()
 	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.PrintDateTime(dEnabled, tEnabled)
-	dateTimeStr = d.formatDateTimeString(dateStr, timeStr, dateTimeStr)
 	colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), color)
-	whitespace := " "
 
-	if !logger.GetShowLogLevel() {
-		level = ""
+	// Composing the final log message
+	var b bytes.Buffer
+	b.Grow((averageWordLen * len(args)) + averageWordLen)
 
-		if !dEnabled && !tEnabled {
-			whitespace = ""
-		}
+	b.WriteString(string(colors[0]))
+
+	if logger.GetShowLogLevel() {
+		b.WriteString(level)
 	}
 
-	_, _ = fmt.Fprint(output, colors[0], level, dateTimeStr, colors[1], whitespace, d.buildMsg(args...), "\n")
+	dtb := d.formatDateTimeString(dateStr, timeStr, dateTimeStr)
+	b.Write(dtb.Bytes())
+	b.WriteString(string(colors[1]))
+
+	if logger.GetShowLogLevel() || dEnabled || tEnabled {
+		b.WriteByte(' ')
+	}
+
+	b.WriteString(d.buildMsg(args...))
+	b.WriteByte('\n')
+
+	// Actual message print
+	switch outType {
+	case shared.StdOutput:
+		os.Stdout.Write(b.Bytes())
+	case shared.StdErrOutput:
+		os.Stderr.Write(b.Bytes())
+	}
 }
 
 // formatDateTimeString correctly formats the dateTime string adding and removing square brackets
 // and white spaces as needed.
-func (d *DefaultEncoder) formatDateTimeString(dateStr, timeStr, dateTimeStr string) string {
+func (d *DefaultEncoder) formatDateTimeString(dateStr, timeStr, dateTimeStr string) bytes.Buffer {
+	var sb bytes.Buffer
+
 	if dateStr == "" && timeStr == "" && dateTimeStr == "" {
-		return ""
+		return sb
 	}
 
-	var sb strings.Builder
+	sb.Grow(averageWordLen)
 	sb.WriteByte('[')
 
 	if dateTimeStr != "" {
@@ -114,7 +124,7 @@ func (d *DefaultEncoder) formatDateTimeString(dateStr, timeStr, dateTimeStr stri
 
 	sb.WriteByte(']')
 
-	return sb.String()
+	return sb
 }
 
 // NewDefaultEncoder initializes and returns a new DefaultEncoder instance.

@@ -1,10 +1,13 @@
 package encoders
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/pho3b/tiny-logger/shared"
-	"strings"
+	"strconv"
 )
+
+const averageWordLen = 30
 
 type BaseEncoder struct {
 	encoderType shared.EncoderType
@@ -12,14 +15,30 @@ type BaseEncoder struct {
 
 // buildMsg returns a string containing all the given arguments cast to strings concatenated with a white space.
 func (b *BaseEncoder) buildMsg(args ...interface{}) string {
-	var res strings.Builder
-	res.Grow(30 * len(args)) // Assuming average word length of N chars
+	var res bytes.Buffer
+	res.Grow(averageWordLen * len(args)) // Assuming an average word length of 30 chars
 
 	for i, arg := range args {
-		res.WriteString(fmt.Sprint(arg))
+		switch v := arg.(type) {
+		case string:
+			res.WriteString(v)
+		case rune:
+			res.WriteRune(v)
+		case int:
+			res.WriteString(strconv.Itoa(v))
+		case int64:
+			res.WriteString(strconv.FormatInt(v, 10))
+		case float64:
+			res.WriteString(strconv.FormatFloat(v, 'f', -1, 64))
+		case bool:
+			res.WriteString(strconv.FormatBool(v))
+		default:
+			// Using the slower fmt.Sprint only for unknown types
+			res.WriteString(fmt.Sprint(v))
+		}
 
 		if i < len(args)-1 {
-			res.WriteString(" ")
+			res.WriteByte(' ')
 		}
 	}
 

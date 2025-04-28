@@ -107,6 +107,7 @@ func (j *JSONEncoder) printJSONLog(
 //	// Result: map[string]interface{}{"user": "alice", "ip": "192.168.1.1"}
 func buildExtraMessages(keyAndValuePairs ...interface{}) map[string]interface{} {
 	keyAndValuePairsLen := len(keyAndValuePairs)
+
 	if keyAndValuePairsLen == 0 {
 		return nil
 	}

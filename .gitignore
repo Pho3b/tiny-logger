@@ -1,3 +1,4 @@
 .idea
 tiny-logger
 main.go
+main_test.go

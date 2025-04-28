@@ -68,8 +68,10 @@ func (d *DefaultEncoder) printDefaultLog(
 	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.PrintDateTime(dEnabled, tEnabled)
 	colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), color)
 
+	// Composing the final log message
 	var b bytes.Buffer
-	b.Grow(50 * len(args))
+	b.Grow((averageWordLen * len(args)) + averageWordLen)
+
 	b.WriteString(string(colors[0]))
 
 	if logger.GetShowLogLevel() {
@@ -87,6 +89,7 @@ func (d *DefaultEncoder) printDefaultLog(
 	b.WriteString(d.buildMsg(args...))
 	b.WriteByte('\n')
 
+	// Actual message print
 	switch outType {
 	case shared.StdOutput:
 		os.Stdout.Write(b.Bytes())
@@ -104,7 +107,7 @@ func (d *DefaultEncoder) formatDateTimeString(dateStr, timeStr, dateTimeStr stri
 		return sb
 	}
 
-	sb.Grow(30)
+	sb.Grow(averageWordLen)
 	sb.WriteByte('[')
 
 	if dateTimeStr != "" {

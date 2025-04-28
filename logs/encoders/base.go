@@ -7,6 +7,8 @@ import (
 	"strconv"
 )
 
+const averageWordLen = 30
+
 type BaseEncoder struct {
 	encoderType shared.EncoderType
 }
@@ -14,12 +16,14 @@ type BaseEncoder struct {
 // buildMsg returns a string containing all the given arguments cast to strings concatenated with a white space.
 func (b *BaseEncoder) buildMsg(args ...interface{}) string {
 	var res bytes.Buffer
-	res.Grow(30 * len(args)) // Assuming an average word length of 30 chars
+	res.Grow(averageWordLen * len(args)) // Assuming an average word length of 30 chars
 
 	for i, arg := range args {
 		switch v := arg.(type) {
 		case string:
 			res.WriteString(v)
+		case rune:
+			res.WriteRune(v)
 		case int:
 			res.WriteString(strconv.Itoa(v))
 		case int64:

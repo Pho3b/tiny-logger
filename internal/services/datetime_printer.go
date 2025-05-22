@@ -10,14 +10,12 @@ type DateTimePrinter struct {
 	currentTime string
 }
 
-// PrintDateTime returns formatted date and/or time strings based on input flags.
+// RetrieveDateTime returns formatted date and/or time strings based on input flags.
 // - If addDate is true, the method returns the current date in "DD/MM/YYYY" format.
 // - If addTime is true, it returns the current time in "HH:MM:SS" format.
 // - If both addDate and addTime are true, dateTimeRes is returned as a unified string.
 // - If neither addDate nor addTime is true, empty strings are returned.
-
-// TODO: Add a cancel method for the spawned goroutines
-func (d *DateTimePrinter) PrintDateTime(addDate bool, addTime bool) (dateRes string, timeRes string, dateTimeRes string) {
+func (d *DateTimePrinter) RetrieveDateTime(addDate bool, addTime bool) (dateRes string, timeRes string, dateTimeRes string) {
 	if addDate {
 		if d.currentDate == "" {
 			d.currentDate = d.timeNow().Format("02/01/2006")

@@ -66,7 +66,7 @@ func (j *JSONEncoder) printJSONLog(
 	outType shared.OutputType,
 	args ...interface{},
 ) {
-	dateStr, timeStr, dateTimeStr := j.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
+	dateStr, timeStr, dateTimeStr := j.DateTimePrinter.RetrieveDateTime(logger.GetDateTimeEnabled())
 
 	if !logger.GetShowLogLevel() {
 		level = ""

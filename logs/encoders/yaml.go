@@ -65,7 +65,7 @@ func (y *YAMLEncoder) printYAMLLog(
 	outType shared.OutputType,
 	args ...interface{},
 ) {
-	dateStr, timeStr, dateTimeStr := y.DateTimePrinter.PrintDateTime(logger.GetDateTimeEnabled())
+	dateStr, timeStr, dateTimeStr := y.DateTimePrinter.RetrieveDateTime(logger.GetDateTimeEnabled())
 
 	if !logger.GetShowLogLevel() {
 		level = ""

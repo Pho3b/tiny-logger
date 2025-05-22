@@ -65,7 +65,7 @@ func (d *DefaultEncoder) printDefaultLog(
 	args ...interface{},
 ) {
 	dEnabled, tEnabled := logger.GetDateTimeEnabled()
-	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.PrintDateTime(dEnabled, tEnabled)
+	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.RetrieveDateTime(dEnabled, tEnabled)
 	colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), color)
 
 	// Composing the final log message

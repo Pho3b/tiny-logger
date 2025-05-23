@@ -54,7 +54,7 @@ func (j *JSONEncoder) LogError(logger shared.LoggerConfigsInterface, args ...int
 // LogFatalError formats and prints a fatal error-level log message in JSON format and exits the program.
 func (j *JSONEncoder) LogFatalError(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 && !j.areAllNil(args...) {
-		j.printJSONLog("FATAL", logger, shared.StdErrOutput, args...)
+		j.printJSONLog("FATAL_ERROR", logger, shared.StdErrOutput, args...)
 		os.Exit(1)
 	}
 }

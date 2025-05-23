@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pho3b/tiny-logger/internal/services"
+	ll "github.com/pho3b/tiny-logger/logs/log_level"
 	"github.com/pho3b/tiny-logger/shared"
 	"os"
 )
@@ -26,35 +27,35 @@ type jsonLogEntry struct {
 // LogDebug formats and prints a debug-level log message in JSON format.
 func (j *JSONEncoder) LogDebug(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		j.printJSONLog("DEBUG", logger, shared.StdOutput, args...)
+		j.printJSONLog(ll.DebugLvlName.String(), logger, shared.StdOutput, args...)
 	}
 }
 
 // LogInfo formats and prints an info-level log message in JSON format.
 func (j *JSONEncoder) LogInfo(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		j.printJSONLog("INFO", logger, shared.StdOutput, args...)
+		j.printJSONLog(ll.InfoLvlName.String(), logger, shared.StdOutput, args...)
 	}
 }
 
 // LogWarn formats and prints a warning-level log message in JSON format.
 func (j *JSONEncoder) LogWarn(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		j.printJSONLog("WARN", logger, shared.StdOutput, args...)
+		j.printJSONLog(ll.WarnLvlName.String(), logger, shared.StdOutput, args...)
 	}
 }
 
 // LogError formats and prints an error-level log message in JSON format.
 func (j *JSONEncoder) LogError(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 && !j.areAllNil(args...) {
-		j.printJSONLog("ERROR", logger, shared.StdErrOutput, args...)
+		j.printJSONLog(ll.ErrorLvlName.String(), logger, shared.StdErrOutput, args...)
 	}
 }
 
 // LogFatalError formats and prints a fatal error-level log message in JSON format and exits the program.
 func (j *JSONEncoder) LogFatalError(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 && !j.areAllNil(args...) {
-		j.printJSONLog("FATAL_ERROR", logger, shared.StdErrOutput, args...)
+		j.printJSONLog(ll.FatalErrorLvlName.String(), logger, shared.StdErrOutput, args...)
 		os.Exit(1)
 	}
 }

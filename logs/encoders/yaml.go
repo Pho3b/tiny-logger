@@ -3,6 +3,7 @@ package encoders
 import (
 	"fmt"
 	"github.com/pho3b/tiny-logger/internal/services"
+	ll "github.com/pho3b/tiny-logger/logs/log_level"
 	"github.com/pho3b/tiny-logger/shared"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -25,35 +26,35 @@ type yamlLogEntry struct {
 // LogDebug formats and prints a debug-level log message in YAML format.
 func (y *YAMLEncoder) LogDebug(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		y.printYAMLLog("DEBUG", logger, shared.StdOutput, args...)
+		y.printYAMLLog(ll.DebugLvlName.String(), logger, shared.StdOutput, args...)
 	}
 }
 
 // LogInfo formats and prints an info-level log message in YAML format.
 func (y *YAMLEncoder) LogInfo(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		y.printYAMLLog("INFO", logger, shared.StdOutput, args...)
+		y.printYAMLLog(ll.InfoLvlName.String(), logger, shared.StdOutput, args...)
 	}
 }
 
 // LogWarn formats and prints a warning-level log message in YAML format.
 func (y *YAMLEncoder) LogWarn(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		y.printYAMLLog("WARN", logger, shared.StdOutput, args...)
+		y.printYAMLLog(ll.WarnLvlName.String(), logger, shared.StdOutput, args...)
 	}
 }
 
 // LogError formats and prints an error-level log message in YAML format.
 func (y *YAMLEncoder) LogError(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 && !y.areAllNil(args...) {
-		y.printYAMLLog("ERROR", logger, shared.StdErrOutput, args...)
+		y.printYAMLLog(ll.ErrorLvlName.String(), logger, shared.StdErrOutput, args...)
 	}
 }
 
 // LogFatalError formats and prints a fatal error-level log message in YAML format and exits the program.
 func (y *YAMLEncoder) LogFatalError(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 && !y.areAllNil(args...) {
-		y.printYAMLLog("FATAL", logger, shared.StdErrOutput, args...)
+		y.printYAMLLog(ll.FatalErrorLvlName.String(), logger, shared.StdErrOutput, args...)
 		os.Exit(1)
 	}
 }

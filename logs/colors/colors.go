@@ -16,6 +16,10 @@ var (
 	Gray    Color = "\033[37m"
 )
 
+func (c Color) String() string {
+	return string(c)
+}
+
 func init() {
 	// Avoids printing unusable Color codes for Windows operating systems
 	if strings.Contains(runtime.GOOS, "windows") {

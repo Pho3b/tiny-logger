@@ -13,34 +13,42 @@ type LogLvlName string
 const DefaultEnvLogLvlVar = "TINY_LOGGER_LVL"
 
 const (
-	ErrorLvlName LogLvlName = "ERROR"
-	WarnLvlName  LogLvlName = "WARN"
-	InfoLvlName  LogLvlName = "INFO"
-	DebugLvlName LogLvlName = "DEBUG"
+	FatalErrorLvlName LogLvlName = "FATAL_ERROR"
+	ErrorLvlName      LogLvlName = "ERROR"
+	WarnLvlName       LogLvlName = "WARN"
+	InfoLvlName       LogLvlName = "INFO"
+	DebugLvlName      LogLvlName = "DEBUG"
 )
+
+func (l LogLvlName) String() string {
+	return string(l)
+}
 
 // Log Level INT8 Constants
 const (
-	ErrorLvl = int8(0)
-	WarnLvl  = int8(1)
-	InfoLvl  = int8(2)
-	DebugLvl = int8(3)
+	FatalErrorLvl = int8(-1)
+	ErrorLvl      = int8(0)
+	WarnLvl       = int8(1)
+	InfoLvl       = int8(2)
+	DebugLvl      = int8(3)
 )
 
 // LogLvlIntToName represents the log level INT to STRING map
 var LogLvlIntToName = map[int8]LogLvlName{
-	ErrorLvl: ErrorLvlName,
-	WarnLvl:  WarnLvlName,
-	InfoLvl:  InfoLvlName,
-	DebugLvl: DebugLvlName,
+	FatalErrorLvl: FatalErrorLvlName,
+	ErrorLvl:      ErrorLvlName,
+	WarnLvl:       WarnLvlName,
+	InfoLvl:       InfoLvlName,
+	DebugLvl:      DebugLvlName,
 }
 
 // LogLvlNameToInt represents the log level STRING to INT map
 var LogLvlNameToInt = map[LogLvlName]int8{
-	ErrorLvlName: ErrorLvl,
-	WarnLvlName:  WarnLvl,
-	InfoLvlName:  InfoLvl,
-	DebugLvlName: DebugLvl,
+	FatalErrorLvlName: FatalErrorLvl,
+	ErrorLvlName:      ErrorLvl,
+	WarnLvlName:       WarnLvl,
+	InfoLvlName:       InfoLvl,
+	DebugLvlName:      DebugLvl,
 }
 
 type LogLevel struct {

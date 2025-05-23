@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/pho3b/tiny-logger/logs/log_level"
 	"testing"
 
 	c "github.com/pho3b/tiny-logger/logs/colors"
@@ -9,20 +10,36 @@ import (
 
 func TestPrintColors_EnableColorsTrue(t *testing.T) {
 	printer := ColorsPrinter{}
-	color := c.Cyan
 
-	result := printer.PrintColors(true, color)
+	result := printer.RetrieveColorsFromLogLevel(true, log_level.FatalErrorLvl)
+	assert.Equal(t, c.Magenta, result[0], "Expected first element to be the provided color")
+	assert.Equal(t, c.Reset, result[1], "Expected second element to be the reset color")
 
-	assert.Equal(t, color, result[0], "Expected first element to be the provided color")
+	result = printer.RetrieveColorsFromLogLevel(true, log_level.ErrorLvl)
+	assert.Equal(t, c.Red, result[0], "Expected first element to be the provided color")
+	assert.Equal(t, c.Reset, result[1], "Expected second element to be the reset color")
+
+	result = printer.RetrieveColorsFromLogLevel(true, log_level.WarnLvl)
+	assert.Equal(t, c.Yellow, result[0], "Expected first element to be the provided color")
+	assert.Equal(t, c.Reset, result[1], "Expected second element to be the reset color")
+
+	result = printer.RetrieveColorsFromLogLevel(true, log_level.InfoLvl)
+	assert.Equal(t, c.Cyan, result[0], "Expected first element to be the provided color")
+	assert.Equal(t, c.Reset, result[1], "Expected second element to be the reset color")
+
+	result = printer.RetrieveColorsFromLogLevel(true, log_level.DebugLvl)
+	assert.Equal(t, c.Gray, result[0], "Expected first element to be the provided color")
 	assert.Equal(t, c.Reset, result[1], "Expected second element to be the reset color")
 }
 
 func TestPrintColors_EnableColorsFalse(t *testing.T) {
 	printer := ColorsPrinter{}
-	color := c.Color("blue")
 
-	result := printer.PrintColors(false, color)
+	result := printer.RetrieveColorsFromLogLevel(false, log_level.DebugLvl)
+	assert.Equal(t, c.Color(""), result[0], "Expected first element to be an empty string when colors are disabled")
+	assert.Equal(t, c.Color(""), result[1], "Expected second element to be an empty string when colors are disabled")
 
+	result = printer.RetrieveColorsFromLogLevel(false, log_level.InfoLvl)
 	assert.Equal(t, c.Color(""), result[0], "Expected first element to be an empty string when colors are disabled")
 	assert.Equal(t, c.Color(""), result[1], "Expected second element to be an empty string when colors are disabled")
 }

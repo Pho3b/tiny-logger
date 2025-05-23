@@ -2,6 +2,7 @@ package encoders
 
 import (
 	"bytes"
+	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"os/exec"
@@ -148,4 +149,21 @@ func TestShowLogLevel(t *testing.T) {
 
 	assert.NotContains(t, output, "DEBUG:")
 	assert.Contains(t, output, "Test my-test message")
+}
+
+func TestCheckColorsInTheOutput(t *testing.T) {
+	encoder := NewDefaultEncoder()
+	loggerConfig := &LoggerConfigMock{DateEnabled: false, TimeEnabled: false, ColorsEnabled: true, ShowLogLevel: true}
+
+	output := captureOutput(func() { encoder.LogDebug(loggerConfig, "Test msg") })
+	assert.Contains(t, output, colors.Gray.String())
+
+	output = captureOutput(func() { encoder.LogInfo(loggerConfig, "Test msg") })
+	assert.Contains(t, output, colors.Cyan.String())
+
+	output = captureOutput(func() { encoder.LogWarn(loggerConfig, "Test msg") })
+	assert.Contains(t, output, colors.Yellow.String())
+
+	output = captureErrorOutput(func() { encoder.LogError(loggerConfig, "Test msg") })
+	assert.Contains(t, output, colors.Red.String())
 }

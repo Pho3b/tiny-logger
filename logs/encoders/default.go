@@ -3,7 +3,7 @@ package encoders
 import (
 	"bytes"
 	"github.com/pho3b/tiny-logger/internal/services"
-	c "github.com/pho3b/tiny-logger/logs/colors"
+	ll "github.com/pho3b/tiny-logger/logs/log_level"
 	"github.com/pho3b/tiny-logger/shared"
 	"os"
 )
@@ -18,7 +18,7 @@ type DefaultEncoder struct {
 // It includes date and/or time if enabled, with the text in gray if colors are enabled.
 func (d *DefaultEncoder) LogDebug(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		d.printDefaultLog("DEBUG:", logger, shared.StdOutput, c.Gray, d.buildMsg(args...))
+		d.printDefaultLog(ll.DebugLvlName, logger, shared.StdOutput, d.buildMsg(args...))
 	}
 }
 
@@ -26,7 +26,7 @@ func (d *DefaultEncoder) LogDebug(logger shared.LoggerConfigsInterface, args ...
 // It includes date and/or time if enabled, with the text in cyan if colors are enabled.
 func (d *DefaultEncoder) LogInfo(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		d.printDefaultLog("INFO:", logger, shared.StdOutput, c.Cyan, d.buildMsg(args...))
+		d.printDefaultLog(ll.InfoLvlName, logger, shared.StdOutput, d.buildMsg(args...))
 	}
 }
 
@@ -34,7 +34,7 @@ func (d *DefaultEncoder) LogInfo(logger shared.LoggerConfigsInterface, args ...i
 // It includes date and/or time if enabled, with the text in yellow if colors are enabled.
 func (d *DefaultEncoder) LogWarn(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		d.printDefaultLog("WARN:", logger, shared.StdOutput, c.Yellow, d.buildMsg(args...))
+		d.printDefaultLog(ll.WarnLvlName, logger, shared.StdOutput, d.buildMsg(args...))
 	}
 }
 
@@ -42,7 +42,7 @@ func (d *DefaultEncoder) LogWarn(logger shared.LoggerConfigsInterface, args ...i
 // It includes date and/or time if enabled, with the text in red if colors are enabled.
 func (d *DefaultEncoder) LogError(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 && !d.areAllNil(args...) {
-		d.printDefaultLog("ERROR:", logger, shared.StdErrOutput, c.Red, d.buildMsg(args...))
+		d.printDefaultLog(ll.ErrorLvlName, logger, shared.StdErrOutput, d.buildMsg(args...))
 	}
 }
 
@@ -51,22 +51,21 @@ func (d *DefaultEncoder) LogError(logger shared.LoggerConfigsInterface, args ...
 // NOTE: the LogFatalError also Terminates the program with a non-zero exit code.
 func (d *DefaultEncoder) LogFatalError(logger shared.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 && !d.areAllNil(args...) {
-		d.printDefaultLog("FATAL ERROR:", logger, shared.StdErrOutput, c.Magenta, d.buildMsg(args...))
+		d.printDefaultLog(ll.FatalErrorLvlName, logger, shared.StdErrOutput, d.buildMsg(args...))
 		os.Exit(1)
 	}
 }
 
 // printDefaultLog formats a default log message and prints it to the appropriate output (stdout or stderr).
 func (d *DefaultEncoder) printDefaultLog(
-	level string,
+	logLevelName ll.LogLvlName,
 	logger shared.LoggerConfigsInterface,
 	outType shared.OutputType,
-	color c.Color,
 	args ...interface{},
 ) {
 	dEnabled, tEnabled := logger.GetDateTimeEnabled()
-	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.PrintDateTime(dEnabled, tEnabled)
-	colors := d.ColorsPrinter.PrintColors(logger.GetColorsEnabled(), color)
+	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.RetrieveDateTime(dEnabled, tEnabled)
+	colors := d.ColorsPrinter.RetrieveColorsFromLogLevel(logger.GetColorsEnabled(), ll.LogLvlNameToInt[logLevelName])
 
 	// Composing the final log message
 	var b bytes.Buffer
@@ -75,7 +74,8 @@ func (d *DefaultEncoder) printDefaultLog(
 	b.WriteString(string(colors[0]))
 
 	if logger.GetShowLogLevel() {
-		b.WriteString(level)
+		b.WriteString(logLevelName.String())
+		b.WriteRune(':')
 	}
 
 	dtb := d.formatDateTimeString(dateStr, timeStr, dateTimeStr)
@@ -92,9 +92,9 @@ func (d *DefaultEncoder) printDefaultLog(
 	// Actual message print
 	switch outType {
 	case shared.StdOutput:
-		os.Stdout.Write(b.Bytes())
+		_, _ = os.Stdout.Write(b.Bytes())
 	case shared.StdErrOutput:
-		os.Stderr.Write(b.Bytes())
+		_, _ = os.Stderr.Write(b.Bytes())
 	}
 }
 

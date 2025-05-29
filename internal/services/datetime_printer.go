@@ -1,13 +1,17 @@
 package services
 
 import (
+	"sync"
+	"sync/atomic"
 	"time"
 )
 
 type DateTimePrinter struct {
 	timeNow     func() time.Time // Function to get current time, allows mocking for tests
-	currentDate string
-	currentTime string
+	currentDate atomic.Value
+	currentTime atomic.Value
+	dateOnce    sync.Once
+	timeOnce    sync.Once
 }
 
 // RetrieveDateTime returns formatted date and/or time strings based on input flags.
@@ -15,23 +19,37 @@ type DateTimePrinter struct {
 // - If addTime is true, it returns the current time in "HH:MM:SS" format.
 // - If both addDate and addTime are true, dateTimeRes is returned as a unified string.
 // - If neither addDate nor addTime is true, empty strings are returned.
-func (d *DateTimePrinter) RetrieveDateTime(addDate bool, addTime bool) (dateRes string, timeRes string, dateTimeRes string) {
+func (d *DateTimePrinter) RetrieveDateTime(addDate, addTime bool) (string, string, string) {
+	var dateRes, timeRes string
+
 	if addDate {
-		if d.currentDate == "" {
-			d.currentDate = d.timeNow().Format("02/01/2006")
-			go d.updateCurrentDateEveryDay()
+		cDate := d.currentDate.Load()
+
+		if cDate == nil {
+			d.currentDate.Store(d.timeNow().Format("02/01/2006"))
+			d.dateOnce.Do(func() {
+				go d.updateCurrentDateEveryDay()
+			})
+
+			cDate = d.currentDate.Load()
 		}
 
-		dateRes = d.currentDate
+		dateRes = cDate.(string)
 	}
 
 	if addTime {
-		if d.currentTime == "" {
-			d.currentTime = d.timeNow().Format("15:04:05")
-			go d.updateCurrentTimeEverySecond()
+		cTime := d.currentTime.Load()
+
+		if cTime == nil {
+			d.currentTime.Store(d.timeNow().Format("15:04:05"))
+			d.timeOnce.Do(func() {
+				go d.updateCurrentTimeEverySecond()
+			})
+
+			cTime = d.currentTime.Load()
 		}
 
-		timeRes = d.currentTime
+		timeRes = cTime.(string)
 	}
 
 	if addDate && addTime {
@@ -49,10 +67,11 @@ func (d *DateTimePrinter) updateCurrentDateEveryDay() {
 	initialDelay := now.Sub(midnight) // Time since midnight
 	time.Sleep(initialDelay)
 
-	daysTicker := time.NewTicker(1 * (time.Hour * 24))
+	ticker := time.NewTicker(24 * time.Hour)
+	defer ticker.Stop()
 
-	for t := range daysTicker.C {
-		d.currentDate = t.Format("02/01/2006")
+	for t := range ticker.C {
+		d.currentDate.Store(t.Format("02/01/2006"))
 	}
 }
 
@@ -62,10 +81,11 @@ func (d *DateTimePrinter) updateCurrentTimeEverySecond() {
 	initialDelay := 1*time.Second - time.Duration(d.timeNow().Nanosecond())*time.Nanosecond
 	time.Sleep(initialDelay)
 
-	secondsTicker := time.NewTicker(1 * time.Second)
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
 
-	for t := range secondsTicker.C {
-		d.currentTime = t.Format("15:04:05")
+	for t := range ticker.C {
+		d.currentTime.Store(t.Format("15:04:05"))
 	}
 }
 

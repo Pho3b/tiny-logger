@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"io"
 	"os"
+	"sync"
 	"testing"
 )
 
@@ -172,4 +173,27 @@ func TestLogger_EnableColors(t *testing.T) {
 
 	logger.EnableColors(false)
 	assert.False(t, logger.GetColorsEnabled())
+}
+
+func TestLoggerConcurrency(t *testing.T) {
+	var wg sync.WaitGroup
+
+	logger := NewLogger()
+	numGoroutines := 100
+	numMessages := 1000
+
+	for i := 0; i < numGoroutines; i++ {
+		wg.Add(1)
+		go writeDummyLogsWithNewLogger(numMessages, &wg, logger)
+	}
+
+	wg.Wait()
+}
+
+func writeDummyLogsWithNewLogger(logsNumber int, wg *sync.WaitGroup, logger *Logger) {
+	defer wg.Done()
+
+	for i := 0; i < logsNumber; i++ {
+		logger.Debug("This is a test message", ";", 2)
+	}
 }

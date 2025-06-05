@@ -61,7 +61,7 @@ func (d *DefaultEncoder) printDefaultLog(
 	logLevelName ll.LogLvlName,
 	logger shared.LoggerConfigsInterface,
 	outType shared.OutputType,
-	args ...interface{},
+	msg string,
 ) {
 	dEnabled, tEnabled := logger.GetDateTimeEnabled()
 	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.RetrieveDateTime(dEnabled, tEnabled)
@@ -69,7 +69,7 @@ func (d *DefaultEncoder) printDefaultLog(
 
 	// Composing the final log message
 	var b bytes.Buffer
-	b.Grow((averageWordLen * len(args)) + averageWordLen)
+	b.Grow(len(msg) + 50)
 
 	b.WriteString(string(colors[0]))
 
@@ -86,7 +86,7 @@ func (d *DefaultEncoder) printDefaultLog(
 		b.WriteByte(' ')
 	}
 
-	b.WriteString(d.buildMsg(args...))
+	b.WriteString(msg)
 	b.WriteByte('\n')
 
 	// Actual message print

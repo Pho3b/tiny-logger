@@ -56,6 +56,11 @@ func (d *DefaultEncoder) LogFatalError(logger shared.LoggerConfigsInterface, arg
 	}
 }
 
+func (d *DefaultEncoder) ColoredLog(logger shared.LoggerConfigsInterface, args ...interface{}) {
+	if len(args) > 0 && !d.areAllNil(args...) {
+	}
+}
+
 // printDefaultLog formats a default log message and prints it to the appropriate output (stdout or stderr).
 func (d *DefaultEncoder) printDefaultLog(
 	logLevelName ll.LogLvlName,
@@ -63,6 +68,25 @@ func (d *DefaultEncoder) printDefaultLog(
 	outType shared.OutputType,
 	msg string,
 ) {
+	var b bytes.Buffer
+	b.Grow(len(msg) + averageWordLen)
+
+	d.composeMsg(&b, logLevelName, logger, msg)
+
+	switch outType {
+	case shared.StdOutput:
+		_, _ = os.Stdout.Write(b.Bytes())
+	case shared.StdErrOutput:
+		_, _ = os.Stderr.Write(b.Bytes())
+	}
+}
+
+func (d *DefaultEncoder) composeMsg(
+	b *bytes.Buffer,
+	logLevelName ll.LogLvlName,
+	logger shared.LoggerConfigsInterface,
+	msg string,
+) *bytes.Buffer {
 	dEnabled, tEnabled := logger.GetDateTimeEnabled()
 	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.RetrieveDateTime(dEnabled, tEnabled)
 	colors := d.ColorsPrinter.RetrieveColorsFromLogLevel(logger.GetColorsEnabled(), ll.LogLvlNameToInt[logLevelName])
@@ -89,13 +113,7 @@ func (d *DefaultEncoder) printDefaultLog(
 	b.WriteString(msg)
 	b.WriteByte('\n')
 
-	// Actual message print
-	switch outType {
-	case shared.StdOutput:
-		_, _ = os.Stdout.Write(b.Bytes())
-	case shared.StdErrOutput:
-		_, _ = os.Stderr.Write(b.Bytes())
-	}
+	return b
 }
 
 // formatDateTimeString correctly formats the dateTime string adding and removing square brackets

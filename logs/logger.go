@@ -1,6 +1,7 @@
 package logs
 
 import (
+	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/logs/encoders"
 	"github.com/pho3b/tiny-logger/logs/log_level"
 	"github.com/pho3b/tiny-logger/shared"
@@ -64,6 +65,10 @@ func (l *Logger) SetLogLvlEnvVariable(envVariableName string) *Logger {
 	l.logLvl.Lvl = log_level.RetrieveLogLvlFromEnv(l.logLvl.EnvVariable)
 
 	return l
+}
+
+func (l *Logger) Color(color colors.Color, args ...interface{}) {
+	l.encoder.LogDebug(l, args...)
 }
 
 // GetLogLvlName returns the current log level name as a string.

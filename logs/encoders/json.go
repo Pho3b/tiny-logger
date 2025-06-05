@@ -1,9 +1,11 @@
 package encoders
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/pho3b/tiny-logger/internal/services"
+	"github.com/pho3b/tiny-logger/logs/colors"
 	ll "github.com/pho3b/tiny-logger/logs/log_level"
 	"github.com/pho3b/tiny-logger/shared"
 	"os"
@@ -68,6 +70,9 @@ func (j *JSONEncoder) printJSONLog(
 	args ...interface{},
 ) {
 	dateStr, timeStr, dateTimeStr := j.DateTimePrinter.RetrieveDateTime(logger.GetDateTimeEnabled())
+	var b bytes.Buffer
+	b.Grow((averageWordLen * len(args)) + 100)
+	b.WriteString(colors.Cyan.String())
 
 	if !logger.GetShowLogLevel() {
 		level = ""
@@ -83,17 +88,20 @@ func (j *JSONEncoder) printJSONLog(
 			Extras:   buildExtraMessages(args[1:]...),
 		},
 	)
-	msgBytes = append(msgBytes, '\n')
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, `{"level":"ERROR", "message":"Failed to marshal JSON log: %s"}`, err.Error())
 		return
 	}
 
+	b.Write(msgBytes)
+	b.WriteString(colors.Reset.String())
+	b.WriteByte('\n')
+
 	switch outType {
 	case shared.StdOutput:
-		_, _ = os.Stdout.Write(msgBytes)
+		_, _ = os.Stdout.Write(b.Bytes())
 	case shared.StdErrOutput:
-		_, _ = os.Stderr.Write(msgBytes)
+		_, _ = os.Stderr.Write(b.Bytes())
 	}
 }
 

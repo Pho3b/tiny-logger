@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/logs/log_level"
 )
 
@@ -28,4 +29,8 @@ type EncoderInterface interface {
 	LogError(logger LoggerConfigsInterface, args ...interface{})
 	LogFatalError(logger LoggerConfigsInterface, args ...interface{})
 	GetType() EncoderType
+}
+
+type ColorsInterface interface {
+	Color(color colors.Color, args ...interface{})
 }

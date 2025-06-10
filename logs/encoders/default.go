@@ -87,7 +87,7 @@ func (d *DefaultEncoder) LogError(logger s.LoggerConfigsInterface, args ...inter
 // It includes date and/or time if enabled, with the text in magenta if colors are enabled.
 // NOTE: the LogFatalError also Terminates the program with a non-zero exit code.
 func (d *DefaultEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...interface{}) {
-	if len(args) > 0 {
+	if len(args) > 0 && !d.areAllNil(args...) {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := d.composeMsg(
 			ll.DebugLvlName,

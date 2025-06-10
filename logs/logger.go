@@ -68,7 +68,7 @@ func (l *Logger) SetLogLvlEnvVariable(envVariableName string) *Logger {
 }
 
 func (l *Logger) Color(color colors.Color, args ...interface{}) {
-	l.encoder.LogDebug(l, args...)
+	l.encoder.Color(l, color, args...)
 }
 
 // GetLogLvlName returns the current log level name as a string.
@@ -137,10 +137,10 @@ func (l *Logger) SetEncoder(encoderType shared.EncoderType) *Logger {
 	switch encoderType {
 	case shared.DefaultEncoderType:
 		l.encoder = encoders.NewDefaultEncoder()
-	case shared.JsonEncoderType:
-		l.encoder = encoders.NewJSONEncoder()
-	case shared.YamlEncoderType:
-		l.encoder = encoders.NewYAMLEncoder()
+		//case shared.JsonEncoderType:
+		//	l.encoder = encoders.NewJSONEncoder()
+		//case shared.YamlEncoderType:
+		//	l.encoder = encoders.NewYAMLEncoder()
 	}
 
 	return l

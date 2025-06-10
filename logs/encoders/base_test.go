@@ -9,19 +9,19 @@ func TestBuildMsg(t *testing.T) {
 	encoder := &BaseEncoder{}
 
 	// Test with multiple arguments
-	result := encoder.buildMsg("This", "is", "a", "test")
+	result := encoder.concatenate("This", "is", "a", "test")
 	assert.Equal(t, "This is a test", result)
 
 	// Test with a single argument
-	result = encoder.buildMsg("SingleArgument")
+	result = encoder.concatenate("SingleArgument")
 	assert.Equal(t, "SingleArgument", result)
 
 	// Test with no arguments
-	result = encoder.buildMsg()
+	result = encoder.concatenate()
 	assert.Equal(t, "", result)
 
 	// Test with mixed data types
-	result = encoder.buildMsg("Mixed", 123, true, 45.6)
+	result = encoder.concatenate("Mixed", 123, true, 45.6)
 	assert.Equal(t, "Mixed 123 true 45.6", result)
 }
 

@@ -13,8 +13,8 @@ type BaseEncoder struct {
 	encoderType shared.EncoderType
 }
 
-// buildMsg returns a string containing all the given arguments cast to strings concatenated with a white space.
-func (b *BaseEncoder) buildMsg(args ...interface{}) string {
+// concatenate returns a string containing all the given arguments cast to strings concatenated with a white space.
+func (b *BaseEncoder) concatenate(args ...interface{}) string {
 	var res bytes.Buffer
 	res.Grow(averageWordLen * len(args)) // Assuming an average word length of 30 chars
 

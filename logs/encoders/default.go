@@ -3,8 +3,9 @@ package encoders
 import (
 	"bytes"
 	"github.com/pho3b/tiny-logger/internal/services"
+	c "github.com/pho3b/tiny-logger/logs/colors"
 	ll "github.com/pho3b/tiny-logger/logs/log_level"
-	"github.com/pho3b/tiny-logger/shared"
+	s "github.com/pho3b/tiny-logger/shared"
 	"os"
 )
 
@@ -16,104 +17,148 @@ type DefaultEncoder struct {
 
 // LogDebug formats and prints a debug-level log message to stdout.
 // It includes date and/or time if enabled, with the text in gray if colors are enabled.
-func (d *DefaultEncoder) LogDebug(logger shared.LoggerConfigsInterface, args ...interface{}) {
+func (d *DefaultEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		d.printDefaultLog(ll.DebugLvlName, logger, shared.StdOutput, d.buildMsg(args...))
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
+		msgBuffer := d.composeMsg(
+			ll.DebugLvlName,
+			dEnabled, tEnabled,
+			false,
+			logger.GetShowLogLevel(),
+			d.concatenate(args...),
+		)
+
+		d.printDefaultLog(s.StdOutput, msgBuffer)
 	}
 }
 
 // LogInfo formats and prints an info-level log message to stdout.
 // It includes date and/or time if enabled, with the text in cyan if colors are enabled.
-func (d *DefaultEncoder) LogInfo(logger shared.LoggerConfigsInterface, args ...interface{}) {
+func (d *DefaultEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		d.printDefaultLog(ll.InfoLvlName, logger, shared.StdOutput, d.buildMsg(args...))
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
+		msgBuffer := d.composeMsg(
+			ll.InfoLvlName,
+			dEnabled, tEnabled,
+			false,
+			logger.GetShowLogLevel(),
+			d.concatenate(args...),
+		)
+
+		d.printDefaultLog(s.StdOutput, msgBuffer)
 	}
 }
 
 // LogWarn formats and prints a warning-level log message to stdout.
 // It includes date and/or time if enabled, with the text in yellow if colors are enabled.
-func (d *DefaultEncoder) LogWarn(logger shared.LoggerConfigsInterface, args ...interface{}) {
+func (d *DefaultEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		d.printDefaultLog(ll.WarnLvlName, logger, shared.StdOutput, d.buildMsg(args...))
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
+		msgBuffer := d.composeMsg(
+			ll.WarnLvlName,
+			dEnabled, tEnabled,
+			false,
+			logger.GetShowLogLevel(),
+			d.concatenate(args...),
+		)
+
+		d.printDefaultLog(s.StdOutput, msgBuffer)
 	}
 }
 
 // LogError formats and prints an error-level log message to stderr.
 // It includes date and/or time if enabled, with the text in red if colors are enabled.
-func (d *DefaultEncoder) LogError(logger shared.LoggerConfigsInterface, args ...interface{}) {
+func (d *DefaultEncoder) LogError(logger s.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 && !d.areAllNil(args...) {
-		d.printDefaultLog(ll.ErrorLvlName, logger, shared.StdErrOutput, d.buildMsg(args...))
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
+		msgBuffer := d.composeMsg(
+			ll.ErrorLvlName,
+			dEnabled, tEnabled,
+			false,
+			logger.GetShowLogLevel(),
+			d.concatenate(args...),
+		)
+
+		d.printDefaultLog(s.StdErrOutput, msgBuffer)
 	}
 }
 
 // LogFatalError formats and prints a fatal error-level log message to stderr and terminates the program.
 // It includes date and/or time if enabled, with the text in magenta if colors are enabled.
 // NOTE: the LogFatalError also Terminates the program with a non-zero exit code.
-func (d *DefaultEncoder) LogFatalError(logger shared.LoggerConfigsInterface, args ...interface{}) {
-	if len(args) > 0 && !d.areAllNil(args...) {
-		d.printDefaultLog(ll.FatalErrorLvlName, logger, shared.StdErrOutput, d.buildMsg(args...))
+func (d *DefaultEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...interface{}) {
+	if len(args) > 0 {
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
+		msgBuffer := d.composeMsg(
+			ll.DebugLvlName,
+			dEnabled, tEnabled,
+			false,
+			logger.GetShowLogLevel(),
+			d.concatenate(args...),
+		)
+
+		d.printDefaultLog(s.StdErrOutput, msgBuffer)
 		os.Exit(1)
 	}
 }
 
-func (d *DefaultEncoder) ColoredLog(logger shared.LoggerConfigsInterface, args ...interface{}) {
-	if len(args) > 0 && !d.areAllNil(args...) {
+func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...interface{}) {
+	if len(args) > 0 {
+		var b bytes.Buffer
+		b.Grow((len(args) * averageWordLen) + averageWordLen)
+		msgBuffer := d.composeMsg(ll.InfoLvlName, false, false, false, false, d.concatenate(args...))
+
+		b.WriteString(color.String())
+		b.Write(msgBuffer.Bytes())
+		b.WriteString(c.Reset.String())
+
+		d.printDefaultLog(s.StdOutput, &b)
 	}
 }
 
 // printDefaultLog formats a default log message and prints it to the appropriate output (stdout or stderr).
-func (d *DefaultEncoder) printDefaultLog(
-	logLevelName ll.LogLvlName,
-	logger shared.LoggerConfigsInterface,
-	outType shared.OutputType,
-	msg string,
-) {
-	var b bytes.Buffer
-	b.Grow(len(msg) + averageWordLen)
-
-	d.composeMsg(&b, logLevelName, logger, msg)
-
+func (d *DefaultEncoder) printDefaultLog(outType s.OutputType, msgBuffer *bytes.Buffer) {
 	switch outType {
-	case shared.StdOutput:
-		_, _ = os.Stdout.Write(b.Bytes())
-	case shared.StdErrOutput:
-		_, _ = os.Stderr.Write(b.Bytes())
+	case s.StdOutput:
+		_, _ = os.Stdout.Write(msgBuffer.Bytes())
+	case s.StdErrOutput:
+		_, _ = os.Stderr.Write(msgBuffer.Bytes())
 	}
 }
 
 func (d *DefaultEncoder) composeMsg(
-	b *bytes.Buffer,
-	logLevelName ll.LogLvlName,
-	logger shared.LoggerConfigsInterface,
+	logLevel ll.LogLvlName,
+	dateEnabled bool,
+	timeEnabled bool,
+	headerColorEnabled bool,
+	showLogLevel bool,
 	msg string,
 ) *bytes.Buffer {
-	dEnabled, tEnabled := logger.GetDateTimeEnabled()
-	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.RetrieveDateTime(dEnabled, tEnabled)
-	colors := d.ColorsPrinter.RetrieveColorsFromLogLevel(logger.GetColorsEnabled(), ll.LogLvlNameToInt[logLevelName])
-
-	// Composing the final log message
 	var b bytes.Buffer
 	b.Grow(len(msg) + 50)
 
+	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
+	colors := d.ColorsPrinter.RetrieveColorsFromLogLevel(headerColorEnabled, ll.LogLvlNameToInt[logLevel])
+
 	b.WriteString(string(colors[0]))
 
-	if logger.GetShowLogLevel() {
-		b.WriteString(logLevelName.String())
+	if showLogLevel {
+		b.WriteString(logLevel.String())
 		b.WriteRune(':')
 	}
 
-	dtb := d.formatDateTimeString(dateStr, timeStr, dateTimeStr)
-	b.Write(dtb.Bytes())
+	dateTime := d.formatDateTimeString(dateStr, timeStr, dateTimeStr)
+	b.Write(dateTime.Bytes())
 	b.WriteString(string(colors[1]))
 
-	if logger.GetShowLogLevel() || dEnabled || tEnabled {
+	if showLogLevel || dateEnabled || timeEnabled {
 		b.WriteByte(' ')
 	}
 
 	b.WriteString(msg)
 	b.WriteByte('\n')
 
-	return b
+	return &b
 }
 
 // formatDateTimeString correctly formats the dateTime string adding and removing square brackets
@@ -151,7 +196,7 @@ func NewDefaultEncoder() *DefaultEncoder {
 		DateTimePrinter: services.NewDateTimePrinter(),
 		ColorsPrinter:   &services.ColorsPrinter{},
 	}
-	encoder.encoderType = shared.DefaultEncoderType
+	encoder.encoderType = s.DefaultEncoderType
 
 	return encoder
 }

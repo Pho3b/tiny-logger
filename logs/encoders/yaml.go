@@ -78,7 +78,7 @@ func (y *YAMLEncoder) printYAMLLog(
 			Date:     dateStr,
 			Time:     timeStr,
 			DateTime: dateTimeStr,
-			Message:  y.buildMsg(args...),
+			Message:  y.concatenate(args...),
 		},
 	)
 	if err != nil {

@@ -84,7 +84,7 @@ func (j *JSONEncoder) printJSONLog(
 			Date:     dateStr,
 			DateTime: dateTimeStr,
 			Time:     timeStr,
-			Message:  j.buildMsg(args[0]),
+			Message:  j.concatenate(args[0]),
 			Extras:   buildExtraMessages(args[1:]...),
 		},
 	)

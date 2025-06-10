@@ -28,9 +28,6 @@ type EncoderInterface interface {
 	LogWarn(logger LoggerConfigsInterface, args ...interface{})
 	LogError(logger LoggerConfigsInterface, args ...interface{})
 	LogFatalError(logger LoggerConfigsInterface, args ...interface{})
+	Color(logger LoggerConfigsInterface, color colors.Color, args ...interface{})
 	GetType() EncoderType
-}
-
-type ColorsInterface interface {
-	Color(color colors.Color, args ...interface{})
 }

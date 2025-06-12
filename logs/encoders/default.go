@@ -11,8 +11,8 @@ import (
 
 type DefaultEncoder struct {
 	BaseEncoder
-	ColorsPrinter   *services.ColorsPrinter
-	DateTimePrinter *services.DateTimePrinter
+	ColorsPrinter   services.ColorsPrinter
+	DateTimePrinter services.DateTimePrinter
 }
 
 // LogDebug formats and prints a debug-level log message to stdout.
@@ -112,12 +112,12 @@ func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, a
 		b.Write(msgBuffer.Bytes())
 		b.WriteString(c.Reset.String())
 
-		d.printDefaultLog(s.StdOutput, &b)
+		d.printDefaultLog(s.StdOutput, b)
 	}
 }
 
 // printDefaultLog formats a default log message and prints it to the appropriate output (stdout or stderr).
-func (d *DefaultEncoder) printDefaultLog(outType s.OutputType, msgBuffer *bytes.Buffer) {
+func (d *DefaultEncoder) printDefaultLog(outType s.OutputType, msgBuffer bytes.Buffer) {
 	switch outType {
 	case s.StdOutput:
 		_, _ = os.Stdout.Write(msgBuffer.Bytes())
@@ -133,7 +133,7 @@ func (d *DefaultEncoder) composeMsg(
 	headerColorEnabled bool,
 	showLogLevel bool,
 	msg string,
-) *bytes.Buffer {
+) bytes.Buffer {
 	var b bytes.Buffer
 	b.Grow(len(msg) + 50)
 
@@ -158,7 +158,7 @@ func (d *DefaultEncoder) composeMsg(
 	b.WriteString(msg)
 	b.WriteByte('\n')
 
-	return &b
+	return b
 }
 
 // formatDateTimeString correctly formats the dateTime string adding and removing square brackets
@@ -194,7 +194,7 @@ func (d *DefaultEncoder) formatDateTimeString(dateStr, timeStr, dateTimeStr stri
 func NewDefaultEncoder() *DefaultEncoder {
 	encoder := &DefaultEncoder{
 		DateTimePrinter: services.NewDateTimePrinter(),
-		ColorsPrinter:   &services.ColorsPrinter{},
+		ColorsPrinter:   services.ColorsPrinter{},
 	}
 	encoder.encoderType = s.DefaultEncoderType
 

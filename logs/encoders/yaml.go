@@ -11,7 +11,7 @@ import (
 
 type YAMLEncoder struct {
 	BaseEncoder
-	DateTimePrinter *services.DateTimePrinter
+	DateTimePrinter services.DateTimePrinter
 }
 
 // yamlLogEntry represents the structure of a YAML log entry.

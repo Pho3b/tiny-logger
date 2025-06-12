@@ -13,7 +13,7 @@ import (
 
 type JSONEncoder struct {
 	BaseEncoder
-	DateTimePrinter *services.DateTimePrinter
+	DateTimePrinter services.DateTimePrinter
 }
 
 // jsonLogEntry represents the structure of a JSON log entry.

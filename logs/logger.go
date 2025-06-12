@@ -44,7 +44,7 @@ func (l *Logger) Error(args ...interface{}) {
 	}
 }
 
-// FatalError logs a fatal error message and typically terminates the application.
+// FatalError logs a fatal error message and terminates the application if any given args is not nil.
 func (l *Logger) FatalError(args ...interface{}) {
 	l.encoder.LogFatalError(l, args...)
 }

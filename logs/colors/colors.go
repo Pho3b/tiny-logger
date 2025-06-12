@@ -38,5 +38,16 @@ func init() {
 		Magenta = ""
 		Yellow = ""
 		Cyan = ""
+		Gray = ""
+		Black = ""
+		Green = ""
+		Blue = ""
+		White = ""
+		DarkGray = ""
+		BrightGreen = ""
+		BrightYellow = ""
+		BrightBlue = ""
+		Pink = ""
+		BrightCyan = ""
 	}
 }

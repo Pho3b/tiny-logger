@@ -23,12 +23,12 @@ func (d *DefaultEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...inter
 		msgBuffer := d.composeMsg(
 			ll.DebugLvlName,
 			dEnabled, tEnabled,
-			false,
+			logger.GetColorsEnabled(),
 			logger.GetShowLogLevel(),
-			d.concatenate(args...),
+			d.castAndConcatenate(args...),
 		)
 
-		d.printDefaultLog(s.StdOutput, msgBuffer)
+		d.printLog(s.StdOutput, msgBuffer)
 	}
 }
 
@@ -40,12 +40,12 @@ func (d *DefaultEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...interf
 		msgBuffer := d.composeMsg(
 			ll.InfoLvlName,
 			dEnabled, tEnabled,
-			false,
+			logger.GetColorsEnabled(),
 			logger.GetShowLogLevel(),
-			d.concatenate(args...),
+			d.castAndConcatenate(args...),
 		)
 
-		d.printDefaultLog(s.StdOutput, msgBuffer)
+		d.printLog(s.StdOutput, msgBuffer)
 	}
 }
 
@@ -57,12 +57,12 @@ func (d *DefaultEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...interf
 		msgBuffer := d.composeMsg(
 			ll.WarnLvlName,
 			dEnabled, tEnabled,
-			false,
+			logger.GetColorsEnabled(),
 			logger.GetShowLogLevel(),
-			d.concatenate(args...),
+			d.castAndConcatenate(args...),
 		)
 
-		d.printDefaultLog(s.StdOutput, msgBuffer)
+		d.printLog(s.StdOutput, msgBuffer)
 	}
 }
 
@@ -74,12 +74,12 @@ func (d *DefaultEncoder) LogError(logger s.LoggerConfigsInterface, args ...inter
 		msgBuffer := d.composeMsg(
 			ll.ErrorLvlName,
 			dEnabled, tEnabled,
-			false,
+			logger.GetColorsEnabled(),
 			logger.GetShowLogLevel(),
-			d.concatenate(args...),
+			d.castAndConcatenate(args...),
 		)
 
-		d.printDefaultLog(s.StdErrOutput, msgBuffer)
+		d.printLog(s.StdErrOutput, msgBuffer)
 	}
 }
 
@@ -92,37 +92,27 @@ func (d *DefaultEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...
 		msgBuffer := d.composeMsg(
 			ll.DebugLvlName,
 			dEnabled, tEnabled,
-			false,
+			logger.GetColorsEnabled(),
 			logger.GetShowLogLevel(),
-			d.concatenate(args...),
+			d.castAndConcatenate(args...),
 		)
 
-		d.printDefaultLog(s.StdErrOutput, msgBuffer)
+		d.printLog(s.StdErrOutput, msgBuffer)
 		os.Exit(1)
 	}
 }
 
-func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...interface{}) {
+func (d *DefaultEncoder) Color(color c.Color, args ...interface{}) {
 	if len(args) > 0 {
 		var b bytes.Buffer
 		b.Grow((len(args) * averageWordLen) + averageWordLen)
-		msgBuffer := d.composeMsg(ll.InfoLvlName, false, false, false, false, d.concatenate(args...))
+		msgBuffer := d.composeMsg(ll.InfoLvlName, false, false, false, false, d.castAndConcatenate(args...))
 
 		b.WriteString(color.String())
 		b.Write(msgBuffer.Bytes())
 		b.WriteString(c.Reset.String())
 
-		d.printDefaultLog(s.StdOutput, b)
-	}
-}
-
-// printDefaultLog formats a default log message and prints it to the appropriate output (stdout or stderr).
-func (d *DefaultEncoder) printDefaultLog(outType s.OutputType, msgBuffer bytes.Buffer) {
-	switch outType {
-	case s.StdOutput:
-		_, _ = os.Stdout.Write(msgBuffer.Bytes())
-	case s.StdErrOutput:
-		_, _ = os.Stderr.Write(msgBuffer.Bytes())
+		d.printLog(s.StdOutput, b)
 	}
 }
 
@@ -156,7 +146,6 @@ func (d *DefaultEncoder) composeMsg(
 	}
 
 	b.WriteString(msg)
-	b.WriteByte('\n')
 
 	return b
 }

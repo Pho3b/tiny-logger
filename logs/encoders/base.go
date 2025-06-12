@@ -3,18 +3,19 @@ package encoders
 import (
 	"bytes"
 	"fmt"
-	"github.com/pho3b/tiny-logger/shared"
+	s "github.com/pho3b/tiny-logger/shared"
+	"os"
 	"strconv"
 )
 
 const averageWordLen = 30
 
 type BaseEncoder struct {
-	encoderType shared.EncoderType
+	encoderType s.EncoderType
 }
 
-// concatenate returns a string containing all the given arguments cast to strings concatenated with a white space.
-func (b *BaseEncoder) concatenate(args ...interface{}) string {
+// castAndConcatenate returns a string containing all the given arguments cast to string and concatenated by a white space.
+func (b *BaseEncoder) castAndConcatenate(args ...interface{}) string {
 	var res bytes.Buffer
 	res.Grow(averageWordLen * len(args)) // Assuming an average word length of 30 chars
 
@@ -56,6 +57,18 @@ func (b *BaseEncoder) areAllNil(args ...interface{}) bool {
 	return true
 }
 
-func (b *BaseEncoder) GetType() shared.EncoderType {
+// printLog prints the given msgBuffer to the given outputType (stdout or stderr).
+func (b *BaseEncoder) printLog(outType s.OutputType, msgBuffer bytes.Buffer) {
+	msgBuffer.WriteByte('\n')
+
+	switch outType {
+	case s.StdOutput:
+		_, _ = os.Stdout.Write(msgBuffer.Bytes())
+	case s.StdErrOutput:
+		_, _ = os.Stderr.Write(msgBuffer.Bytes())
+	}
+}
+
+func (b *BaseEncoder) GetType() s.EncoderType {
 	return b.encoderType
 }

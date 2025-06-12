@@ -2,6 +2,7 @@ package logs
 
 import (
 	"bytes"
+	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/logs/log_level"
 	"github.com/stretchr/testify/assert"
 	"io"
@@ -196,4 +197,44 @@ func writeDummyLogsWithNewLogger(logsNumber int, wg *sync.WaitGroup, logger *Log
 	for i := 0; i < logsNumber; i++ {
 		logger.Debug("This is a test message", ";", 2)
 	}
+}
+
+func TestLogger_Color(t *testing.T) {
+	var buf bytes.Buffer
+	testLog := "my testing DEBUG log"
+	originalStdOut := os.Stdout
+	logger := NewLogger()
+
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+	logger.Color(colors.Magenta, testLog)
+	_ = w.Close()
+	_, _ = io.Copy(&buf, r)
+	assert.Contains(t, buf.String(), colors.Magenta.String()+testLog)
+
+	buf.Reset()
+	r, w, _ = os.Pipe()
+	os.Stdout = w
+	logger.Color(colors.Cyan, testLog)
+	_ = w.Close()
+	_, _ = io.Copy(&buf, r)
+	assert.Contains(t, buf.String(), colors.Cyan.String()+testLog+colors.Reset.String())
+
+	buf.Reset()
+	r, w, _ = os.Pipe()
+	os.Stdout = w
+	logger.Color(colors.Cyan, testLog)
+	_ = w.Close()
+	_, _ = io.Copy(&buf, r)
+	assert.Contains(t, buf.String(), colors.Cyan.String()+testLog+colors.Reset.String())
+
+	buf.Reset()
+	r, w, _ = os.Pipe()
+	os.Stdout = w
+	logger.Color(colors.Blue, testLog)
+	_ = w.Close()
+	_, _ = io.Copy(&buf, r)
+	assert.Contains(t, buf.String(), colors.Blue.String()+testLog+colors.Reset.String())
+
+	os.Stdout = originalStdOut
 }

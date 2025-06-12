@@ -67,8 +67,9 @@ func (l *Logger) SetLogLvlEnvVariable(envVariableName string) *Logger {
 	return l
 }
 
+// Color prints the given message colored with the given color.
 func (l *Logger) Color(color colors.Color, args ...interface{}) {
-	l.encoder.Color(l, color, args...)
+	l.encoder.Color(color, args...)
 }
 
 // GetLogLvlName returns the current log level name as a string.
@@ -82,6 +83,7 @@ func (l *Logger) GetLogLvlIntValue() int8 {
 }
 
 // EnableColors enables or disables color output in the logger based on the given parameter.
+// Colors apply only on the header elements [Data, Time, Log Level]
 func (l *Logger) EnableColors(enable bool) *Logger {
 	l.colorsEnabled = enable
 
@@ -137,10 +139,10 @@ func (l *Logger) SetEncoder(encoderType shared.EncoderType) *Logger {
 	switch encoderType {
 	case shared.DefaultEncoderType:
 		l.encoder = encoders.NewDefaultEncoder()
-		//case shared.JsonEncoderType:
-		//	l.encoder = encoders.NewJSONEncoder()
-		//case shared.YamlEncoderType:
-		//	l.encoder = encoders.NewYAMLEncoder()
+	case shared.JsonEncoderType:
+		l.encoder = encoders.NewJSONEncoder()
+	case shared.YamlEncoderType:
+		l.encoder = encoders.NewYAMLEncoder()
 	}
 
 	return l

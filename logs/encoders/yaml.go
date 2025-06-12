@@ -3,6 +3,7 @@ package encoders
 import (
 	"fmt"
 	"github.com/pho3b/tiny-logger/internal/services"
+	c "github.com/pho3b/tiny-logger/logs/colors"
 	ll "github.com/pho3b/tiny-logger/logs/log_level"
 	"github.com/pho3b/tiny-logger/shared"
 	"gopkg.in/yaml.v3"
@@ -59,6 +60,10 @@ func (y *YAMLEncoder) LogFatalError(logger shared.LoggerConfigsInterface, args .
 	}
 }
 
+// Color TODO: this still needs to be implemented
+func (y *YAMLEncoder) Color(_ c.Color, _ ...interface{}) {
+}
+
 // printYAMLLog formats a log message as YAML and prints it to the appropriate output (stdout or stderr).
 func (y *YAMLEncoder) printYAMLLog(
 	level string,
@@ -78,7 +83,7 @@ func (y *YAMLEncoder) printYAMLLog(
 			Date:     dateStr,
 			Time:     timeStr,
 			DateTime: dateTimeStr,
-			Message:  y.concatenate(args...),
+			Message:  y.castAndConcatenate(args...),
 		},
 	)
 	if err != nil {

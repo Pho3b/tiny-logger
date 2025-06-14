@@ -1,6 +1,6 @@
 .PHONY: test coverage clean
 
-# Run all tests with verbose output and coverage profile
+# Run all tests with coverage profile
 test:
 	CGO_ENABLED=1 GOARCH=amd64 go test -cover ./... -race
 

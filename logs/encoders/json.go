@@ -39,7 +39,7 @@ func (j *JSONEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...interfac
 			args[1:]...,
 		)
 
-		j.printLog(s.StdOutput, msgBuffer)
+		j.printLog(s.StdOutput, msgBuffer, true)
 	}
 }
 
@@ -56,7 +56,7 @@ func (j *JSONEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...interface
 			args[1:]...,
 		)
 
-		j.printLog(s.StdOutput, msgBuffer)
+		j.printLog(s.StdOutput, msgBuffer, true)
 	}
 }
 
@@ -73,7 +73,7 @@ func (j *JSONEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...interface
 			args[1:]...,
 		)
 
-		j.printLog(s.StdOutput, msgBuffer)
+		j.printLog(s.StdOutput, msgBuffer, true)
 	}
 }
 
@@ -90,7 +90,7 @@ func (j *JSONEncoder) LogError(logger s.LoggerConfigsInterface, args ...interfac
 			args[1:]...,
 		)
 
-		j.printLog(s.StdErrOutput, msgBuffer)
+		j.printLog(s.StdErrOutput, msgBuffer, true)
 	}
 }
 
@@ -107,7 +107,7 @@ func (j *JSONEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...int
 			args[1:]...,
 		)
 
-		j.printLog(s.StdErrOutput, msgBuffer)
+		j.printLog(s.StdErrOutput, msgBuffer, true)
 		os.Exit(1)
 	}
 }
@@ -117,15 +117,16 @@ func (j *JSONEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...int
 // Parameters:
 //   - color: the color to apply to the log message.
 //   - args: variadic arguments where the first is treated as the message and the rest are appended.
-func (j *JSONEncoder) Color(color c.Color, args ...interface{}) {
+func (j *JSONEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, args ...interface{}) {
 	if len(args) > 0 {
 		var b bytes.Buffer
 		b.Grow((len(args) * averageWordLen) + averageWordLen)
+		dEnabled, tEnabled := lConfig.GetDateTimeEnabled()
 
 		msgBuffer := j.composeMsg(
-			ll.FatalErrorLvlName,
-			false,
-			false,
+			ll.InfoLvlName,
+			dEnabled,
+			tEnabled,
 			false,
 			j.castAndConcatenate(args[0]),
 			args[1:]...,
@@ -135,7 +136,7 @@ func (j *JSONEncoder) Color(color c.Color, args ...interface{}) {
 		b.Write(msgBuffer.Bytes())
 		b.WriteString(c.Reset.String())
 
-		j.printLog(s.StdOutput, b)
+		j.printLog(s.StdOutput, b, true)
 	}
 }
 
@@ -147,9 +148,9 @@ func (j *JSONEncoder) composeMsg(
 	msg string,
 	extras ...interface{},
 ) bytes.Buffer {
-	dateStr, timeStr, dateTimeStr := j.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
 	var b bytes.Buffer
-	b.Grow((averageWordLen * len(msg)) + 100)
+	b.Grow((averageWordLen * len(extras)) + len(msg) + 60)
+	dateStr, timeStr, dateTimeStr := j.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
 
 	if !showLogLevel {
 		logLevel = ""
@@ -162,7 +163,7 @@ func (j *JSONEncoder) composeMsg(
 			DateTime: dateTimeStr,
 			Time:     timeStr,
 			Message:  msg,
-			Extras:   buildExtraMessages(extras...),
+			Extras:   j.buildExtraMessages(extras...),
 		},
 	)
 	if err != nil {
@@ -183,9 +184,8 @@ func (j *JSONEncoder) composeMsg(
 //
 //	extra := b.buildExtraMessages("user", "alice", "ip", "192.168.1.1")
 //	// Result: map[string]interface{}{"user": "alice", "ip": "192.168.1.1"}
-func buildExtraMessages(keyAndValuePairs ...interface{}) map[string]interface{} {
+func (j *JSONEncoder) buildExtraMessages(keyAndValuePairs ...interface{}) map[string]interface{} {
 	keyAndValuePairsLen := len(keyAndValuePairs)
-
 	if keyAndValuePairsLen == 0 {
 		return nil
 	}
@@ -193,13 +193,13 @@ func buildExtraMessages(keyAndValuePairs ...interface{}) map[string]interface{} 
 	resMap := make(map[string]interface{}, keyAndValuePairsLen/2)
 
 	for i := 0; i < keyAndValuePairsLen-1; i += 2 {
-		key := fmt.Sprint(keyAndValuePairs[i])
+		key := j.castAndConcatenate(keyAndValuePairs[i])
 		value := keyAndValuePairs[i+1]
 		resMap[key] = value
 	}
 
 	if keyAndValuePairsLen%2 != 0 {
-		lastKey := fmt.Sprint(keyAndValuePairs[keyAndValuePairsLen-1])
+		lastKey := j.castAndConcatenate(keyAndValuePairs[keyAndValuePairsLen-1])
 		resMap[lastKey] = nil
 	}
 

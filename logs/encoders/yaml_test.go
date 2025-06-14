@@ -1,11 +1,13 @@
 package encoders
 
 import (
+	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 	"os"
 	"os/exec"
 	"testing"
+	"time"
 )
 
 func decodeYamlLogEntry(t *testing.T, logOutput string) jsonLogEntry {
@@ -103,4 +105,42 @@ func TestYAMLEncoder_ShowLogLevelLt(t *testing.T) {
 
 	entry = decodeYamlLogEntry(t, output)
 	assert.Equal(t, "", entry.Level)
+}
+
+func TestYAMLEncoder_Color(t *testing.T) {
+	var output string
+	testLog := "my testing log"
+	originalStdOut := os.Stdout
+	encoder := NewYAMLEncoder()
+	lConfig := LoggerConfigMock{
+		DateEnabled:   false,
+		TimeEnabled:   false,
+		ColorsEnabled: false,
+		ShowLogLevel:  false,
+	}
+
+	output = captureOutput(func() { encoder.Color(&lConfig, colors.Magenta, testLog) })
+	assert.Contains(t, output, colors.Magenta.String())
+	assert.Contains(t, output, testLog)
+	assert.NotContains(t, output, time.Now().Format("02/01/2006"))
+	assert.Contains(t, output, colors.Reset.String())
+
+	lConfig.DateEnabled = true
+	output = captureOutput(func() { encoder.Color(&lConfig, colors.Cyan, testLog) })
+	assert.Contains(t, output, colors.Cyan.String())
+	assert.Contains(t, output, time.Now().Format("02/01/2006"))
+	assert.Contains(t, output, testLog)
+	assert.Contains(t, output, colors.Reset.String())
+
+	output = captureOutput(func() { encoder.Color(&lConfig, colors.Gray, testLog) })
+	assert.Contains(t, output, colors.Gray.String())
+	assert.Contains(t, output, testLog)
+	assert.Contains(t, output, colors.Reset.String())
+
+	output = captureOutput(func() { encoder.Color(&lConfig, colors.Blue, testLog) })
+	assert.Contains(t, output, colors.Blue.String())
+	assert.Contains(t, output, testLog)
+	assert.Contains(t, output, colors.Reset.String())
+
+	os.Stdout = originalStdOut
 }

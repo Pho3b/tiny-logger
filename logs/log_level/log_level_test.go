@@ -36,3 +36,16 @@ func TestLogLvlIntValue(t *testing.T) {
 	logLvl.Lvl = 3
 	assert.Equal(t, DebugLvl, logLvl.LvlIntValue())
 }
+
+func TestLogLvlName_String(t *testing.T) {
+	logLvl := LogLevel{Lvl: 3}
+	assert.Equal(t, DebugLvlName.String(), logLvl.LvlName().String())
+	logLvl.Lvl = 2
+	assert.Equal(t, InfoLvlName, logLvl.LvlName())
+	logLvl.Lvl = 1
+	assert.Equal(t, WarnLvlName.String(), logLvl.LvlName().String())
+	logLvl.Lvl = 0
+	assert.Equal(t, ErrorLvlName, logLvl.LvlName())
+	logLvl.Lvl = -1
+	assert.Equal(t, FatalErrorLvlName.String(), logLvl.LvlName().String())
+}

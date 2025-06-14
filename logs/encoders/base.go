@@ -58,8 +58,10 @@ func (b *BaseEncoder) areAllNil(args ...interface{}) bool {
 }
 
 // printLog prints the given msgBuffer to the given outputType (stdout or stderr).
-func (b *BaseEncoder) printLog(outType s.OutputType, msgBuffer bytes.Buffer) {
-	msgBuffer.WriteByte('\n')
+func (b *BaseEncoder) printLog(outType s.OutputType, msgBuffer bytes.Buffer, newLine bool) {
+	if newLine {
+		msgBuffer.WriteByte('\n')
+	}
 
 	switch outType {
 	case s.StdOutput:

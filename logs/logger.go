@@ -71,7 +71,7 @@ func (l *Logger) SetLogLvlEnvVariable(envVariableName string) *Logger {
 
 // Color formats and prints a colored log message using the specified color.
 func (l *Logger) Color(color colors.Color, args ...interface{}) {
-	l.encoder.Color(color, args...)
+	l.encoder.Color(l, color, args...)
 }
 
 // GetLogLvlName returns the current log level name as a string.

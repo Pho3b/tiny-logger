@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"testing"
+	"time"
 )
 
 // decodeLogEntry decodes a JSON-encoded log entry into a jsonLogEntry struct.
@@ -147,16 +148,18 @@ func TestJSONEncoder_DateTime(t *testing.T) {
 }
 
 func TestJSONEncoder_ExtraMessages(t *testing.T) {
-	resMap := buildExtraMessages("user", "alice", "ip", "192.168.1.1")
+	jsonEncoder := NewJSONEncoder()
+
+	resMap := jsonEncoder.buildExtraMessages("user", "alice", "ip", "192.168.1.1")
 	assert.NotNil(t, resMap)
 	assert.NotNil(t, resMap["ip"])
 	assert.Len(t, resMap, 2)
 
-	resMap = buildExtraMessages("user", "alice", "ip")
+	resMap = jsonEncoder.buildExtraMessages("user", "alice", "ip")
 	assert.Nil(t, resMap["ip"])
 	assert.Len(t, resMap, 2)
 
-	resMap = buildExtraMessages("user", "alice", "ip", "192.168.1.1", "city", "paris", "pass")
+	resMap = jsonEncoder.buildExtraMessages("user", "alice", "ip", "192.168.1.1", "city", "paris", "pass")
 	assert.Len(t, resMap, 4)
 	assert.Equal(t, "alice", resMap["user"])
 	assert.Equal(t, "192.168.1.1", resMap["ip"])
@@ -191,23 +194,32 @@ func TestJSONEncoder_Color(t *testing.T) {
 	testLog := "my testing log"
 	originalStdOut := os.Stdout
 	encoder := NewJSONEncoder()
+	lConfig := LoggerConfigMock{
+		DateEnabled:   false,
+		TimeEnabled:   false,
+		ColorsEnabled: false,
+		ShowLogLevel:  false,
+	}
 
-	output = captureOutput(func() { encoder.Color(colors.Magenta, testLog) })
+	output = captureOutput(func() { encoder.Color(&lConfig, colors.Magenta, testLog) })
 	assert.Contains(t, output, colors.Magenta.String())
 	assert.Contains(t, output, testLog)
+	assert.NotContains(t, output, time.Now().Format("02/01/2006"))
 	assert.Contains(t, output, colors.Reset.String())
 
-	output = captureOutput(func() { encoder.Color(colors.Cyan, testLog) })
+	lConfig.DateEnabled = true
+	output = captureOutput(func() { encoder.Color(&lConfig, colors.Cyan, testLog) })
 	assert.Contains(t, output, colors.Cyan.String())
+	assert.Contains(t, output, time.Now().Format("02/01/2006"))
 	assert.Contains(t, output, testLog)
 	assert.Contains(t, output, colors.Reset.String())
 
-	output = captureOutput(func() { encoder.Color(colors.Gray, testLog) })
+	output = captureOutput(func() { encoder.Color(&lConfig, colors.Gray, testLog) })
 	assert.Contains(t, output, colors.Gray.String())
 	assert.Contains(t, output, testLog)
 	assert.Contains(t, output, colors.Reset.String())
 
-	output = captureOutput(func() { encoder.Color(colors.Blue, testLog) })
+	output = captureOutput(func() { encoder.Color(&lConfig, colors.Blue, testLog) })
 	assert.Contains(t, output, colors.Blue.String())
 	assert.Contains(t, output, testLog)
 	assert.Contains(t, output, colors.Reset.String())

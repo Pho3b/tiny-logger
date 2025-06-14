@@ -28,7 +28,7 @@ func (d *DefaultEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...inter
 			d.castAndConcatenate(args...),
 		)
 
-		d.printLog(s.StdOutput, msgBuffer)
+		d.printLog(s.StdOutput, msgBuffer, true)
 	}
 }
 
@@ -45,7 +45,7 @@ func (d *DefaultEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...interf
 			d.castAndConcatenate(args...),
 		)
 
-		d.printLog(s.StdOutput, msgBuffer)
+		d.printLog(s.StdOutput, msgBuffer, true)
 	}
 }
 
@@ -62,7 +62,7 @@ func (d *DefaultEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...interf
 			d.castAndConcatenate(args...),
 		)
 
-		d.printLog(s.StdOutput, msgBuffer)
+		d.printLog(s.StdOutput, msgBuffer, true)
 	}
 }
 
@@ -79,7 +79,7 @@ func (d *DefaultEncoder) LogError(logger s.LoggerConfigsInterface, args ...inter
 			d.castAndConcatenate(args...),
 		)
 
-		d.printLog(s.StdErrOutput, msgBuffer)
+		d.printLog(s.StdErrOutput, msgBuffer, true)
 	}
 }
 
@@ -97,7 +97,7 @@ func (d *DefaultEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...
 			d.castAndConcatenate(args...),
 		)
 
-		d.printLog(s.StdErrOutput, msgBuffer)
+		d.printLog(s.StdErrOutput, msgBuffer, true)
 		os.Exit(1)
 	}
 }
@@ -106,18 +106,25 @@ func (d *DefaultEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...
 //
 // Parameters:
 //   - color: the color to apply to the log message.
-//   - args: variadic arguments where the first is treated as the message and the rest are appended.
-func (d *DefaultEncoder) Color(color c.Color, args ...interface{}) {
+//   - args: variadic msg arguments.
+func (d *DefaultEncoder) Color(_ s.LoggerConfigsInterface, color c.Color, args ...interface{}) {
 	if len(args) > 0 {
 		var b bytes.Buffer
 		b.Grow((len(args) * averageWordLen) + averageWordLen)
-		msgBuffer := d.composeMsg(ll.InfoLvlName, false, false, false, false, d.castAndConcatenate(args...))
+		msgBuffer := d.composeMsg(
+			ll.InfoLvlName,
+			false,
+			false,
+			false,
+			false,
+			d.castAndConcatenate(args...),
+		)
 
 		b.WriteString(color.String())
 		b.Write(msgBuffer.Bytes())
 		b.WriteString(c.Reset.String())
 
-		d.printLog(s.StdOutput, b)
+		d.printLog(s.StdOutput, b, true)
 	}
 }
 
@@ -139,17 +146,17 @@ func (d *DefaultEncoder) composeMsg(
 
 	if showLogLevel {
 		b.WriteString(logLevel.String())
-		b.WriteRune(':')
 	}
 
 	dateTime := d.formatDateTimeString(dateStr, timeStr, dateTimeStr)
 	b.Write(dateTime.Bytes())
-	b.WriteString(string(colors[1]))
 
 	if showLogLevel || dateEnabled || timeEnabled {
+		b.WriteRune(':')
 		b.WriteByte(' ')
 	}
 
+	b.WriteString(string(colors[1]))
 	b.WriteString(msg)
 
 	return b

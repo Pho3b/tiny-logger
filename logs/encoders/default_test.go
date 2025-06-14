@@ -104,7 +104,7 @@ func TestShowLogLevel(t *testing.T) {
 		encoder.LogDebug(loggerConfig, "Test my-test message")
 	})
 
-	assert.Contains(t, output, "DEBUG:")
+	assert.Contains(t, output, "DEBUG")
 	assert.Contains(t, output, "Test my-test message")
 
 	loggerConfig = &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ShowLogLevel: false}
@@ -139,17 +139,23 @@ func TestDefaultEncoder_Color(t *testing.T) {
 	testLog := "my testing log"
 	originalStdOut := os.Stdout
 	encoder := NewDefaultEncoder()
+	lConfig := LoggerConfigMock{
+		DateEnabled:   false,
+		TimeEnabled:   false,
+		ColorsEnabled: false,
+		ShowLogLevel:  false,
+	}
 
-	output = captureOutput(func() { encoder.Color(colors.Magenta, testLog) })
+	output = captureOutput(func() { encoder.Color(&lConfig, colors.Magenta, testLog) })
 	assert.Contains(t, output, colors.Magenta.String()+testLog)
 
-	output = captureOutput(func() { encoder.Color(colors.Cyan, testLog) })
+	output = captureOutput(func() { encoder.Color(&lConfig, colors.Cyan, testLog) })
 	assert.Contains(t, output, colors.Cyan.String()+testLog+colors.Reset.String())
 
-	output = captureOutput(func() { encoder.Color(colors.Gray, testLog) })
+	output = captureOutput(func() { encoder.Color(&lConfig, colors.Gray, testLog) })
 	assert.Contains(t, output, colors.Gray.String()+testLog+colors.Reset.String())
 
-	output = captureOutput(func() { encoder.Color(colors.Blue, testLog) })
+	output = captureOutput(func() { encoder.Color(&lConfig, colors.Blue, testLog) })
 	assert.Contains(t, output, colors.Blue.String()+testLog+colors.Reset.String())
 
 	os.Stdout = originalStdOut

@@ -60,7 +60,7 @@ func (y *YAMLEncoder) LogFatalError(logger shared.LoggerConfigsInterface, args .
 	}
 }
 
-// Color TODO: this still needs to be implemented
+// Color TODO: this needs to be implemented
 func (y *YAMLEncoder) Color(_ c.Color, _ ...interface{}) {
 }
 

@@ -1,6 +1,8 @@
 package encoders
 
 import (
+	"errors"
+	s "github.com/pho3b/tiny-logger/shared"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -23,6 +25,10 @@ func TestBuildMsg(t *testing.T) {
 	// Test with mixed data types
 	result = encoder.castAndConcatenate("Mixed", 123, true, 45.6)
 	assert.Equal(t, "Mixed 123 true 45.6", result)
+
+	// Test with rune and int64 types and struct
+	result = encoder.castAndConcatenate('A', int64(43), errors.New("my error"))
+	assert.Equal(t, "A 43 my error", result)
 }
 
 func TestAreAllNil(t *testing.T) {
@@ -43,4 +49,18 @@ func TestAreAllNil(t *testing.T) {
 	// Test with all non-nil arguments
 	result = encoder.areAllNil("test", 123, true)
 	assert.False(t, result)
+}
+
+func TestBaseEncoder_GetType(t *testing.T) {
+	encoder := NewDefaultEncoder()
+	assert.Equal(t, s.DefaultEncoderType, encoder.GetType())
+
+	jsonEncoder := NewJSONEncoder()
+	assert.Equal(t, s.JsonEncoderType, jsonEncoder.GetType())
+
+	yamlEncoder := NewYAMLEncoder()
+	assert.Equal(t, s.YamlEncoderType, yamlEncoder.GetType())
+
+	baseEncoder := &BaseEncoder{}
+	assert.Equal(t, s.EncoderType(""), baseEncoder.GetType())
 }

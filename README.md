@@ -1,7 +1,7 @@
 ## Tiny Logger
 
-A lightweight logging library with standard logging methods,
-supporting customizable log levels, color-coding, and optional date/time formatting.
+A lightweight Golang logging library,
+supporting customizable log levels, color-coding, optional date/time formatting, and some more.
 
 ### Usage
 

@@ -1,6 +1,7 @@
 package logs
 
 import (
+	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/logs/encoders"
 	"github.com/pho3b/tiny-logger/logs/log_level"
 	"github.com/pho3b/tiny-logger/shared"
@@ -43,7 +44,8 @@ func (l *Logger) Error(args ...interface{}) {
 	}
 }
 
-// FatalError logs a fatal error message and typically terminates the application.
+// FatalError logs a fatal error message and terminates the application only if any given args is not NIl,
+// otherwise the method does nothing.
 func (l *Logger) FatalError(args ...interface{}) {
 	l.encoder.LogFatalError(l, args...)
 }
@@ -58,12 +60,18 @@ func (l *Logger) SetLogLvl(logLvlName log_level.LogLvlName) *Logger {
 
 // SetLogLvlEnvVariable sets the log level based on an environment variable. If the variable is not found,
 // defaults to DebugLvlName.
+//
 // NOTE: The environment variable value must be a valid log_level.LogLvlName string.
 func (l *Logger) SetLogLvlEnvVariable(envVariableName string) *Logger {
 	l.logLvl.EnvVariable = envVariableName
 	l.logLvl.Lvl = log_level.RetrieveLogLvlFromEnv(l.logLvl.EnvVariable)
 
 	return l
+}
+
+// Color formats and prints a colored log message using the specified color.
+func (l *Logger) Color(color colors.Color, args ...interface{}) {
+	l.encoder.Color(l, color, args...)
 }
 
 // GetLogLvlName returns the current log level name as a string.
@@ -77,6 +85,7 @@ func (l *Logger) GetLogLvlIntValue() int8 {
 }
 
 // EnableColors enables or disables color output in the logger based on the given parameter.
+// Colors apply only on the header elements [Data, Time, Log Level]
 func (l *Logger) EnableColors(enable bool) *Logger {
 	l.colorsEnabled = enable
 

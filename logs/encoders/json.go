@@ -1,17 +1,19 @@
 package encoders
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/pho3b/tiny-logger/internal/services"
+	c "github.com/pho3b/tiny-logger/logs/colors"
 	ll "github.com/pho3b/tiny-logger/logs/log_level"
-	"github.com/pho3b/tiny-logger/shared"
+	s "github.com/pho3b/tiny-logger/shared"
 	"os"
 )
 
 type JSONEncoder struct {
 	BaseEncoder
-	DateTimePrinter *services.DateTimePrinter
+	DateTimePrinter services.DateTimePrinter
 }
 
 // jsonLogEntry represents the structure of a JSON log entry.
@@ -25,76 +27,152 @@ type jsonLogEntry struct {
 }
 
 // LogDebug formats and prints a debug-level log message in JSON format.
-func (j *JSONEncoder) LogDebug(logger shared.LoggerConfigsInterface, args ...interface{}) {
+func (j *JSONEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		j.printJSONLog(ll.DebugLvlName.String(), logger, shared.StdOutput, args...)
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
+		msgBuffer := j.composeMsg(
+			ll.DebugLvlName,
+			dEnabled,
+			tEnabled,
+			logger.GetShowLogLevel(),
+			j.castAndConcatenate(args[0]),
+			args[1:]...,
+		)
+
+		j.printLog(s.StdOutput, msgBuffer, true)
 	}
 }
 
 // LogInfo formats and prints an info-level log message in JSON format.
-func (j *JSONEncoder) LogInfo(logger shared.LoggerConfigsInterface, args ...interface{}) {
+func (j *JSONEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		j.printJSONLog(ll.InfoLvlName.String(), logger, shared.StdOutput, args...)
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
+		msgBuffer := j.composeMsg(
+			ll.InfoLvlName,
+			dEnabled,
+			tEnabled,
+			logger.GetShowLogLevel(),
+			j.castAndConcatenate(args[0]),
+			args[1:]...,
+		)
+
+		j.printLog(s.StdOutput, msgBuffer, true)
 	}
 }
 
 // LogWarn formats and prints a warning-level log message in JSON format.
-func (j *JSONEncoder) LogWarn(logger shared.LoggerConfigsInterface, args ...interface{}) {
+func (j *JSONEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 {
-		j.printJSONLog(ll.WarnLvlName.String(), logger, shared.StdOutput, args...)
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
+		msgBuffer := j.composeMsg(
+			ll.WarnLvlName,
+			dEnabled,
+			tEnabled,
+			logger.GetShowLogLevel(),
+			j.castAndConcatenate(args[0]),
+			args[1:]...,
+		)
+
+		j.printLog(s.StdOutput, msgBuffer, true)
 	}
 }
 
 // LogError formats and prints an error-level log message in JSON format.
-func (j *JSONEncoder) LogError(logger shared.LoggerConfigsInterface, args ...interface{}) {
+func (j *JSONEncoder) LogError(logger s.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 && !j.areAllNil(args...) {
-		j.printJSONLog(ll.ErrorLvlName.String(), logger, shared.StdErrOutput, args...)
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
+		msgBuffer := j.composeMsg(
+			ll.ErrorLvlName,
+			dEnabled,
+			tEnabled,
+			logger.GetShowLogLevel(),
+			j.castAndConcatenate(args[0]),
+			args[1:]...,
+		)
+
+		j.printLog(s.StdErrOutput, msgBuffer, true)
 	}
 }
 
 // LogFatalError formats and prints a fatal error-level log message in JSON format and exits the program.
-func (j *JSONEncoder) LogFatalError(logger shared.LoggerConfigsInterface, args ...interface{}) {
+func (j *JSONEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...interface{}) {
 	if len(args) > 0 && !j.areAllNil(args...) {
-		j.printJSONLog(ll.FatalErrorLvlName.String(), logger, shared.StdErrOutput, args...)
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
+		msgBuffer := j.composeMsg(
+			ll.FatalErrorLvlName,
+			dEnabled,
+			tEnabled,
+			logger.GetShowLogLevel(),
+			j.castAndConcatenate(args[0]),
+			args[1:]...,
+		)
+
+		j.printLog(s.StdErrOutput, msgBuffer, true)
 		os.Exit(1)
 	}
 }
 
-// printJSONLog formats a log message as JSON and prints it to the appropriate output (stdout or stderr).
-func (j *JSONEncoder) printJSONLog(
-	level string,
-	logger shared.LoggerConfigsInterface,
-	outType shared.OutputType,
-	args ...interface{},
-) {
-	dateStr, timeStr, dateTimeStr := j.DateTimePrinter.RetrieveDateTime(logger.GetDateTimeEnabled())
+// Color formats and prints a colored log message using the specified color.
+//
+// Parameters:
+//   - color: the color to apply to the log message.
+//   - args: variadic arguments where the first is treated as the message and the rest are appended.
+func (j *JSONEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, args ...interface{}) {
+	if len(args) > 0 {
+		var b bytes.Buffer
+		b.Grow((len(args) * averageWordLen) + averageWordLen)
+		dEnabled, tEnabled := lConfig.GetDateTimeEnabled()
 
-	if !logger.GetShowLogLevel() {
-		level = ""
+		msgBuffer := j.composeMsg(
+			ll.InfoLvlName,
+			dEnabled,
+			tEnabled,
+			false,
+			j.castAndConcatenate(args[0]),
+			args[1:]...,
+		)
+
+		b.WriteString(color.String())
+		b.Write(msgBuffer.Bytes())
+		b.WriteString(c.Reset.String())
+
+		j.printLog(s.StdOutput, b, true)
+	}
+}
+
+func (j *JSONEncoder) composeMsg(
+	logLevel ll.LogLvlName,
+	dateEnabled bool,
+	timeEnabled bool,
+	showLogLevel bool,
+	msg string,
+	extras ...interface{},
+) bytes.Buffer {
+	var b bytes.Buffer
+	b.Grow((averageWordLen * len(extras)) + len(msg) + 60)
+	dateStr, timeStr, dateTimeStr := j.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
+
+	if !showLogLevel {
+		logLevel = ""
 	}
 
 	msgBytes, err := json.Marshal(
 		jsonLogEntry{
-			Level:    level,
+			Level:    logLevel.String(),
 			Date:     dateStr,
 			DateTime: dateTimeStr,
 			Time:     timeStr,
-			Message:  j.buildMsg(args[0]),
-			Extras:   buildExtraMessages(args[1:]...),
+			Message:  msg,
+			Extras:   j.buildExtraMessages(extras...),
 		},
 	)
-	msgBytes = append(msgBytes, '\n')
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, `{"level":"ERROR", "message":"Failed to marshal JSON log: %s"}`, err.Error())
-		return
+		return bytes.Buffer{}
 	}
 
-	switch outType {
-	case shared.StdOutput:
-		_, _ = os.Stdout.Write(msgBytes)
-	case shared.StdErrOutput:
-		_, _ = os.Stderr.Write(msgBytes)
-	}
+	b.Write(msgBytes)
+	return b
 }
 
 // buildExtraMessages constructs a map from a variadic list of key-value pairs.
@@ -106,9 +184,8 @@ func (j *JSONEncoder) printJSONLog(
 //
 //	extra := b.buildExtraMessages("user", "alice", "ip", "192.168.1.1")
 //	// Result: map[string]interface{}{"user": "alice", "ip": "192.168.1.1"}
-func buildExtraMessages(keyAndValuePairs ...interface{}) map[string]interface{} {
+func (j *JSONEncoder) buildExtraMessages(keyAndValuePairs ...interface{}) map[string]interface{} {
 	keyAndValuePairsLen := len(keyAndValuePairs)
-
 	if keyAndValuePairsLen == 0 {
 		return nil
 	}
@@ -134,7 +211,7 @@ func NewJSONEncoder() *JSONEncoder {
 	encoder := &JSONEncoder{
 		DateTimePrinter: services.NewDateTimePrinter(),
 	}
-	encoder.encoderType = shared.JsonEncoderType
+	encoder.encoderType = s.JsonEncoderType
 
 	return encoder
 }

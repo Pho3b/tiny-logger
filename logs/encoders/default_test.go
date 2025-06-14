@@ -9,40 +9,6 @@ import (
 	"testing"
 )
 
-// captureOutput redirects os.Stdout to capture the output of the function f
-func captureOutput(f func()) string {
-	r, w, _ := os.Pipe()
-	defer r.Close()
-
-	origStdout := os.Stdout
-	os.Stdout = w
-
-	f()
-	w.Close()
-	os.Stdout = origStdout
-
-	var buf bytes.Buffer
-	_, _ = buf.ReadFrom(r)
-	return buf.String()
-}
-
-// captureErrorOutput redirects os.Stderr to capture the output of the function f
-func captureErrorOutput(f func()) string {
-	r, w, _ := os.Pipe()
-	defer r.Close()
-
-	origStderr := os.Stderr
-	os.Stderr = w
-
-	f()
-	w.Close()
-	os.Stderr = origStderr
-
-	var buf bytes.Buffer
-	_, _ = buf.ReadFrom(r)
-	return buf.String()
-}
-
 func TestLogDebug(t *testing.T) {
 	encoder := NewDefaultEncoder()
 	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
@@ -138,7 +104,7 @@ func TestShowLogLevel(t *testing.T) {
 		encoder.LogDebug(loggerConfig, "Test my-test message")
 	})
 
-	assert.Contains(t, output, "DEBUG:")
+	assert.Contains(t, output, "DEBUG")
 	assert.Contains(t, output, "Test my-test message")
 
 	loggerConfig = &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ShowLogLevel: false}
@@ -166,4 +132,31 @@ func TestCheckColorsInTheOutput(t *testing.T) {
 
 	output = captureErrorOutput(func() { encoder.LogError(loggerConfig, "Test msg") })
 	assert.Contains(t, output, colors.Red.String())
+}
+
+func TestDefaultEncoder_Color(t *testing.T) {
+	var output string
+	testLog := "my testing log"
+	originalStdOut := os.Stdout
+	encoder := NewDefaultEncoder()
+	lConfig := LoggerConfigMock{
+		DateEnabled:   false,
+		TimeEnabled:   false,
+		ColorsEnabled: false,
+		ShowLogLevel:  false,
+	}
+
+	output = captureOutput(func() { encoder.Color(&lConfig, colors.Magenta, testLog) })
+	assert.Contains(t, output, colors.Magenta.String()+testLog)
+
+	output = captureOutput(func() { encoder.Color(&lConfig, colors.Cyan, testLog) })
+	assert.Contains(t, output, colors.Cyan.String()+testLog+colors.Reset.String())
+
+	output = captureOutput(func() { encoder.Color(&lConfig, colors.Gray, testLog) })
+	assert.Contains(t, output, colors.Gray.String()+testLog+colors.Reset.String())
+
+	output = captureOutput(func() { encoder.Color(&lConfig, colors.Blue, testLog) })
+	assert.Contains(t, output, colors.Blue.String()+testLog+colors.Reset.String())
+
+	os.Stdout = originalStdOut
 }

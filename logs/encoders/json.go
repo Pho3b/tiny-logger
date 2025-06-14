@@ -193,13 +193,13 @@ func (j *JSONEncoder) buildExtraMessages(keyAndValuePairs ...interface{}) map[st
 	resMap := make(map[string]interface{}, keyAndValuePairsLen/2)
 
 	for i := 0; i < keyAndValuePairsLen-1; i += 2 {
-		key := j.castAndConcatenate(keyAndValuePairs[i])
+		key := fmt.Sprint(keyAndValuePairs[i])
 		value := keyAndValuePairs[i+1]
 		resMap[key] = value
 	}
 
 	if keyAndValuePairsLen%2 != 0 {
-		lastKey := j.castAndConcatenate(keyAndValuePairs[keyAndValuePairsLen-1])
+		lastKey := fmt.Sprint(keyAndValuePairs[keyAndValuePairsLen-1])
 		resMap[lastKey] = nil
 	}
 

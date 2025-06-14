@@ -1,11 +1,30 @@
 package encoders
 
 import (
+	"bytes"
 	"errors"
 	s "github.com/pho3b/tiny-logger/shared"
 	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
 )
+
+// captureOutput redirects os.Stdout to capture the output of the function f
+func captureOutput(f func()) string {
+	r, w, _ := os.Pipe()
+	defer r.Close()
+
+	origStdout := os.Stdout
+	os.Stdout = w
+
+	f()
+	w.Close()
+	os.Stdout = origStdout
+
+	var buf bytes.Buffer
+	_, _ = buf.ReadFrom(r)
+	return buf.String()
+}
 
 func TestBuildMsg(t *testing.T) {
 	encoder := &BaseEncoder{}

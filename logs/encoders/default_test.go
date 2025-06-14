@@ -9,23 +9,6 @@ import (
 	"testing"
 )
 
-// captureOutput redirects os.Stdout to capture the output of the function f
-func captureOutput(f func()) string {
-	r, w, _ := os.Pipe()
-	defer r.Close()
-
-	origStdout := os.Stdout
-	os.Stdout = w
-
-	f()
-	w.Close()
-	os.Stdout = origStdout
-
-	var buf bytes.Buffer
-	_, _ = buf.ReadFrom(r)
-	return buf.String()
-}
-
 // captureErrorOutput redirects os.Stderr to capture the output of the function f
 func captureErrorOutput(f func()) string {
 	r, w, _ := os.Pipe()

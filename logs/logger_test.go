@@ -201,71 +201,42 @@ func writeDummyLogsWithNewLogger(logsNumber int, wg *sync.WaitGroup, logger *Log
 }
 
 func TestLogger_Color(t *testing.T) {
-	var buf bytes.Buffer
+	var output string
 	testLog := "my testing DEBUG log"
 	originalStdOut := os.Stdout
 	logger := NewLogger()
 
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-	logger.Color(colors.Magenta, testLog)
-	_ = w.Close()
-	_, _ = io.Copy(&buf, r)
-	assert.Contains(t, buf.String(), colors.Magenta.String()+testLog)
+	output = captureOutput(func() { logger.Color(colors.Magenta, testLog) })
+	assert.Contains(t, output, colors.Magenta.String()+testLog)
 
-	buf.Reset()
-	r, w, _ = os.Pipe()
-	os.Stdout = w
-	logger.Color(colors.Cyan, testLog)
-	_ = w.Close()
-	_, _ = io.Copy(&buf, r)
-	assert.Contains(t, buf.String(), colors.Cyan.String()+testLog+colors.Reset.String())
+	output = captureOutput(func() { logger.Color(colors.Cyan, testLog) })
+	assert.Contains(t, output, colors.Cyan.String()+testLog+colors.Reset.String())
 
-	buf.Reset()
-	r, w, _ = os.Pipe()
-	os.Stdout = w
-	logger.Color(colors.Cyan, testLog)
-	_ = w.Close()
-	_, _ = io.Copy(&buf, r)
-	assert.Contains(t, buf.String(), colors.Cyan.String()+testLog+colors.Reset.String())
+	output = captureOutput(func() { logger.Color(colors.Gray, testLog) })
+	assert.Contains(t, output, colors.Gray.String()+testLog+colors.Reset.String())
 
-	buf.Reset()
-	r, w, _ = os.Pipe()
-	os.Stdout = w
-	logger.Color(colors.Blue, testLog)
-	_ = w.Close()
-	_, _ = io.Copy(&buf, r)
-	assert.Contains(t, buf.String(), colors.Blue.String()+testLog+colors.Reset.String())
+	output = captureOutput(func() { logger.Color(colors.Blue, testLog) })
+	assert.Contains(t, output, colors.Blue.String()+testLog+colors.Reset.String())
 
 	os.Stdout = originalStdOut
 }
 
 func TestLogger_ShowLogLevel(t *testing.T) {
-	var buf bytes.Buffer
-	originalStdOut := os.Stdout
 	logger := NewLogger().AddDateTime(false).
 		ShowLogLevel(true).
 		EnableColors(false)
 
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-	logger.Info("my testing log")
-	_ = w.Close()
-	_, _ = io.Copy(&buf, r)
-	assert.Contains(t, buf.String(), "INFO: my testing log")
+	output := captureOutput(func() {
+		logger.Info("my testing log")
+	})
+	assert.Contains(t, output, "INFO: my testing log")
 
 	logger.ShowLogLevel(false)
-
-	buf.Reset()
-	r, w, _ = os.Pipe()
-	os.Stdout = w
-	logger.Color(colors.Cyan, "my testing log")
-	_ = w.Close()
-	_, _ = io.Copy(&buf, r)
-	assert.NotContains(t, buf.String(), "INFO: my testing log")
-	assert.Contains(t, buf.String(), "my testing log")
-
-	os.Stdout = originalStdOut
+	output = captureOutput(func() {
+		logger.Info("my testing log")
+	})
+	assert.NotContains(t, output, "INFO: my testing log")
+	assert.Contains(t, output, "my testing log")
 }
 
 func TestLogger_SetEncoder(t *testing.T) {
@@ -280,4 +251,21 @@ func TestLogger_SetEncoder(t *testing.T) {
 	l.SetEncoder(shared.YamlEncoderType)
 	assert.Equal(t, shared.YamlEncoderType, l.GetEncoderType())
 	assert.Equal(t, shared.YamlEncoderType, l.encoder.GetType())
+}
+
+// captureOutput redirects os.Stdout to capture the output of the function f
+func captureOutput(f func()) string {
+	r, w, _ := os.Pipe()
+	defer r.Close()
+
+	origStdout := os.Stdout
+	os.Stdout = w
+
+	f()
+	w.Close()
+	os.Stdout = origStdout
+
+	var buf bytes.Buffer
+	_, _ = buf.ReadFrom(r)
+	return buf.String()
 }

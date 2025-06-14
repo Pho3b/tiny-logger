@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/logs/log_level"
+	"github.com/pho3b/tiny-logger/shared"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"os"
@@ -63,7 +64,7 @@ func TestLogger_SetLogLvl(t *testing.T) {
 
 func TestLogger_Info(t *testing.T) {
 	var buf bytes.Buffer
-	testLog := "my testing DEBUG log"
+	testLog := "my testing INFO log"
 	originalStdOut := os.Stdout
 	r, w, _ := os.Pipe()
 
@@ -94,7 +95,7 @@ func TestLogger_InfoNotLogging(t *testing.T) {
 
 func TestLogger_Debug(t *testing.T) {
 	var buf bytes.Buffer
-	testLog := "my testing INFO log"
+	testLog := "my testing DEBUG log"
 	originalStdOut := os.Stdout
 	r, w, _ := os.Pipe()
 
@@ -237,4 +238,46 @@ func TestLogger_Color(t *testing.T) {
 	assert.Contains(t, buf.String(), colors.Blue.String()+testLog+colors.Reset.String())
 
 	os.Stdout = originalStdOut
+}
+
+func TestLogger_ShowLogLevel(t *testing.T) {
+	var buf bytes.Buffer
+	originalStdOut := os.Stdout
+	logger := NewLogger().AddDateTime(false).
+		ShowLogLevel(true).
+		EnableColors(false)
+
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+	logger.Info("my testing log")
+	_ = w.Close()
+	_, _ = io.Copy(&buf, r)
+	assert.Contains(t, buf.String(), "INFO: my testing log")
+
+	logger.ShowLogLevel(false)
+
+	buf.Reset()
+	r, w, _ = os.Pipe()
+	os.Stdout = w
+	logger.Color(colors.Cyan, "my testing log")
+	_ = w.Close()
+	_, _ = io.Copy(&buf, r)
+	assert.NotContains(t, buf.String(), "INFO: my testing log")
+	assert.Contains(t, buf.String(), "my testing log")
+
+	os.Stdout = originalStdOut
+}
+
+func TestLogger_SetEncoder(t *testing.T) {
+	l := NewLogger().SetEncoder(shared.DefaultEncoderType)
+	assert.Equal(t, shared.DefaultEncoderType, l.encoder.GetType())
+	assert.Equal(t, shared.DefaultEncoderType, l.GetEncoderType())
+
+	l.SetEncoder(shared.JsonEncoderType)
+	assert.Equal(t, shared.JsonEncoderType, l.encoder.GetType())
+	assert.Equal(t, shared.JsonEncoderType, l.GetEncoderType())
+
+	l.SetEncoder(shared.YamlEncoderType)
+	assert.Equal(t, shared.YamlEncoderType, l.GetEncoderType())
+	assert.Equal(t, shared.YamlEncoderType, l.encoder.GetType())
 }

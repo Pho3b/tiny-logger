@@ -112,7 +112,31 @@ func (j *JSONEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...int
 	}
 }
 
+// Color formats and prints a colored log message using the specified color.
+//
+// Parameters:
+//   - color: the color to apply to the log message.
+//   - args: variadic arguments where the first is treated as the message and the rest are appended.
 func (j *JSONEncoder) Color(color c.Color, args ...interface{}) {
+	if len(args) > 0 {
+		var b bytes.Buffer
+		b.Grow((len(args) * averageWordLen) + averageWordLen)
+
+		msgBuffer := j.composeMsg(
+			ll.FatalErrorLvlName,
+			false,
+			false,
+			false,
+			j.castAndConcatenate(args[0]),
+			args[1:]...,
+		)
+
+		b.WriteString(color.String())
+		b.Write(msgBuffer.Bytes())
+		b.WriteString(c.Reset.String())
+
+		j.printLog(s.StdOutput, b)
+	}
 }
 
 func (j *JSONEncoder) composeMsg(

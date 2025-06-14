@@ -102,6 +102,11 @@ func (d *DefaultEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...
 	}
 }
 
+// Color formats and prints a colored log message using the specified color.
+//
+// Parameters:
+//   - color: the color to apply to the log message.
+//   - args: variadic arguments where the first is treated as the message and the rest are appended.
 func (d *DefaultEncoder) Color(color c.Color, args ...interface{}) {
 	if len(args) > 0 {
 		var b bytes.Buffer

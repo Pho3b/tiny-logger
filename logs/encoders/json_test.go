@@ -2,6 +2,7 @@ package encoders
 
 import (
 	"encoding/json"
+	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"os/exec"
@@ -183,4 +184,33 @@ func TestJSONEncoder_ShowLogLevelLt(t *testing.T) {
 
 	entry = decodeLogEntry(t, output)
 	assert.Equal(t, "", entry.Level)
+}
+
+func TestJSONEncoder_Color(t *testing.T) {
+	var output string
+	testLog := "my testing log"
+	originalStdOut := os.Stdout
+	encoder := NewJSONEncoder()
+
+	output = captureOutput(func() { encoder.Color(colors.Magenta, testLog) })
+	assert.Contains(t, output, colors.Magenta.String())
+	assert.Contains(t, output, testLog)
+	assert.Contains(t, output, colors.Reset.String())
+
+	output = captureOutput(func() { encoder.Color(colors.Cyan, testLog) })
+	assert.Contains(t, output, colors.Cyan.String())
+	assert.Contains(t, output, testLog)
+	assert.Contains(t, output, colors.Reset.String())
+
+	output = captureOutput(func() { encoder.Color(colors.Gray, testLog) })
+	assert.Contains(t, output, colors.Gray.String())
+	assert.Contains(t, output, testLog)
+	assert.Contains(t, output, colors.Reset.String())
+
+	output = captureOutput(func() { encoder.Color(colors.Blue, testLog) })
+	assert.Contains(t, output, colors.Blue.String())
+	assert.Contains(t, output, testLog)
+	assert.Contains(t, output, colors.Reset.String())
+
+	os.Stdout = originalStdOut
 }

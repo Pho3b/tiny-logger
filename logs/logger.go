@@ -44,7 +44,8 @@ func (l *Logger) Error(args ...interface{}) {
 	}
 }
 
-// FatalError logs a fatal error message and terminates the application if any given args is not nil.
+// FatalError logs a fatal error message and terminates the application only if any given args is not NIl,
+// otherwise the method does nothing.
 func (l *Logger) FatalError(args ...interface{}) {
 	l.encoder.LogFatalError(l, args...)
 }
@@ -59,6 +60,7 @@ func (l *Logger) SetLogLvl(logLvlName log_level.LogLvlName) *Logger {
 
 // SetLogLvlEnvVariable sets the log level based on an environment variable. If the variable is not found,
 // defaults to DebugLvlName.
+//
 // NOTE: The environment variable value must be a valid log_level.LogLvlName string.
 func (l *Logger) SetLogLvlEnvVariable(envVariableName string) *Logger {
 	l.logLvl.EnvVariable = envVariableName
@@ -67,7 +69,7 @@ func (l *Logger) SetLogLvlEnvVariable(envVariableName string) *Logger {
 	return l
 }
 
-// Color prints the given message colored with the given color.
+// Color formats and prints a colored log message using the specified color.
 func (l *Logger) Color(color colors.Color, args ...interface{}) {
 	l.encoder.Color(color, args...)
 }

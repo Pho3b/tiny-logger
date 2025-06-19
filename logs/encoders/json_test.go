@@ -191,6 +191,7 @@ func TestJSONEncoder_ShowLogLevelLt(t *testing.T) {
 
 func TestJSONEncoder_Color(t *testing.T) {
 	var output string
+
 	testLog := "my testing log"
 	originalStdOut := os.Stdout
 	encoder := NewJSONEncoder()
@@ -223,6 +224,39 @@ func TestJSONEncoder_Color(t *testing.T) {
 	assert.Contains(t, output, colors.Blue.String())
 	assert.Contains(t, output, testLog)
 	assert.Contains(t, output, colors.Reset.String())
+
+	os.Stdout = originalStdOut
+}
+
+func TestJSONEncoder_ValidJSONOutput(t *testing.T) {
+	var jsonMsg string
+
+	originalStdOut := os.Stdout
+	testLog := "my testing log"
+	jsonEncoder := NewJSONEncoder()
+	lConfig := &LoggerConfigMock{
+		DateEnabled:   false,
+		TimeEnabled:   false,
+		ColorsEnabled: false,
+		ShowLogLevel:  false,
+	}
+
+	jsonMsg = captureOutput(func() { jsonEncoder.LogInfo(lConfig, testLog, "id", 3) })
+	assert.NoError(t, json.Unmarshal([]byte(jsonMsg), &jsonLogEntry{}))
+
+	jsonMsg = captureOutput(func() { jsonEncoder.LogInfo(lConfig, testLog, "id", 3, 34, []string{"test", "test2"}) })
+	assert.NoError(t, json.Unmarshal([]byte(jsonMsg), &jsonLogEntry{}))
+
+	jsonMsg = captureOutput(func() {
+		jsonEncoder.LogInfo(lConfig, testLog, "id", 3, 34, []string{"test", "test2"}, []string{"k", "k2"}, 2.3, 'f', 'A')
+	})
+	assert.NoError(t, json.Unmarshal([]byte(jsonMsg), &jsonLogEntry{}))
+
+	jsonMsg = "{{'test'}"
+	assert.Error(t, json.Unmarshal([]byte(jsonMsg), &jsonLogEntry{}))
+
+	jsonMsg = "{\"msg\"\"This is my Warn log\",\"extras\":{\"Test arg\":[\"efsdaf\",\"dfas\"],\"[k3 k2]\":3}}"
+	assert.Error(t, json.Unmarshal([]byte(jsonMsg), &jsonLogEntry{}))
 
 	os.Stdout = originalStdOut
 }

@@ -31,7 +31,7 @@ Executed Logging a message + 4 extra elements (Check the `./test/benchmark_test.
 
 ## 🎯 Use Cases
 
-````
+````go
 logger := logs.NewLogger()
 logger.Warn("my warning test") // stdout: 'WARN: my warning test'
 logger.Info("my", "into", "test", 2) // stdout: 'INFO: my info test 2'

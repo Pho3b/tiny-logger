@@ -30,7 +30,7 @@ Executed Logging a message + 4 extra elements (Check the `./test/benchmark_test.
 | **YAML Encoder**    | All Properties OFF | 674.0 | 464  | 5         |
 |                     | All Properties ON  | 798.5 | 648  | 7         |
 
-## 🎯 Use Cases
+## 🎯 Use Examples
 
 ````go
 logger := logs.NewLogger()

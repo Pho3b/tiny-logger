@@ -31,7 +31,7 @@ func (c Color) String() string {
 }
 
 func init() {
-	// Avoids printing unusable Color codes for Windows operating systems
+	// It avoids printing unusable Color codes for Windows operating systems
 	if strings.Contains(runtime.GOOS, "windows") {
 		Reset = ""
 		Red = ""

@@ -152,22 +152,32 @@ func TestJSONEncoder_DateTime(t *testing.T) {
 
 func TestJSONEncoder_ExtraMessages(t *testing.T) {
 	jsonEncoder := NewJSONEncoder()
+	lConfig := &test.LoggerConfigMock{DateEnabled: false, TimeEnabled: false, ColorsEnabled: false, ShowLogLevel: false}
 
-	resMap := jsonEncoder.buildExtraMessages("user", "alice", "ip", "192.168.1.1")
-	assert.NotNil(t, resMap)
-	assert.NotNil(t, resMap["ip"])
-	assert.Len(t, resMap, 2)
+	output := captureOutput(func() {
+		jsonEncoder.LogInfo(lConfig, "test", "user", "alice", "ip", "192.168.1.1")
+	})
+	entry := decodeLogEntry(t, output)
+	assert.NotNil(t, entry)
+	assert.NotNil(t, entry.Extras["ip"])
+	assert.Len(t, entry.Extras, 2)
 
-	resMap = jsonEncoder.buildExtraMessages("user", "alice", "ip")
-	assert.Nil(t, resMap["ip"])
-	assert.Len(t, resMap, 2)
+	output = captureOutput(func() {
+		jsonEncoder.LogInfo(lConfig, "test", "user", "alice", "ip")
+	})
+	entry = decodeLogEntry(t, output)
+	assert.Nil(t, entry.Extras["ip"])
+	assert.Len(t, entry.Extras, 2)
 
-	resMap = jsonEncoder.buildExtraMessages("user", "alice", "ip", "192.168.1.1", "city", "paris", "pass")
-	assert.Len(t, resMap, 4)
-	assert.Equal(t, "alice", resMap["user"])
-	assert.Equal(t, "192.168.1.1", resMap["ip"])
-	assert.Equal(t, "paris", resMap["city"])
-	assert.Equal(t, nil, resMap["pass"])
+	output = captureOutput(func() {
+		jsonEncoder.LogInfo(lConfig, "test", "user", "alice", "ip", "192.168.1.1", "city", "paris", "pass")
+	})
+	entry = decodeLogEntry(t, output)
+	assert.Len(t, entry.Extras, 4)
+	assert.Equal(t, "alice", entry.Extras["user"])
+	assert.Equal(t, "192.168.1.1", entry.Extras["ip"])
+	assert.Equal(t, "paris", entry.Extras["city"])
+	assert.Equal(t, nil, entry.Extras["pass"])
 }
 
 func TestJSONEncoder_ShowLogLevelLt(t *testing.T) {

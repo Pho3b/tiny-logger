@@ -2,7 +2,6 @@ package encoders
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/pho3b/tiny-logger/internal/services"
 	c "github.com/pho3b/tiny-logger/logs/colors"
 	ll "github.com/pho3b/tiny-logger/logs/log_level"
@@ -167,37 +166,6 @@ func (j *JSONEncoder) composeMsg(
 	)
 
 	return b
-}
-
-// buildExtraMessages constructs a map from a variadic list of key-value pairs.
-// It expects an even number of arguments, where even indices (0, 2, 4, ...) are keys
-// and odd indices (1, 3, 5, ...) are values. If an odd number of arguments is passed,
-// the last key will be assigned a `nil` value.
-//
-// Example Usage:
-//
-//	extra := b.buildExtraMessages("user", "alice", "ip", "192.168.1.1")
-//	// Result: map[string]any{"user": "alice", "ip": "192.168.1.1"}
-func (j *JSONEncoder) buildExtraMessages(keyAndValuePairs ...any) map[string]any {
-	keyAndValuePairsLen := len(keyAndValuePairs)
-	if keyAndValuePairsLen == 0 {
-		return nil
-	}
-
-	resMap := make(map[string]any, keyAndValuePairsLen/2)
-
-	for i := 0; i < keyAndValuePairsLen-1; i += 2 {
-		key := fmt.Sprint(keyAndValuePairs[i])
-		value := keyAndValuePairs[i+1]
-		resMap[key] = value
-	}
-
-	if keyAndValuePairsLen%2 != 0 {
-		lastKey := fmt.Sprint(keyAndValuePairs[keyAndValuePairsLen-1])
-		resMap[lastKey] = nil
-	}
-
-	return resMap
 }
 
 // NewJSONEncoder initializes and returns a new JSONEncoder instance.

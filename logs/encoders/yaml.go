@@ -26,7 +26,7 @@ type yamlLogEntry struct {
 }
 
 // LogDebug formats and prints a debug-level log message in YAML format.
-func (y *YAMLEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...interface{}) {
+func (y *YAMLEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := y.composeMsg(
@@ -42,7 +42,7 @@ func (y *YAMLEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...interfac
 }
 
 // LogInfo formats and prints an info-level log message in YAML format.
-func (y *YAMLEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...interface{}) {
+func (y *YAMLEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := y.composeMsg(
@@ -58,7 +58,7 @@ func (y *YAMLEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...interface
 }
 
 // LogWarn formats and prints a warning-level log message in YAML format.
-func (y *YAMLEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...interface{}) {
+func (y *YAMLEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := y.composeMsg(
@@ -74,7 +74,7 @@ func (y *YAMLEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...interface
 }
 
 // LogError formats and prints an error-level log message in YAML format.
-func (y *YAMLEncoder) LogError(logger s.LoggerConfigsInterface, args ...interface{}) {
+func (y *YAMLEncoder) LogError(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 && !y.areAllNil(args...) {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := y.composeMsg(
@@ -90,7 +90,7 @@ func (y *YAMLEncoder) LogError(logger s.LoggerConfigsInterface, args ...interfac
 }
 
 // LogFatalError formats and prints a fatal error-level log message in YAML format and exits the program.
-func (y *YAMLEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...interface{}) {
+func (y *YAMLEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 && !y.areAllNil(args...) {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := y.composeMsg(
@@ -111,7 +111,7 @@ func (y *YAMLEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...int
 // Parameters:
 //   - color: the color to apply to the log message.
 //   - args: variadic msg arguments.
-func (y *YAMLEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, args ...interface{}) {
+func (y *YAMLEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, args ...any) {
 	if len(args) > 0 {
 		var b bytes.Buffer
 		b.Grow((len(args) * averageWordLen) + averageWordLen)

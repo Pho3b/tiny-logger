@@ -17,7 +17,7 @@ type DefaultEncoder struct {
 
 // LogDebug formats and prints a debug-level log message to stdout.
 // It includes date and/or time if enabled, with the text in gray if colors are enabled.
-func (d *DefaultEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...interface{}) {
+func (d *DefaultEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := d.composeMsg(
@@ -34,7 +34,7 @@ func (d *DefaultEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...inter
 
 // LogInfo formats and prints an info-level log message to stdout.
 // It includes date and/or time if enabled, with the text in cyan if colors are enabled.
-func (d *DefaultEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...interface{}) {
+func (d *DefaultEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := d.composeMsg(
@@ -51,7 +51,7 @@ func (d *DefaultEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...interf
 
 // LogWarn formats and prints a warning-level log message to stdout.
 // It includes date and/or time if enabled, with the text in yellow if colors are enabled.
-func (d *DefaultEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...interface{}) {
+func (d *DefaultEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := d.composeMsg(
@@ -68,7 +68,7 @@ func (d *DefaultEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...interf
 
 // LogError formats and prints an error-level log message to stderr.
 // It includes date and/or time if enabled, with the text in red if colors are enabled.
-func (d *DefaultEncoder) LogError(logger s.LoggerConfigsInterface, args ...interface{}) {
+func (d *DefaultEncoder) LogError(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 && !d.areAllNil(args...) {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := d.composeMsg(
@@ -86,7 +86,7 @@ func (d *DefaultEncoder) LogError(logger s.LoggerConfigsInterface, args ...inter
 // LogFatalError formats and prints a fatal error-level log message to stderr and terminates the program if any give
 // args is not nil.
 // It includes date and/or time if enabled, with the text in magenta if colors are enabled.
-func (d *DefaultEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...interface{}) {
+func (d *DefaultEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 && !d.areAllNil(args...) {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := d.composeMsg(
@@ -107,7 +107,7 @@ func (d *DefaultEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...
 // Parameters:
 //   - color: the color to apply to the log message.
 //   - args: variadic msg arguments.
-func (d *DefaultEncoder) Color(_ s.LoggerConfigsInterface, color c.Color, args ...interface{}) {
+func (d *DefaultEncoder) Color(_ s.LoggerConfigsInterface, color c.Color, args ...any) {
 	if len(args) > 0 {
 		var b bytes.Buffer
 		b.Grow((len(args) * averageWordLen) + averageWordLen)

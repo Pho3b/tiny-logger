@@ -6,7 +6,9 @@ import (
 	"strconv"
 )
 
-type jsonLogEntry struct {
+// JsonLogEntry represents a structured log entry that can be marshaled to JSON format.
+// All fields except Message are optional and will be omitted if empty.
+type JsonLogEntry struct {
 	Level    string `json:"level,omitempty"`
 	Date     string `json:"date,omitempty"`
 	Time     string `json:"time,omitempty"`
@@ -15,77 +17,46 @@ type jsonLogEntry struct {
 	Extras   []any  `json:"extras,omitempty"`
 }
 
+// JsonMarshaler provides custom JSON marshaling functionality optimized for log entries.
 type JsonMarshaler struct {
 }
 
-func (j *JsonMarshaler) Marshal(entry *jsonLogEntry) ([]byte, error) {
+// Marshal converts a JsonLogEntry into a JSON-formatted byte slice.
+// It uses a buffer-based approach to minimize allocations during marshaling.
+func (j *JsonMarshaler) Marshal(logEntry JsonLogEntry) []byte {
 	var res bytes.Buffer
 	res.Grow(250)
 
 	res.WriteByte('{')
 
-	if entry.Level != "" {
-		res.WriteString("\"level\":\"")
-		res.WriteString(entry.Level)
-		res.WriteByte('"')
-		res.WriteByte(',')
-	}
-
-	if entry.Date != "" {
-		res.WriteString("\"date\":\"")
-		res.WriteString(entry.Date)
-		res.WriteByte('"')
-		res.WriteByte(',')
-	}
-
-	if entry.Time != "" {
-		res.WriteString("\"time\":\"")
-		res.WriteString(entry.Time)
-		res.WriteByte('"')
-		res.WriteByte(',')
-	}
-
-	if entry.DateTime != "" {
-		res.WriteString("\"datetime\":\"")
-		res.WriteString(entry.DateTime)
-		res.WriteByte('"')
-		res.WriteByte(',')
-	}
+	j.writeLogEntryProperties(&res, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.DateTime)
 
 	res.WriteString("\"msg\":\"")
-	res.WriteString(entry.Message)
+	res.WriteString(logEntry.Message)
 	res.WriteByte('"')
 
-	if entry.Extras != nil {
+	extrasLen := len(logEntry.Extras)
+	if extrasLen > 0 {
 		res.WriteString(",\"extras\":{")
 
-		for i, extra := range entry.Extras {
-			switch v := extra.(type) {
-			case string:
-				res.WriteString(v)
-			case rune:
-				res.WriteRune(v)
-			case int:
-				res.WriteString(strconv.Itoa(v))
-			case int64:
-				res.WriteString(strconv.FormatInt(v, 10))
-			case float64:
-				res.WriteString(strconv.FormatFloat(v, 'f', -1, 64))
-			case bool:
-				res.WriteString(strconv.FormatBool(v))
-			default:
-				// Using the slower fmt.Sprint only for unknown types
-				res.WriteString(fmt.Sprint(v))
-			}
+		for i, extra := range logEntry.Extras {
+			isKey := i%2 == 0
 
-			if i%2 == 0 && i > 0 {
-				res.WriteString("\":")
+			if isKey {
+				res.WriteByte('"')
+				j.writeValue(&res, extra, true)
+				res.WriteString(`":`)
 			} else {
-				res.WriteByte(',')
+				j.writeValue(&res, extra, false)
+
+				if i < extrasLen-1 {
+					res.WriteByte(',')
+				}
+
 			}
 		}
 
-		if len(entry.Extras)%2 != 0 {
+		if extrasLen%2 != 0 {
 			res.WriteString("null")
 		}
 
@@ -93,36 +64,77 @@ func (j *JsonMarshaler) Marshal(entry *jsonLogEntry) ([]byte, error) {
 	}
 
 	res.WriteByte('}')
-	return res.Bytes(), nil
+	return res.Bytes()
 }
 
-//// buildExtraMessages constructs a map from a variadic list of key-value pairs.
-//// It expects an even number of arguments, where even indices (0, 2, 4, ...) are keys
-//// and odd indices (1, 3, 5, ...) are values. If an odd number of arguments is passed,
-//// the last key will be assigned a `nil` value.
-////
-//// Example Usage:
-////
-////	extra := b.buildExtraMessages("user", "alice", "ip", "192.168.1.1")
-////	// Result: map[string]interface{}{"user": "alice", "ip": "192.168.1.1"}
-//func (j *JsonMarshaler) buildExtraMessages(keyAndValuePairs ...interface{}) map[string]interface{} {
-//	keyAndValuePairsLen := len(keyAndValuePairs)
-//	if keyAndValuePairsLen == 0 {
-//		return nil
-//	}
-//
-//	resMap := make(map[string]interface{}, keyAndValuePairsLen/2)
-//
-//	for i := 0; i < keyAndValuePairsLen-1; i += 2 {
-//		key := fmt.Sprint(keyAndValuePairs[i])
-//		value := keyAndValuePairs[i+1]
-//		resMap[key] = value
-//	}
-//
-//	if keyAndValuePairsLen%2 != 0 {
-//		lastKey := fmt.Sprint(keyAndValuePairs[keyAndValuePairsLen-1])
-//		resMap[lastKey] = nil
-//	}
-//
-//	return resMap
-//}
+// writeValue writes a value to the buffer with appropriate JSON formatting.
+// The method handles different types (string, rune, int, int64, float64, bool)
+// with special consideration for whether the value is being written as a key or value.
+func (j *JsonMarshaler) writeValue(buf *bytes.Buffer, v any, isKey bool) {
+	switch val := v.(type) {
+	case string:
+		if isKey {
+			buf.WriteString(val)
+		} else {
+			buf.WriteByte('"')
+			buf.WriteString(val)
+			buf.WriteByte('"')
+		}
+	case rune:
+		if isKey {
+			buf.WriteRune(val)
+		} else {
+			buf.WriteByte('"')
+			buf.WriteRune(val)
+			buf.WriteByte('"')
+		}
+	case int:
+		buf.WriteString(strconv.Itoa(val))
+	case int64:
+		buf.WriteString(strconv.FormatInt(val, 10))
+	case float64:
+		buf.WriteString(strconv.FormatFloat(val, 'f', -1, 64))
+	case bool:
+		buf.WriteString(strconv.FormatBool(val))
+	default:
+		if isKey {
+			buf.WriteString(fmt.Sprint(val))
+		} else {
+			buf.WriteByte('"')
+			buf.WriteString(fmt.Sprint(val))
+			buf.WriteByte('"')
+		}
+	}
+}
+
+// writeLogEntryProperties writes the standard log entry properties to the buffer.
+// Only non-empty properties are written, each followed by a comma.
+func (j *JsonMarshaler) writeLogEntryProperties(res *bytes.Buffer, level string, date string, time string, dateTime string) {
+	if level != "" {
+		res.WriteString("\"level\":\"")
+		res.WriteString(level)
+		res.WriteByte('"')
+		res.WriteByte(',')
+	}
+
+	if date != "" {
+		res.WriteString("\"date\":\"")
+		res.WriteString(date)
+		res.WriteByte('"')
+		res.WriteByte(',')
+	}
+
+	if time != "" {
+		res.WriteString("\"time\":\"")
+		res.WriteString(time)
+		res.WriteByte('"')
+		res.WriteByte(',')
+	}
+
+	if dateTime != "" {
+		res.WriteString("\"datetime\":\"")
+		res.WriteString(dateTime)
+		res.WriteByte('"')
+		res.WriteByte(',')
+	}
+}

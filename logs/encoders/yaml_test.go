@@ -2,6 +2,7 @@ package encoders
 
 import (
 	"github.com/pho3b/tiny-logger/logs/colors"
+	"github.com/pho3b/tiny-logger/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -10,8 +11,8 @@ import (
 	"time"
 )
 
-func decodeYamlLogEntry(t *testing.T, logOutput string) jsonLogEntry {
-	var entry jsonLogEntry
+func decodeYamlLogEntry(t *testing.T, logOutput string) yamlLogEntry {
+	var entry yamlLogEntry
 	err := yaml.Unmarshal([]byte(logOutput), &entry)
 	assert.NoError(t, err)
 	return entry
@@ -19,7 +20,7 @@ func decodeYamlLogEntry(t *testing.T, logOutput string) jsonLogEntry {
 
 func TestYAMLEncoder_LogDebug(t *testing.T) {
 	encoder := NewYAMLEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
 		encoder.LogDebug(loggerConfig, "Test debug message")
@@ -32,7 +33,7 @@ func TestYAMLEncoder_LogDebug(t *testing.T) {
 
 func TestYAMLEncoder_LogInfo(t *testing.T) {
 	encoder := NewYAMLEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
 		encoder.LogInfo(loggerConfig, "Test info message")
@@ -45,7 +46,7 @@ func TestYAMLEncoder_LogInfo(t *testing.T) {
 
 func TestYAMLEncoder_LogWarn(t *testing.T) {
 	encoder := NewYAMLEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
 		encoder.LogWarn(loggerConfig, "Test warning message")
@@ -58,7 +59,7 @@ func TestYAMLEncoder_LogWarn(t *testing.T) {
 
 func TestYAMLEncoder_LogError(t *testing.T) {
 	encoder := NewYAMLEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureErrorOutput(func() {
 		encoder.LogError(loggerConfig, "Test error message")
@@ -71,7 +72,7 @@ func TestYAMLEncoder_LogError(t *testing.T) {
 
 func TestYAMLEncoder_LogFatalError(t *testing.T) {
 	encoder := NewYAMLEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	if os.Getenv("BE_CRASHER") == "1" {
 		encoder.LogFatalError(loggerConfig, "Test fatal error message")
@@ -87,7 +88,7 @@ func TestYAMLEncoder_LogFatalError(t *testing.T) {
 
 func TestYAMLEncoder_ShowLogLevelLt(t *testing.T) {
 	encoder := NewYAMLEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
 		encoder.LogDebug(loggerConfig, "Test debug message")
@@ -97,7 +98,7 @@ func TestYAMLEncoder_ShowLogLevelLt(t *testing.T) {
 	assert.Equal(t, "DEBUG", entry.Level)
 	assert.Equal(t, "Test debug message", entry.Message)
 
-	loggerConfig = &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: false}
+	loggerConfig = &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: false}
 
 	output = captureOutput(func() {
 		encoder.LogDebug(loggerConfig, "Test debug message")
@@ -112,7 +113,7 @@ func TestYAMLEncoder_Color(t *testing.T) {
 	testLog := "my testing log"
 	originalStdOut := os.Stdout
 	encoder := NewYAMLEncoder()
-	lConfig := LoggerConfigMock{
+	lConfig := test.LoggerConfigMock{
 		DateEnabled:   false,
 		TimeEnabled:   false,
 		ColorsEnabled: false,

@@ -40,10 +40,10 @@ logger.Debug("hey", "check this", "debug") // stdout: 'DEBUG: hey check this deb
 logger.Error("here is the error") // stderr: 'ERROR: here is the error'
 
 logger := logs.NewLogger().
-SetLogLvl(ll.WarnLvlName).
-EnableColors(true).
-AddTime(true).
-AddDate(true)
+   SetLogLvl(ll.WarnLvlName).
+   EnableColors(true).
+   AddTime(true).
+   AddDate(true)
 
 logger.Warn("This is my Warn log", "Test arg") // stdout: WARN[03/11/2024 18:35:43]: This is my Warn log Test arg
 

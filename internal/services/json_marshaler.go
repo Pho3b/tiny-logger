@@ -25,34 +25,33 @@ type JsonMarshaler struct {
 // It uses a buffer-based approach to minimize allocations during marshaling.
 func (j *JsonMarshaler) Marshal(logEntry JsonLogEntry) []byte {
 	var res bytes.Buffer
-	res.Grow(250)
+	extrasLen := len(logEntry.Extras)
+	res.Grow(jsonCharOverhead + (averageExtraLen * extrasLen))
 
 	res.WriteByte('{')
-
 	j.writeLogEntryProperties(&res, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.DateTime)
 
 	res.WriteString("\"msg\":\"")
 	res.WriteString(logEntry.Message)
 	res.WriteByte('"')
 
-	extrasLen := len(logEntry.Extras)
 	if extrasLen > 0 {
 		res.WriteString(",\"extras\":{")
 
-		for i, extra := range logEntry.Extras {
-			isKey := i%2 == 0
-
-			if isKey {
+		for i := 0; i < extrasLen; i += 2 {
+			if i < extrasLen {
 				res.WriteByte('"')
-				j.writeValue(&res, extra, true)
+				j.writeValue(&res, logEntry.Extras[i], true)
 				res.WriteString(`":`)
-			} else {
-				j.writeValue(&res, extra, false)
 
-				if i < extrasLen-1 {
-					res.WriteByte(',')
+				k := i + 1
+				if k < extrasLen {
+					j.writeValue(&res, logEntry.Extras[k], false)
+
+					if k < extrasLen-1 {
+						res.WriteByte(',')
+					}
 				}
-
 			}
 		}
 

@@ -2,6 +2,7 @@ package encoders
 
 import (
 	"github.com/pho3b/tiny-logger/logs/colors"
+	"github.com/pho3b/tiny-logger/shared"
 	"github.com/pho3b/tiny-logger/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
@@ -11,11 +12,12 @@ import (
 	"time"
 )
 
-func decodeYamlLogEntry(t *testing.T, logOutput string) yamlLogEntry {
-	var entry yamlLogEntry
-	err := yaml.Unmarshal([]byte(logOutput), &entry)
+func decodeYamlLogEntry(t *testing.T, logOutput string) shared.YamlLog {
+	var yamlLog shared.YamlLog
+	err := yaml.Unmarshal([]byte(logOutput), &yamlLog)
 	assert.NoError(t, err)
-	return entry
+
+	return yamlLog
 }
 
 func TestYAMLEncoder_LogDebug(t *testing.T) {
@@ -142,6 +144,39 @@ func TestYAMLEncoder_Color(t *testing.T) {
 	assert.Contains(t, output, colors.Blue.String())
 	assert.Contains(t, output, testLog)
 	assert.Contains(t, output, colors.Reset.String())
+
+	os.Stdout = originalStdOut
+}
+
+func TestYAMLEncoder_ValidYAMLOutput(t *testing.T) {
+	var yamlMsg string
+
+	originalStdOut := os.Stdout
+	testLog := "my testing log"
+	yamlEncoder := NewYAMLEncoder()
+	lConfig := &test.LoggerConfigMock{
+		DateEnabled:   false,
+		TimeEnabled:   false,
+		ColorsEnabled: false,
+		ShowLogLevel:  false,
+	}
+
+	yamlMsg = captureOutput(func() { yamlEncoder.LogInfo(lConfig, testLog, "id", 3) })
+	assert.NoError(t, yaml.Unmarshal([]byte(yamlMsg), &shared.YamlLog{}))
+
+	yamlMsg = captureOutput(func() { yamlEncoder.LogInfo(lConfig, testLog, "id", 3, 34, []string{"test", "test2"}) })
+	assert.NoError(t, yaml.Unmarshal([]byte(yamlMsg), &shared.YamlLog{}))
+
+	yamlMsg = captureOutput(func() {
+		yamlEncoder.LogInfo(lConfig, testLog, "id", 3, 34, []string{"test", "test2"}, []string{"k", "k2"}, 2.3, 'f', 'A')
+	})
+	assert.NoError(t, yaml.Unmarshal([]byte(yamlMsg), &shared.YamlLog{}))
+
+	yamlMsg = ":'test'}"
+	assert.Error(t, yaml.Unmarshal([]byte(yamlMsg), &shared.YamlLog{}))
+
+	yamlMsg = "level: DEBUG\ndatetime: 21/06/2025 11:34:56\nmsg: my testing log\nextras:\n  id: 3\n  34: [test test2]\n  [k k2]: 2.3\n  f: \"A\""
+	assert.Error(t, yaml.Unmarshal([]byte(yamlMsg), &shared.YamlLog{}))
 
 	os.Stdout = originalStdOut
 }

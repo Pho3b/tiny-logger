@@ -9,9 +9,10 @@ Compatible with Go version 1.18.x and above
 
 - 🪶 **Minimal Footprint**: The entire library weights around `100kB` (Comments and README included)
 - ⚖️ **Zero Dependencies**: Pure Go implementation with no external dependencies
-- 🚀 **Blazing Fast**: Custom JSON marshaling optimized for logging
-    - Up to 1.4x faster than `encoding/json`
-    - Benchmark: `~640ns` per log entry (including JSON serialization) even less using the `Default encoder`.
+- 🚀 **Blazing Fast**: Custom JSON and YAML marshaling optimized for logging
+    - Up to 1.4x faster JSON marshaling than `encoding/json`
+    - Up to 5x faster YAML marshaling than `gopkg.in/yaml.v3`
+    - Benchmark: up to `~640ns` per log entry (including JSON/YAML serialization) even less using the `Default encoder`.
 - 🎨 **Color Support**: Built-in ANSI color support for terminal output
 - 🔀 **Thread-Safe**: Concurrent-safe logging with atomic operations
 - ⏱️ **Time-Optimized**: Efficient date/time handling with minimal allocations
@@ -22,12 +23,12 @@ Executed Logging a message + 4 extra elements (Check the `./test/benchmark_test.
 
 | Encoder             | Configuration      | ns/op | B/op | allocs/op |
 |---------------------|--------------------|-------|------|-----------|
-| **Default Encoder** | All Properties ON  | 673.3 | 488  | 6         |        
-|                     | All Properties OFF | 590.4 | 410  | 4         |
-| **JSON Encoder**    | All Properties ON  | 681.3 | 632  | 6         |
-|                     | All Properties OFF | 640.8 | 608  | 5         |
-| **YAML Encoder**    | All Properties ON  | 2894  | 7280 | 24        |
-|                     | All Properties OFF | 4465  | 7678 | 40        |
+| **Default Encoder** | All Properties OFF | 590.4 | 410  | 4         |        
+|                     | All Properties ON  | 673.3 | 488  | 6         |
+| **JSON Encoder**    | All Properties OFF | 640.8 | 608  | 5         |
+|                     | All Properties ON  | 681.3 | 632  | 6         |
+| **YAML Encoder**    | All Properties OFF | 674.0 | 464  | 5         |
+|                     | All Properties ON  | 798.5 | 648  | 7         |
 
 ## 🎯 Use Cases
 
@@ -38,12 +39,11 @@ logger.Info("my", "into", "test", 2) // stdout: 'INFO: my info test 2'
 logger.Debug("hey", "check this", "debug") // stdout: 'DEBUG: hey check this debug'
 logger.Error("here is the error") // stderr: 'ERROR: here is the error'
 
-
 logger := logs.NewLogger().
-    SetLogLvl(ll.WarnLvlName).
-    EnableColors(true).
-    AddTime(true).
-    AddDate(true)
+SetLogLvl(ll.WarnLvlName).
+EnableColors(true).
+AddTime(true).
+AddDate(true)
 
 logger.Warn("This is my Warn log", "Test arg") // stdout: WARN[03/11/2024 18:35:43]: This is my Warn log Test arg
 
@@ -105,4 +105,4 @@ Need help? Feel free to open an issue
 
 ## 📝 License
 
-MIT License - see [LICENSE](https://mit-license.org/) file for details
+MIT License—see [LICENSE](https://mit-license.org/) file for details

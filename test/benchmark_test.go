@@ -17,7 +17,7 @@ func BenchmarkDefaultEncoderAllPropertiesDisabled(b *testing.B) {
 		logger.Debug("DEFAULT encoder", "all-properties-enabled", false, "id", 2)
 	}
 
-	fmt.Print("BenchmarkDefaultEncoderAllPropertiesDisabled:")
+	fmt.Print("Default_Encoder_All_Properties_Disabled:")
 }
 
 func BenchmarkDefaultEncoderAllPropertiesEnabled(b *testing.B) {
@@ -33,10 +33,10 @@ func BenchmarkDefaultEncoderAllPropertiesEnabled(b *testing.B) {
 		logger.Debug("DEFAULT encoder", "all-properties-enabled", true, "id", 2)
 	}
 
-	fmt.Print("BenchmarkDefaultEncoderAllPropertiesEnabled:")
+	fmt.Print("Default_Encoder_All_Properties_Enabled: ")
 }
 
-func BenchmarkJsonEncoderAllPropertiesDisables(b *testing.B) {
+func BenchmarkJsonEncoderAllPropertiesDisabled(b *testing.B) {
 	b.ReportAllocs()
 
 	logger := logs.NewLogger().
@@ -46,7 +46,7 @@ func BenchmarkJsonEncoderAllPropertiesDisables(b *testing.B) {
 		logger.Debug("JSON encoder", "all-properties-enabled", false, "id", 2)
 	}
 
-	fmt.Print("BenchmarkJsonEncoderAllPropertiesDisables:")
+	fmt.Print("Json_Encoder_All_Properties_Disabled: ")
 }
 
 func BenchmarkJsonEncoderAllPropertiesEnabled(b *testing.B) {
@@ -61,10 +61,10 @@ func BenchmarkJsonEncoderAllPropertiesEnabled(b *testing.B) {
 		logger.Debug("JSON encoder", "all-properties-enabled", true, "id", 2)
 	}
 
-	fmt.Print("BenchmarkJsonEncoderAllPropertiesEnabled:")
+	fmt.Print("Json_Encoder_All_Properties_Enabled: ")
 }
 
-func BenchmarkYamlEncoderAllPropertiesDisables(b *testing.B) {
+func BenchmarkYamlEncoderAllPropertiesDisabled(b *testing.B) {
 	b.ReportAllocs()
 
 	logger := logs.NewLogger().
@@ -74,7 +74,7 @@ func BenchmarkYamlEncoderAllPropertiesDisables(b *testing.B) {
 		logger.Debug("YAML encoder", "all-properties-enabled", false, "id", 2)
 	}
 
-	fmt.Print("BenchmarkYamlEncoderAllPropertiesDisables:")
+	fmt.Print("Yaml_Encoder_All_Properties_Disabled: ")
 }
 
 func BenchmarkYamlEncoderAllPropertiesEnabled(b *testing.B) {
@@ -89,5 +89,5 @@ func BenchmarkYamlEncoderAllPropertiesEnabled(b *testing.B) {
 		logger.Debug("YAML encoder", "all-properties-enabled", true, "id", 2)
 	}
 
-	fmt.Print("BenchmarkYamlEncoderAllPropertiesEnabled:")
+	fmt.Print("Yaml_Encoder_All_Properties_Enabled: ")
 }

@@ -193,10 +193,7 @@ func (d *DefaultEncoder) formatDateTimeString(dateStr, timeStr, dateTimeStr stri
 
 // NewDefaultEncoder initializes and returns a new DefaultEncoder instance.
 func NewDefaultEncoder() *DefaultEncoder {
-	encoder := &DefaultEncoder{
-		DateTimePrinter: services.NewDateTimePrinter(),
-		ColorsPrinter:   services.ColorsPrinter{},
-	}
+	encoder := &DefaultEncoder{DateTimePrinter: services.NewDateTimePrinter(), ColorsPrinter: services.ColorsPrinter{}}
 	encoder.encoderType = s.DefaultEncoderType
 
 	return encoder

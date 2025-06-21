@@ -89,7 +89,7 @@ func (d *DateTimePrinter) updateCurrentTimeEverySecond() {
 	}
 }
 
-// NewDateTimePrinter initializes DateTimePrinter with default timeNow function.
+// NewDateTimePrinter initializes DateTimePrinter with the default timeNow function.
 func NewDateTimePrinter() DateTimePrinter {
 	return DateTimePrinter{timeNow: time.Now}
 }

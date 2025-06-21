@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-const averageWordLen = 30
+const averageWordLen = 35
 
 type BaseEncoder struct {
 	encoderType s.EncoderType
@@ -17,7 +17,8 @@ type BaseEncoder struct {
 // castAndConcatenate returns a string containing all the given arguments cast to string and concatenated by a white space.
 func (b *BaseEncoder) castAndConcatenate(args ...any) string {
 	var res bytes.Buffer
-	res.Grow(averageWordLen * len(args)) // Assuming an average word length of 30 chars
+	argsLen := len(args)
+	res.Grow(averageWordLen * argsLen)
 
 	for i, arg := range args {
 		switch v := arg.(type) {
@@ -38,7 +39,7 @@ func (b *BaseEncoder) castAndConcatenate(args ...any) string {
 			res.WriteString(fmt.Sprint(v))
 		}
 
-		if i < len(args)-1 {
+		if i < argsLen-1 {
 			res.WriteByte(' ')
 		}
 	}

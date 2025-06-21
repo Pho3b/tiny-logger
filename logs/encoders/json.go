@@ -202,10 +202,7 @@ func (j *JSONEncoder) buildExtraMessages(keyAndValuePairs ...any) map[string]any
 
 // NewJSONEncoder initializes and returns a new JSONEncoder instance.
 func NewJSONEncoder() *JSONEncoder {
-	encoder := &JSONEncoder{
-		DateTimePrinter: services.NewDateTimePrinter(),
-		jsonMarshaler:   services.JsonMarshaler{},
-	}
+	encoder := &JSONEncoder{DateTimePrinter: services.NewDateTimePrinter(), jsonMarshaler: services.JsonMarshaler{}}
 	encoder.encoderType = s.JsonEncoderType
 
 	return encoder

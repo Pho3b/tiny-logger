@@ -2,6 +2,8 @@ package encoders
 
 import (
 	"github.com/pho3b/tiny-logger/logs/colors"
+	"github.com/pho3b/tiny-logger/shared"
+	"github.com/pho3b/tiny-logger/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -10,16 +12,17 @@ import (
 	"time"
 )
 
-func decodeYamlLogEntry(t *testing.T, logOutput string) jsonLogEntry {
-	var entry jsonLogEntry
-	err := yaml.Unmarshal([]byte(logOutput), &entry)
+func decodeYamlLogEntry(t *testing.T, logOutput string) shared.YamlLog {
+	var yamlLog shared.YamlLog
+	err := yaml.Unmarshal([]byte(logOutput), &yamlLog)
 	assert.NoError(t, err)
-	return entry
+
+	return yamlLog
 }
 
 func TestYAMLEncoder_LogDebug(t *testing.T) {
 	encoder := NewYAMLEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
 		encoder.LogDebug(loggerConfig, "Test debug message")
@@ -32,7 +35,7 @@ func TestYAMLEncoder_LogDebug(t *testing.T) {
 
 func TestYAMLEncoder_LogInfo(t *testing.T) {
 	encoder := NewYAMLEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
 		encoder.LogInfo(loggerConfig, "Test info message")
@@ -45,7 +48,7 @@ func TestYAMLEncoder_LogInfo(t *testing.T) {
 
 func TestYAMLEncoder_LogWarn(t *testing.T) {
 	encoder := NewYAMLEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
 		encoder.LogWarn(loggerConfig, "Test warning message")
@@ -58,7 +61,7 @@ func TestYAMLEncoder_LogWarn(t *testing.T) {
 
 func TestYAMLEncoder_LogError(t *testing.T) {
 	encoder := NewYAMLEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureErrorOutput(func() {
 		encoder.LogError(loggerConfig, "Test error message")
@@ -71,7 +74,7 @@ func TestYAMLEncoder_LogError(t *testing.T) {
 
 func TestYAMLEncoder_LogFatalError(t *testing.T) {
 	encoder := NewYAMLEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	if os.Getenv("BE_CRASHER") == "1" {
 		encoder.LogFatalError(loggerConfig, "Test fatal error message")
@@ -87,7 +90,7 @@ func TestYAMLEncoder_LogFatalError(t *testing.T) {
 
 func TestYAMLEncoder_ShowLogLevelLt(t *testing.T) {
 	encoder := NewYAMLEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
 		encoder.LogDebug(loggerConfig, "Test debug message")
@@ -97,7 +100,7 @@ func TestYAMLEncoder_ShowLogLevelLt(t *testing.T) {
 	assert.Equal(t, "DEBUG", entry.Level)
 	assert.Equal(t, "Test debug message", entry.Message)
 
-	loggerConfig = &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: false}
+	loggerConfig = &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: false}
 
 	output = captureOutput(func() {
 		encoder.LogDebug(loggerConfig, "Test debug message")
@@ -112,7 +115,7 @@ func TestYAMLEncoder_Color(t *testing.T) {
 	testLog := "my testing log"
 	originalStdOut := os.Stdout
 	encoder := NewYAMLEncoder()
-	lConfig := LoggerConfigMock{
+	lConfig := test.LoggerConfigMock{
 		DateEnabled:   false,
 		TimeEnabled:   false,
 		ColorsEnabled: false,
@@ -141,6 +144,39 @@ func TestYAMLEncoder_Color(t *testing.T) {
 	assert.Contains(t, output, colors.Blue.String())
 	assert.Contains(t, output, testLog)
 	assert.Contains(t, output, colors.Reset.String())
+
+	os.Stdout = originalStdOut
+}
+
+func TestYAMLEncoder_ValidYAMLOutput(t *testing.T) {
+	var yamlMsg string
+
+	originalStdOut := os.Stdout
+	testLog := "my testing log"
+	yamlEncoder := NewYAMLEncoder()
+	lConfig := &test.LoggerConfigMock{
+		DateEnabled:   false,
+		TimeEnabled:   false,
+		ColorsEnabled: false,
+		ShowLogLevel:  false,
+	}
+
+	yamlMsg = captureOutput(func() { yamlEncoder.LogInfo(lConfig, testLog, "id", 3) })
+	assert.NoError(t, yaml.Unmarshal([]byte(yamlMsg), &shared.YamlLog{}))
+
+	yamlMsg = captureOutput(func() { yamlEncoder.LogInfo(lConfig, testLog, "id", 3, 34, []string{"test", "test2"}) })
+	assert.NoError(t, yaml.Unmarshal([]byte(yamlMsg), &shared.YamlLog{}))
+
+	yamlMsg = captureOutput(func() {
+		yamlEncoder.LogInfo(lConfig, testLog, "id", 3, 34, []string{"test", "test2"}, []string{"k", "k2"}, 2.3, 'f', 'A')
+	})
+	assert.NoError(t, yaml.Unmarshal([]byte(yamlMsg), &shared.YamlLog{}))
+
+	yamlMsg = ":'test'}"
+	assert.Error(t, yaml.Unmarshal([]byte(yamlMsg), &shared.YamlLog{}))
+
+	yamlMsg = "level: DEBUG\ndatetime: 21/06/2025 11:34:56\nmsg: my testing log\nextras:\n  id: 3\n  34: [test test2]\n  [k k2]: 2.3\n  f: \"A\""
+	assert.Error(t, yaml.Unmarshal([]byte(yamlMsg), &shared.YamlLog{}))
 
 	os.Stdout = originalStdOut
 }

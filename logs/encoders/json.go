@@ -2,8 +2,6 @@ package encoders
 
 import (
 	"bytes"
-	"encoding/json"
-	"fmt"
 	"github.com/pho3b/tiny-logger/internal/services"
 	c "github.com/pho3b/tiny-logger/logs/colors"
 	ll "github.com/pho3b/tiny-logger/logs/log_level"
@@ -14,23 +12,15 @@ import (
 type JSONEncoder struct {
 	BaseEncoder
 	DateTimePrinter services.DateTimePrinter
-}
-
-// jsonLogEntry represents the structure of a JSON log entry.
-type jsonLogEntry struct {
-	Level    string                 `json:"level,omitempty"`
-	Date     string                 `json:"date,omitempty"`
-	Time     string                 `json:"time,omitempty"`
-	DateTime string                 `json:"datetime,omitempty"`
-	Message  string                 `json:"msg"`
-	Extras   map[string]interface{} `json:"extras,omitempty"`
+	jsonMarshaler   services.JsonMarshaler
 }
 
 // LogDebug formats and prints a debug-level log message in JSON format.
-func (j *JSONEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...interface{}) {
+func (j *JSONEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := j.composeMsg(
+			j.jsonMarshaler,
 			ll.DebugLvlName,
 			dEnabled,
 			tEnabled,
@@ -44,10 +34,11 @@ func (j *JSONEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...interfac
 }
 
 // LogInfo formats and prints an info-level log message in JSON format.
-func (j *JSONEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...interface{}) {
+func (j *JSONEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := j.composeMsg(
+			j.jsonMarshaler,
 			ll.InfoLvlName,
 			dEnabled,
 			tEnabled,
@@ -61,10 +52,11 @@ func (j *JSONEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...interface
 }
 
 // LogWarn formats and prints a warning-level log message in JSON format.
-func (j *JSONEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...interface{}) {
+func (j *JSONEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := j.composeMsg(
+			j.jsonMarshaler,
 			ll.WarnLvlName,
 			dEnabled,
 			tEnabled,
@@ -78,10 +70,11 @@ func (j *JSONEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...interface
 }
 
 // LogError formats and prints an error-level log message in JSON format.
-func (j *JSONEncoder) LogError(logger s.LoggerConfigsInterface, args ...interface{}) {
+func (j *JSONEncoder) LogError(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 && !j.areAllNil(args...) {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := j.composeMsg(
+			j.jsonMarshaler,
 			ll.ErrorLvlName,
 			dEnabled,
 			tEnabled,
@@ -95,10 +88,11 @@ func (j *JSONEncoder) LogError(logger s.LoggerConfigsInterface, args ...interfac
 }
 
 // LogFatalError formats and prints a fatal error-level log message in JSON format and exits the program.
-func (j *JSONEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...interface{}) {
+func (j *JSONEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 && !j.areAllNil(args...) {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := j.composeMsg(
+			j.jsonMarshaler,
 			ll.FatalErrorLvlName,
 			dEnabled,
 			tEnabled,
@@ -117,13 +111,14 @@ func (j *JSONEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...int
 // Parameters:
 //   - color: the color to apply to the log message.
 //   - args: variadic arguments where the first is treated as the message and the rest are appended.
-func (j *JSONEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, args ...interface{}) {
+func (j *JSONEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, args ...any) {
 	if len(args) > 0 {
 		var b bytes.Buffer
 		b.Grow((len(args) * averageWordLen) + averageWordLen)
 		dEnabled, tEnabled := lConfig.GetDateTimeEnabled()
 
 		msgBuffer := j.composeMsg(
+			j.jsonMarshaler,
 			ll.InfoLvlName,
 			dEnabled,
 			tEnabled,
@@ -141,12 +136,13 @@ func (j *JSONEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, arg
 }
 
 func (j *JSONEncoder) composeMsg(
+	jsonMarshaler services.JsonMarshaler,
 	logLevel ll.LogLvlName,
 	dateEnabled bool,
 	timeEnabled bool,
 	showLogLevel bool,
 	msg string,
-	extras ...interface{},
+	extras ...any,
 ) bytes.Buffer {
 	var b bytes.Buffer
 	b.Grow((averageWordLen * len(extras)) + len(msg) + 60)
@@ -156,61 +152,25 @@ func (j *JSONEncoder) composeMsg(
 		logLevel = ""
 	}
 
-	msgBytes, err := json.Marshal(
-		jsonLogEntry{
-			Level:    logLevel.String(),
-			Date:     dateStr,
-			DateTime: dateTimeStr,
-			Time:     timeStr,
-			Message:  msg,
-			Extras:   j.buildExtraMessages(extras...),
-		},
+	b.Write(
+		jsonMarshaler.Marshal(
+			services.JsonLogEntry{
+				Level:    logLevel.String(),
+				Date:     dateStr,
+				DateTime: dateTimeStr,
+				Time:     timeStr,
+				Message:  msg,
+				Extras:   extras,
+			},
+		),
 	)
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, `{"level":"ERROR", "message":"Failed to marshal JSON log: %s"}`, err.Error())
-		return bytes.Buffer{}
-	}
 
-	b.Write(msgBytes)
 	return b
-}
-
-// buildExtraMessages constructs a map from a variadic list of key-value pairs.
-// It expects an even number of arguments, where even indices (0, 2, 4, ...) are keys
-// and odd indices (1, 3, 5, ...) are values. If an odd number of arguments is passed,
-// the last key will be assigned a `nil` value.
-//
-// Example Usage:
-//
-//	extra := b.buildExtraMessages("user", "alice", "ip", "192.168.1.1")
-//	// Result: map[string]interface{}{"user": "alice", "ip": "192.168.1.1"}
-func (j *JSONEncoder) buildExtraMessages(keyAndValuePairs ...interface{}) map[string]interface{} {
-	keyAndValuePairsLen := len(keyAndValuePairs)
-	if keyAndValuePairsLen == 0 {
-		return nil
-	}
-
-	resMap := make(map[string]interface{}, keyAndValuePairsLen/2)
-
-	for i := 0; i < keyAndValuePairsLen-1; i += 2 {
-		key := fmt.Sprint(keyAndValuePairs[i])
-		value := keyAndValuePairs[i+1]
-		resMap[key] = value
-	}
-
-	if keyAndValuePairsLen%2 != 0 {
-		lastKey := fmt.Sprint(keyAndValuePairs[keyAndValuePairsLen-1])
-		resMap[lastKey] = nil
-	}
-
-	return resMap
 }
 
 // NewJSONEncoder initializes and returns a new JSONEncoder instance.
 func NewJSONEncoder() *JSONEncoder {
-	encoder := &JSONEncoder{
-		DateTimePrinter: services.NewDateTimePrinter(),
-	}
+	encoder := &JSONEncoder{DateTimePrinter: services.NewDateTimePrinter(), jsonMarshaler: services.JsonMarshaler{}}
 	encoder.encoderType = s.JsonEncoderType
 
 	return encoder

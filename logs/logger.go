@@ -17,28 +17,28 @@ type Logger struct {
 }
 
 // Debug logs a debug-level message if the logger's log level allows it.
-func (l *Logger) Debug(args ...interface{}) {
+func (l *Logger) Debug(args ...any) {
 	if l.logLvl.Lvl >= log_level.DebugLvl {
 		l.encoder.LogDebug(l, args...)
 	}
 }
 
 // Info logs an informational-level message if the logger's log level allows it.
-func (l *Logger) Info(args ...interface{}) {
+func (l *Logger) Info(args ...any) {
 	if l.logLvl.Lvl >= log_level.InfoLvl {
 		l.encoder.LogInfo(l, args...)
 	}
 }
 
 // Warn logs a warning-level message if the logger's log level allows it.
-func (l *Logger) Warn(args ...interface{}) {
+func (l *Logger) Warn(args ...any) {
 	if l.logLvl.Lvl >= log_level.WarnLvl {
 		l.encoder.LogWarn(l, args...)
 	}
 }
 
 // Error logs an error-level message if the logger's log level allows it.
-func (l *Logger) Error(args ...interface{}) {
+func (l *Logger) Error(args ...any) {
 	if l.logLvl.Lvl >= log_level.ErrorLvl {
 		l.encoder.LogError(l, args...)
 	}
@@ -46,7 +46,7 @@ func (l *Logger) Error(args ...interface{}) {
 
 // FatalError logs a fatal error message and terminates the application only if any given args is not NIl,
 // otherwise the method does nothing.
-func (l *Logger) FatalError(args ...interface{}) {
+func (l *Logger) FatalError(args ...any) {
 	l.encoder.LogFatalError(l, args...)
 }
 
@@ -70,7 +70,7 @@ func (l *Logger) SetLogLvlEnvVariable(envVariableName string) *Logger {
 }
 
 // Color formats and prints a colored log message using the specified color.
-func (l *Logger) Color(color colors.Color, args ...interface{}) {
+func (l *Logger) Color(color colors.Color, args ...any) {
 	l.encoder.Color(l, color, args...)
 }
 

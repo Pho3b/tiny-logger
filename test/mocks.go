@@ -1,4 +1,4 @@
-package encoders
+package test
 
 import (
 	"github.com/pho3b/tiny-logger/logs/log_level"

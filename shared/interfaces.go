@@ -6,11 +6,11 @@ import (
 )
 
 type LoggerInterface interface {
-	Debug(args ...interface{})
-	Info(args ...interface{})
-	Warn(args ...interface{})
-	Error(args ...interface{})
-	FatalError(args ...interface{})
+	Debug(args ...any)
+	Info(args ...any)
+	Warn(args ...any)
+	Error(args ...any)
+	FatalError(args ...any)
 }
 
 type LoggerConfigsInterface interface {
@@ -23,11 +23,11 @@ type LoggerConfigsInterface interface {
 }
 
 type EncoderInterface interface {
-	LogDebug(lConfigs LoggerConfigsInterface, args ...interface{})
-	LogInfo(lConfigs LoggerConfigsInterface, args ...interface{})
-	LogWarn(lConfigs LoggerConfigsInterface, args ...interface{})
-	LogError(lConfigs LoggerConfigsInterface, args ...interface{})
-	LogFatalError(lConfigs LoggerConfigsInterface, args ...interface{})
-	Color(lConfigs LoggerConfigsInterface, color colors.Color, args ...interface{})
+	LogDebug(lConfigs LoggerConfigsInterface, args ...any)
+	LogInfo(lConfigs LoggerConfigsInterface, args ...any)
+	LogWarn(lConfigs LoggerConfigsInterface, args ...any)
+	LogError(lConfigs LoggerConfigsInterface, args ...any)
+	LogFatalError(lConfigs LoggerConfigsInterface, args ...any)
+	Color(lConfigs LoggerConfigsInterface, color colors.Color, args ...any)
 	GetType() EncoderType
 }

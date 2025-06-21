@@ -34,7 +34,7 @@ func TestColorString(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			colorCode := tt.color.String()
 
-			// On Windows, expect empty string
+			// On Windows, expect an empty string
 			if isWindows() {
 				if colorCode != "" {
 					t.Errorf("Color %s: expected empty string on Windows, got %q", tt.name, colorCode)

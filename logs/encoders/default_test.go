@@ -3,6 +3,7 @@ package encoders
 import (
 	"bytes"
 	"github.com/pho3b/tiny-logger/logs/colors"
+	"github.com/pho3b/tiny-logger/test"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"os/exec"
@@ -11,7 +12,7 @@ import (
 
 func TestLogDebug(t *testing.T) {
 	encoder := NewDefaultEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
 		encoder.LogDebug(loggerConfig, "Test debug message")
@@ -23,7 +24,7 @@ func TestLogDebug(t *testing.T) {
 
 func TestLogInfo(t *testing.T) {
 	encoder := NewDefaultEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
 		encoder.LogInfo(loggerConfig, "Test info message")
@@ -35,7 +36,7 @@ func TestLogInfo(t *testing.T) {
 
 func TestLogWarn(t *testing.T) {
 	encoder := NewDefaultEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
 		encoder.LogWarn(loggerConfig, "Test warning message")
@@ -47,7 +48,7 @@ func TestLogWarn(t *testing.T) {
 
 func TestLogError(t *testing.T) {
 	encoder := NewDefaultEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureErrorOutput(func() {
 		encoder.LogError(loggerConfig, "Test error message")
@@ -59,7 +60,7 @@ func TestLogError(t *testing.T) {
 
 func TestLogFatalError(t *testing.T) {
 	encoder := NewDefaultEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	if os.Getenv("BE_CRASHER") == "1" {
 		encoder.LogFatalError(loggerConfig, "Test fatal error message")
@@ -98,7 +99,7 @@ func TestFormatDateTimeString(t *testing.T) {
 
 func TestShowLogLevel(t *testing.T) {
 	encoder := NewDefaultEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
 		encoder.LogDebug(loggerConfig, "Test my-test message")
@@ -107,7 +108,7 @@ func TestShowLogLevel(t *testing.T) {
 	assert.Contains(t, output, "DEBUG")
 	assert.Contains(t, output, "Test my-test message")
 
-	loggerConfig = &LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ShowLogLevel: false}
+	loggerConfig = &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ShowLogLevel: false}
 
 	output = captureOutput(func() {
 		encoder.LogDebug(loggerConfig, "Test my-test message")
@@ -119,7 +120,7 @@ func TestShowLogLevel(t *testing.T) {
 
 func TestCheckColorsInTheOutput(t *testing.T) {
 	encoder := NewDefaultEncoder()
-	loggerConfig := &LoggerConfigMock{DateEnabled: false, TimeEnabled: false, ColorsEnabled: true, ShowLogLevel: true}
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: false, TimeEnabled: false, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() { encoder.LogDebug(loggerConfig, "Test msg") })
 	assert.Contains(t, output, colors.Gray.String())
@@ -139,7 +140,7 @@ func TestDefaultEncoder_Color(t *testing.T) {
 	testLog := "my testing log"
 	originalStdOut := os.Stdout
 	encoder := NewDefaultEncoder()
-	lConfig := LoggerConfigMock{
+	lConfig := test.LoggerConfigMock{
 		DateEnabled:   false,
 		TimeEnabled:   false,
 		ColorsEnabled: false,

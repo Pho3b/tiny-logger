@@ -90,7 +90,7 @@ func (d *DefaultEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...
 	if len(args) > 0 && !d.areAllNil(args...) {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := d.composeMsg(
-			ll.DebugLvlName,
+			ll.FatalErrorLvlName,
 			dEnabled, tEnabled,
 			logger.GetColorsEnabled(),
 			logger.GetShowLogLevel(),
@@ -140,15 +140,18 @@ func (d *DefaultEncoder) composeMsg(
 	b.Grow(len(msg) + 50)
 
 	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
+	dateTime := d.formatDateTimeString(dateStr, timeStr, dateTimeStr)
 	colors := d.ColorsPrinter.RetrieveColorsFromLogLevel(headerColorEnabled, ll.LogLvlNameToInt[logLevel])
-
 	b.WriteString(string(colors[0]))
 
 	if showLogLevel {
 		b.WriteString(logLevel.String())
+
+		if dateTime.Len() > 0 {
+			b.WriteByte(' ')
+		}
 	}
 
-	dateTime := d.formatDateTimeString(dateStr, timeStr, dateTimeStr)
 	b.Write(dateTime.Bytes())
 
 	if showLogLevel || dateEnabled || timeEnabled {
@@ -162,7 +165,7 @@ func (d *DefaultEncoder) composeMsg(
 	return b
 }
 
-// formatDateTimeString correctly formats the dateTime string adding and removing square brackets
+// formatDateTimeString correctly formats the dateTime string, adding and removing square brackets
 // and white spaces as needed.
 func (d *DefaultEncoder) formatDateTimeString(dateStr, timeStr, dateTimeStr string) bytes.Buffer {
 	var sb bytes.Buffer

@@ -10,9 +10,9 @@ Compatible with Go version 1.18.x and above
 - 🪶 **Minimal Footprint**: The entire library weights around `100kB` (Comments and README included)
 - ⚖️ **Zero Dependencies**: Pure Go implementation with no external dependencies
 - 🚀 **Blazing Fast**: Custom JSON and YAML marshaling optimized for logging
-    - Up to 1.4x faster JSON marshaling than `encoding/json`
-    - Up to 5x faster YAML marshaling than `gopkg.in/yaml.v3`
-    - Benchmark: up to `~640ns` per log entry (including JSON/YAML serialization) even less using the `Default encoder`.
+  - Up to 1.4x faster JSON marshaling than `encoding/json`
+  - Up to 5x faster YAML marshaling than `gopkg.in/yaml.v3`
+  - Benchmark: up to `~640ns` per log entry (including JSON/YAML serialization) even less using the `Default encoder`.
 - 🎨 **Color Support**: Built-in ANSI color support for terminal output
 - 🔀 **Thread-Safe**: Concurrent-safe logging with atomic operations
 - ⏱️ **Time-Optimized**: Efficient date/time handling with minimal allocations
@@ -23,7 +23,7 @@ Executed Logging a message + 4 extra elements (Check the `./test/benchmark_test.
 
 | Encoder             | Configuration      | ns/op | B/op | allocs/op |
 |---------------------|--------------------|-------|------|-----------|
-| **Default Encoder** | All Properties OFF | 590.4 | 410  | 4         |        
+| **Default Encoder** | All Properties OFF | 590.4 | 410  | 4         |
 |                     | All Properties ON  | 673.3 | 488  | 6         |
 | **JSON Encoder**    | All Properties OFF | 640.8 | 608  | 5         |
 |                     | All Properties ON  | 681.3 | 632  | 6         |
@@ -63,6 +63,7 @@ Contributions are welcome, Here's how you can help:
 1. Fork the repository
 2. Clone your fork:
 3. Create a new branch:
+
    ```bash
    git checkout -b feat/your-feature-name
    ```

@@ -1,4 +1,4 @@
-.PHONY: test coverage clean
+.PHONY: test test-coverage test-benchmark
 
 # Run all tests with coverage profile
 test:

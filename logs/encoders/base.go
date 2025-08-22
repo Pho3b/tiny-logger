@@ -3,12 +3,20 @@ package encoders
 import (
 	"bytes"
 	"fmt"
-	s "github.com/pho3b/tiny-logger/shared"
 	"os"
 	"strconv"
+	"sync"
+
+	s "github.com/pho3b/tiny-logger/shared"
 )
 
 const averageWordLen = 35
+
+var bufferPool = sync.Pool{
+	New: func() any {
+		return new(bytes.Buffer)
+	},
+}
 
 type BaseEncoder struct {
 	encoderType s.EncoderType
@@ -16,35 +24,39 @@ type BaseEncoder struct {
 
 // castAndConcatenate returns a string containing all the given arguments cast to string and concatenated by a white space.
 func (b *BaseEncoder) castAndConcatenate(args ...any) string {
-	var res bytes.Buffer
 	argsLen := len(args)
-	res.Grow(averageWordLen * argsLen)
+	buf := bufferPool.Get().(*bytes.Buffer)
+	buf.Reset()
+	buf.Grow(averageWordLen * argsLen)
 
 	for i, arg := range args {
 		switch v := arg.(type) {
 		case string:
-			res.WriteString(v)
+			buf.WriteString(v)
 		case rune:
-			res.WriteRune(v)
+			buf.WriteRune(v)
 		case int:
-			res.WriteString(strconv.Itoa(v))
+			buf.WriteString(strconv.Itoa(v))
 		case int64:
-			res.WriteString(strconv.FormatInt(v, 10))
+			buf.WriteString(strconv.FormatInt(v, 10))
 		case float64:
-			res.WriteString(strconv.FormatFloat(v, 'f', -1, 64))
+			buf.WriteString(strconv.FormatFloat(v, 'f', -1, 64))
 		case bool:
-			res.WriteString(strconv.FormatBool(v))
+			buf.WriteString(strconv.FormatBool(v))
 		default:
 			// Using the slower fmt.Sprint only for unknown types
-			res.WriteString(fmt.Sprint(v))
+			buf.WriteString(fmt.Sprint(v))
 		}
 
 		if i < argsLen-1 {
-			res.WriteByte(' ')
+			buf.WriteByte(' ')
 		}
 	}
 
-	return res.String()
+	res := buf.String()
+	bufferPool.Put(buf)
+
+	return res
 }
 
 // areAllNil returns true if all the given args are 'nil', false otherwise.

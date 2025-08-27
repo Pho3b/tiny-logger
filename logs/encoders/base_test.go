@@ -3,14 +3,16 @@ package encoders
 import (
 	"bytes"
 	"errors"
+	"os"
+	"sync"
+	"testing"
+
 	s "github.com/pho3b/tiny-logger/shared"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 )
 
 func TestBuildMsg(t *testing.T) {
-	encoder := &BaseEncoder{}
+	encoder := newBaseEncoder()
 
 	// Test with multiple arguments
 	result := encoder.castAndConcatenate("This", "is", "a", "test")
@@ -34,7 +36,7 @@ func TestBuildMsg(t *testing.T) {
 }
 
 func TestAreAllNil(t *testing.T) {
-	encoder := &BaseEncoder{}
+	encoder := newBaseEncoder()
 
 	// Test with all nil arguments
 	result := encoder.areAllNil(nil, nil, nil)
@@ -63,8 +65,20 @@ func TestBaseEncoder_GetType(t *testing.T) {
 	yamlEncoder := NewYAMLEncoder()
 	assert.Equal(t, s.YamlEncoderType, yamlEncoder.GetType())
 
-	baseEncoder := &BaseEncoder{}
+	baseEncoder := newBaseEncoder()
 	assert.Equal(t, s.EncoderType(""), baseEncoder.GetType())
+}
+
+// newBaseEncoder initializes and returns a new BaseEncoder instance with initialized bufferSyncPool.
+func newBaseEncoder() *BaseEncoder {
+	encoder := &BaseEncoder{}
+	encoder.bufferSyncPool = sync.Pool{
+		New: func() any {
+			return new(bytes.Buffer)
+		},
+	}
+
+	return encoder
 }
 
 // captureOutput redirects os.Stdout to capture the output of the function f

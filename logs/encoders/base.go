@@ -12,24 +12,22 @@ import (
 
 const averageWordLen = 35
 
-var bufferPool = sync.Pool{
-	New: func() any {
-		return new(bytes.Buffer)
-	},
-}
-
 type BaseEncoder struct {
-	encoderType s.EncoderType
+	encoderType    s.EncoderType
+	bufferSyncPool sync.Pool
 }
 
 // castAndConcatenate returns a string containing all the given arguments cast to string and concatenated by a white space.
 func (b *BaseEncoder) castAndConcatenate(args ...any) string {
 	argsLen := len(args)
-	buf := bufferPool.Get().(*bytes.Buffer)
-	buf.Reset()
+	buf := b.getBuffer()
 	buf.Grow(averageWordLen * argsLen)
 
 	for i, arg := range args {
+		if i > 0 {
+			buf.WriteByte(' ')
+		}
+
 		switch v := arg.(type) {
 		case string:
 			buf.WriteString(v)
@@ -47,14 +45,10 @@ func (b *BaseEncoder) castAndConcatenate(args ...any) string {
 			// Using the slower fmt.Sprint only for unknown types
 			buf.WriteString(fmt.Sprint(v))
 		}
-
-		if i < argsLen-1 {
-			buf.WriteByte(' ')
-		}
 	}
 
 	res := buf.String()
-	bufferPool.Put(buf)
+	b.putBuffer(buf)
 
 	return res
 }
@@ -71,7 +65,7 @@ func (b *BaseEncoder) areAllNil(args ...any) bool {
 }
 
 // printLog prints the given msgBuffer to the given outputType (stdout or stderr).
-func (b *BaseEncoder) printLog(outType s.OutputType, msgBuffer bytes.Buffer, newLine bool) {
+func (b *BaseEncoder) printLog(outType s.OutputType, msgBuffer *bytes.Buffer, newLine bool) {
 	if newLine {
 		msgBuffer.WriteByte('\n')
 	}
@@ -82,6 +76,18 @@ func (b *BaseEncoder) printLog(outType s.OutputType, msgBuffer bytes.Buffer, new
 	case s.StdErrOutput:
 		_, _ = os.Stderr.Write(msgBuffer.Bytes())
 	}
+}
+
+// getBuffer returns a new bytes buffer from the pool.
+// If the pool is empty, a new buffer is created.
+func (b *BaseEncoder) getBuffer() *bytes.Buffer {
+	return b.bufferSyncPool.Get().(*bytes.Buffer)
+}
+
+// putBuffer puts the given bytes buffer back to the pool.
+func (b *BaseEncoder) putBuffer(buf *bytes.Buffer) {
+	buf.Reset()
+	b.bufferSyncPool.Put(buf)
 }
 
 func (b *BaseEncoder) GetType() s.EncoderType {

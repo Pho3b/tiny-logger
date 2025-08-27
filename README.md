@@ -1,6 +1,6 @@
 # Tiny Logger
 
-A blazingly fast, lightweight, zero-dependency logging solution for Go applications that prioritizes performance and
+A fast, lightweight, zero-dependency logging solution for Go applications that prioritizes performance and
 simplicity.
 
 Compatible with Go version 1.18.x and above
@@ -23,12 +23,12 @@ Executed Logging a message + 4 extra elements (Check the `./test/benchmark_test.
 
 | Encoder             | Configuration      | ns/op | B/op | allocs/op |
 |---------------------|--------------------|-------|------|-----------|
-| **Default Encoder** | All Properties OFF | 590.4 | 410  | 4         |
-|                     | All Properties ON  | 673.3 | 488  | 6         |
-| **JSON Encoder**    | All Properties OFF | 640.8 | 608  | 5         |
-|                     | All Properties ON  | 681.3 | 632  | 6         |
-| **YAML Encoder**    | All Properties OFF | 674.0 | 464  | 5         |
-|                     | All Properties ON  | 798.5 | 648  | 7         |
+| **Default Encoder** | All Properties OFF | 505.8 | 96   | 2         |
+|                     | All Properties ON  | 588.7 | 184  | 4         |
+| **JSON Encoder**    | All Properties OFF | 627.2 | 320  | 3         |
+|                     | All Properties ON  | 664.8 | 344  | 4         |
+| **YAML Encoder**    | All Properties OFF | 642.7 | 320  | 3         |
+|                     | All Properties ON  | 700.2 | 344  | 4         |
 
 ## 🎯 Use Examples
 

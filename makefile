@@ -10,4 +10,4 @@ test-coverage:
 
 # Run benchmark tests
 test-benchmark:
-	CGO_ENABLED=1 GOARCH=amd64 go test ./test/benchmark_test.go -bench=. -benchmem -benchtime=4s -cpu=2 | grep /op
+	CGO_ENABLED=1 GOARCH=amd64 go test ./test/benchmark_test.go -bench=. -benchmem -benchtime=4s -cpu=8 | grep /op

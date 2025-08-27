@@ -2,11 +2,13 @@ package encoders
 
 import (
 	"bytes"
+	"os"
+	"sync"
+
 	"github.com/pho3b/tiny-logger/internal/services"
 	c "github.com/pho3b/tiny-logger/logs/colors"
 	ll "github.com/pho3b/tiny-logger/logs/log_level"
 	s "github.com/pho3b/tiny-logger/shared"
-	"os"
 )
 
 type YAMLEncoder struct {
@@ -18,90 +20,35 @@ type YAMLEncoder struct {
 // LogDebug formats and prints a debug-level log message in YAML format.
 func (y *YAMLEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 {
-		dEnabled, tEnabled := logger.GetDateTimeEnabled()
-		msgBuffer := y.composeMsg(
-			y.yamlMarshaler,
-			ll.DebugLvlName,
-			dEnabled,
-			tEnabled,
-			logger.GetShowLogLevel(),
-			y.castAndConcatenate(args[0]),
-			args[1:]...,
-		)
-
-		y.printLog(s.StdOutput, msgBuffer, false)
+		y.log(logger, ll.DebugLvlName, s.StdOutput, args...)
 	}
 }
 
 // LogInfo formats and prints an info-level log message in YAML format.
 func (y *YAMLEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 {
-		dEnabled, tEnabled := logger.GetDateTimeEnabled()
-		msgBuffer := y.composeMsg(
-			y.yamlMarshaler,
-			ll.InfoLvlName,
-			dEnabled,
-			tEnabled,
-			logger.GetShowLogLevel(),
-			y.castAndConcatenate(args[0]),
-			args[1:]...,
-		)
-
-		y.printLog(s.StdOutput, msgBuffer, false)
+		y.log(logger, ll.InfoLvlName, s.StdOutput, args...)
 	}
 }
 
 // LogWarn formats and prints a warning-level log message in YAML format.
 func (y *YAMLEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 {
-		dEnabled, tEnabled := logger.GetDateTimeEnabled()
-		msgBuffer := y.composeMsg(
-			y.yamlMarshaler,
-			ll.WarnLvlName,
-			dEnabled,
-			tEnabled,
-			logger.GetShowLogLevel(),
-			y.castAndConcatenate(args[0]),
-			args[1:]...,
-		)
-
-		y.printLog(s.StdOutput, msgBuffer, false)
+		y.log(logger, ll.WarnLvlName, s.StdOutput, args...)
 	}
 }
 
 // LogError formats and prints an error-level log message in YAML format.
 func (y *YAMLEncoder) LogError(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 && !y.areAllNil(args...) {
-		dEnabled, tEnabled := logger.GetDateTimeEnabled()
-		msgBuffer := y.composeMsg(
-			y.yamlMarshaler,
-			ll.ErrorLvlName,
-			dEnabled,
-			tEnabled,
-			logger.GetShowLogLevel(),
-			y.castAndConcatenate(args[0]),
-			args[1:]...,
-		)
-
-		y.printLog(s.StdErrOutput, msgBuffer, false)
+		y.log(logger, ll.ErrorLvlName, s.StdErrOutput, args...)
 	}
 }
 
 // LogFatalError formats and prints a fatal error-level log message in YAML format and exits the program.
 func (y *YAMLEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 && !y.areAllNil(args...) {
-		dEnabled, tEnabled := logger.GetDateTimeEnabled()
-		msgBuffer := y.composeMsg(
-			y.yamlMarshaler,
-			ll.FatalErrorLvlName,
-			dEnabled,
-			tEnabled,
-			logger.GetShowLogLevel(),
-			y.castAndConcatenate(args[0]),
-			args[1:]...,
-		)
-
-		y.printLog(s.StdErrOutput, msgBuffer, false)
+		y.log(logger, ll.FatalErrorLvlName, s.StdErrOutput, args...)
 		os.Exit(1)
 	}
 }
@@ -113,11 +60,12 @@ func (y *YAMLEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...any
 //   - args: variadic msg arguments.
 func (y *YAMLEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, args ...any) {
 	if len(args) > 0 {
-		var b bytes.Buffer
-		b.Grow((len(args) * averageWordLen) + averageWordLen)
+		msgBuffer := y.getBuffer()
 		dEnabled, tEnabled := lConfig.GetDateTimeEnabled()
+		msgBuffer.WriteString(color.String())
 
-		msgBuffer := y.composeMsg(
+		y.composeMsgInto(
+			msgBuffer,
 			y.yamlMarshaler,
 			ll.InfoLvlName,
 			dEnabled,
@@ -127,15 +75,41 @@ func (y *YAMLEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, arg
 			args[1:]...,
 		)
 
-		b.WriteString(color.String())
-		b.Write(msgBuffer.Bytes())
-		b.WriteString(c.Reset.String())
-
-		y.printLog(s.StdOutput, b, false)
+		msgBuffer.WriteString(c.Reset.String())
+		y.printLog(s.StdOutput, msgBuffer, true)
+		y.putBuffer(msgBuffer)
 	}
 }
 
-func (y *YAMLEncoder) composeMsg(
+// log formats and prints a log message to the given output type.
+// Internally used by all the encoder Log methods.
+func (y *YAMLEncoder) log(
+	logger s.LoggerConfigsInterface,
+	logLvlName ll.LogLvlName,
+	outType s.OutputType,
+	args ...any,
+) {
+	dEnabled, tEnabled := logger.GetDateTimeEnabled()
+	msgBuffer := y.getBuffer()
+
+	y.composeMsgInto(
+		msgBuffer,
+		y.yamlMarshaler,
+		logLvlName,
+		dEnabled,
+		tEnabled,
+		logger.GetShowLogLevel(),
+		y.castAndConcatenate(args[0]),
+		args[1:]...,
+	)
+
+	y.printLog(outType, msgBuffer, true)
+	y.putBuffer(msgBuffer)
+}
+
+// composeMsgInto formats and writes the given 'msg' into the given buffer.
+func (y *YAMLEncoder) composeMsgInto(
+	buf *bytes.Buffer,
 	yamlMarshaler services.YamlMarshaler,
 	logLevel ll.LogLvlName,
 	dateEnabled bool,
@@ -143,16 +117,15 @@ func (y *YAMLEncoder) composeMsg(
 	showLogLevel bool,
 	msg string,
 	extras ...any,
-) bytes.Buffer {
-	var b bytes.Buffer
-	b.Grow(len(msg) + 60)
+) {
+	buf.Grow((averageWordLen * len(extras)) + len(msg) + 60)
 	date, time, dateTime := y.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
 
 	if !showLogLevel {
 		logLevel = ""
 	}
 
-	b.Write(
+	buf.Write(
 		yamlMarshaler.Marshal(
 			services.YamlLogEntry{
 				Level:    logLevel.String(),
@@ -164,14 +137,17 @@ func (y *YAMLEncoder) composeMsg(
 			},
 		),
 	)
-
-	return b
 }
 
 // NewYAMLEncoder initializes and returns a new YAMLEncoder instance.
 func NewYAMLEncoder() *YAMLEncoder {
 	encoder := &YAMLEncoder{DateTimePrinter: services.NewDateTimePrinter(), yamlMarshaler: services.NewYamlMarshaler()}
 	encoder.encoderType = s.YamlEncoderType
+	encoder.bufferSyncPool = sync.Pool{
+		New: func() any {
+			return new(bytes.Buffer)
+		},
+	}
 
 	return encoder
 }

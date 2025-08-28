@@ -23,12 +23,12 @@ Data retrieved by executing the `./test/benchmark_test.go` file on my personal c
 
 | Encoder             | Configuration      | ns/op | B/op | allocs/op |
 |---------------------|--------------------|-------|------|-----------|
-| **Default Encoder** | All Properties OFF | 484.6 | 80   | 1         |
+| **Default Encoder** | All Properties OFF | 468.6 | 80   | 1         |
 |                     | All Properties ON  | 580.9 | 104  | 2         |
-| **JSON Encoder**    | All Properties OFF | 581.3 | 96   | 2         |
-|                     | All Properties ON  | 658.6 | 120  | 3         |
-| **YAML Encoder**    | All Properties OFF | 618.7 | 96   | 2         |
-|                     | All Properties ON  | 657.5 | 120  | 3         |
+| **JSON Encoder**    | All Properties OFF | 513.3 | 80   | 1         |
+|                     | All Properties ON  | 595.7 | 104  | 2         |
+| **YAML Encoder**    | All Properties OFF | 566.0 | 80   | 1         |
+|                     | All Properties ON  | 657.5 | 104  | 2         |
 
 ## 🎯 Use Examples
 

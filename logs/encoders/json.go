@@ -72,7 +72,7 @@ func (j *JSONEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, arg
 			dEnabled,
 			tEnabled,
 			false,
-			j.castAndConcatenate(args[0]),
+			j.castToString(args[0]),
 			args[1:]...,
 		)
 
@@ -100,7 +100,7 @@ func (j *JSONEncoder) log(
 		dEnabled,
 		tEnabled,
 		logger.GetShowLogLevel(),
-		j.castAndConcatenate(args[0]),
+		j.castToString(args[0]),
 		args[1:]...,
 	)
 

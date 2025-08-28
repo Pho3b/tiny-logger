@@ -15,28 +15,40 @@ func TestBuildMsg(t *testing.T) {
 	encoder := newBaseEncoder()
 
 	// Test with multiple arguments
-	result := encoder.castAndConcatenate("This", "is", 'a', "test")
-	assert.Equal(t, "This is a test", result)
+	result := encoder.castToString("This")
+	assert.Equal(t, "This", result)
 
 	// Test with a single argument
-	result = encoder.castAndConcatenate("SingleArgument")
+	result = encoder.castToString("SingleArgument")
 	assert.Equal(t, "SingleArgument", result)
 
 	// Test with various argument types
-	result = encoder.castAndConcatenate("str", '\n', 2, 2.3, true, nil)
-	assert.Equal(t, "str \n 2 2.3 true <nil>", result)
+	result = encoder.castToString(2)
+	assert.Equal(t, "2", result)
+	result = encoder.castToString(2.3)
+	assert.Equal(t, "2.3", result)
+	result = encoder.castToString(true)
+	assert.Equal(t, "true", result)
+	result = encoder.castToString(nil)
+	assert.Equal(t, "<nil>", result)
 
 	// Test with no arguments
-	result = encoder.castAndConcatenate()
+	result = encoder.castToString("")
 	assert.Equal(t, "", result)
 
-	// Test with mixed data types
-	result = encoder.castAndConcatenate("Mixed", 123, true, 45.6)
-	assert.Equal(t, "Mixed 123 true 45.6", result)
-
 	// Test with rune and int64 types and struct
-	result = encoder.castAndConcatenate('A', int64(43), errors.New("my error"))
-	assert.Equal(t, "A 43 my error", result)
+	result = encoder.castToString(int64(43))
+	assert.Equal(t, "43", result)
+	result = encoder.castToString(int32(32234))
+	assert.Equal(t, "緪", result)
+	result = encoder.castToString(int8(3))
+	assert.Equal(t, "3", result)
+
+	result = encoder.castToString(errors.New("my error"))
+	assert.Equal(t, "my error", result)
+
+	result = encoder.castToString(struct{ test string }{"test"})
+	assert.Equal(t, "{test}", result)
 }
 
 func TestBuildMsgWithCastAndConcatenateInto(t *testing.T) {

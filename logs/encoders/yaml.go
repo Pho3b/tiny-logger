@@ -71,7 +71,7 @@ func (y *YAMLEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, arg
 			dEnabled,
 			tEnabled,
 			false,
-			y.castAndConcatenate(args[0]),
+			y.castToString(args[0]),
 			args[1:]...,
 		)
 
@@ -99,7 +99,7 @@ func (y *YAMLEncoder) log(
 		dEnabled,
 		tEnabled,
 		logger.GetShowLogLevel(),
-		y.castAndConcatenate(args[0]),
+		y.castToString(args[0]),
 		args[1:]...,
 	)
 

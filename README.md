@@ -1,6 +1,6 @@
 # Tiny Logger
 
-A blazingly fast, lightweight, zero-dependency logging solution for Go applications that prioritizes performance and
+A fast, lightweight, zero-dependency logging solution for Go applications that prioritizes performance and
 simplicity.
 
 Compatible with Go version 1.18.x and above
@@ -10,25 +10,25 @@ Compatible with Go version 1.18.x and above
 - 🪶 **Minimal Footprint**: The entire library weights around `100kB` (Comments and README included)
 - ⚖️ **Zero Dependencies**: Pure Go implementation with no external dependencies
 - 🚀 **Blazing Fast**: Custom JSON and YAML marshaling optimized for logging
-  - Up to 1.4x faster JSON marshaling than `encoding/json`
-  - Up to 5x faster YAML marshaling than `gopkg.in/yaml.v3`
-  - Benchmark: up to `~640ns` per log entry (including JSON/YAML serialization) even less using the `Default encoder`.
+    - Up to 1.4x faster JSON marshaling than `encoding/json`
+    - Up to 5x faster YAML marshaling than `gopkg.in/yaml.v3`
+    - Benchmark: up to `~640ns` per log entry (including JSON/YAML serialization) even less using the `Default encoder`.
 - 🎨 **Color Support**: Built-in ANSI color support for terminal output
 - 🔀 **Thread-Safe**: Concurrent-safe logging with atomic operations
 - ⏱️ **Time-Optimized**: Efficient date/time handling with minimal allocations
 
 ## 📊 Benchmark Results
 
-Executed Logging a message + 4 extra elements (Check the `./test/benchmark_test.go` file).
+Data retrieved by executing the `./test/benchmark_test.go` file on my personal computer.
 
 | Encoder             | Configuration      | ns/op | B/op | allocs/op |
 |---------------------|--------------------|-------|------|-----------|
-| **Default Encoder** | All Properties OFF | 590.4 | 410  | 4         |
-|                     | All Properties ON  | 673.3 | 488  | 6         |
-| **JSON Encoder**    | All Properties OFF | 640.8 | 608  | 5         |
-|                     | All Properties ON  | 681.3 | 632  | 6         |
-| **YAML Encoder**    | All Properties OFF | 674.0 | 464  | 5         |
-|                     | All Properties ON  | 798.5 | 648  | 7         |
+| **Default Encoder** | All Properties OFF | 468.6 | 80   | 1         |
+|                     | All Properties ON  | 580.9 | 104  | 2         |
+| **JSON Encoder**    | All Properties OFF | 513.3 | 80   | 1         |
+|                     | All Properties ON  | 595.7 | 104  | 2         |
+| **YAML Encoder**    | All Properties OFF | 566.0 | 80   | 1         |
+|                     | All Properties ON  | 657.5 | 104  | 2         |
 
 ## 🎯 Use Examples
 

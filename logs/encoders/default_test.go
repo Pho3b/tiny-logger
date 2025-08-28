@@ -2,12 +2,13 @@ package encoders
 
 import (
 	"bytes"
-	"github.com/pho3b/tiny-logger/logs/colors"
-	"github.com/pho3b/tiny-logger/test"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"os/exec"
 	"testing"
+
+	"github.com/pho3b/tiny-logger/logs/colors"
+	"github.com/pho3b/tiny-logger/test"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLogDebug(t *testing.T) {
@@ -75,23 +76,26 @@ func TestLogFatalError(t *testing.T) {
 }
 
 func TestFormatDateTimeString(t *testing.T) {
-	var b bytes.Buffer
+	b := bytes.NewBuffer([]byte{})
 	encoder := NewDefaultEncoder()
 
-	b = encoder.formatDateTimeString("dateTest", "timeTest", "")
+	encoder.addFormattedDateTime(b, "dateTest", "timeTest", "")
 	assert.Contains(t, b.String(), "[")
 	assert.Contains(t, b.String(), "]")
 	assert.Contains(t, b.String(), " ")
 
-	b = encoder.formatDateTimeString("", "timeTest", "")
+	b.Reset()
+	encoder.addFormattedDateTime(b, "", "timeTest", "")
 	assert.Contains(t, b.String(), "[")
 	assert.Contains(t, b.String(), "]")
 
-	b = encoder.formatDateTimeString("dateTest", "", "")
+	b.Reset()
+	encoder.addFormattedDateTime(b, "dateTest", "", "")
 	assert.Contains(t, b.String(), "[")
 	assert.Contains(t, b.String(), "]")
 
-	b = encoder.formatDateTimeString("", "", "")
+	b.Reset()
+	encoder.addFormattedDateTime(b, "", "", "")
 	assert.NotContains(t, b.String(), "[")
 	assert.NotContains(t, b.String(), "]")
 	assert.NotContains(t, b.String(), " ")

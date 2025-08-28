@@ -3,48 +3,79 @@ package encoders
 import (
 	"bytes"
 	"fmt"
-	s "github.com/pho3b/tiny-logger/shared"
 	"os"
 	"strconv"
+	"sync"
+
+	s "github.com/pho3b/tiny-logger/shared"
 )
 
-const averageWordLen = 35
+const (
+	averageWordLen      = 30
+	defaultCharOverhead = 50
+)
 
 type BaseEncoder struct {
-	encoderType s.EncoderType
+	encoderType    s.EncoderType
+	bufferSyncPool sync.Pool
 }
 
-// castAndConcatenate returns a string containing all the given arguments cast to string and concatenated by a white space.
-func (b *BaseEncoder) castAndConcatenate(args ...any) string {
-	var res bytes.Buffer
+// castAndConcatenateInto writes all the given arguments cast to string and concatenated by a white space into the given buffer.
+func (b *BaseEncoder) castAndConcatenateInto(buf *bytes.Buffer, args ...any) {
 	argsLen := len(args)
-	res.Grow(averageWordLen * argsLen)
+	buf.Grow(averageWordLen * argsLen)
 
 	for i, arg := range args {
+		if i > 0 {
+			buf.WriteByte(' ')
+		}
+
 		switch v := arg.(type) {
 		case string:
-			res.WriteString(v)
+			buf.WriteString(v)
 		case rune:
-			res.WriteRune(v)
+			buf.WriteRune(v)
 		case int:
-			res.WriteString(strconv.Itoa(v))
+			buf.WriteString(strconv.Itoa(v))
 		case int64:
-			res.WriteString(strconv.FormatInt(v, 10))
+			buf.WriteString(strconv.FormatInt(v, 10))
 		case float64:
-			res.WriteString(strconv.FormatFloat(v, 'f', -1, 64))
+			buf.WriteString(strconv.FormatFloat(v, 'f', -1, 64))
 		case bool:
-			res.WriteString(strconv.FormatBool(v))
+			buf.WriteString(strconv.FormatBool(v))
+		case fmt.Stringer:
+			buf.WriteString(v.String())
+		case error:
+			buf.WriteString(v.Error())
 		default:
 			// Using the slower fmt.Sprint only for unknown types
-			res.WriteString(fmt.Sprint(v))
-		}
-
-		if i < argsLen-1 {
-			res.WriteByte(' ')
+			buf.WriteString(fmt.Sprint(v))
 		}
 	}
+}
 
-	return res.String()
+// castToString is a fast casting method that returns the given argument as a string.
+func (b *BaseEncoder) castToString(arg any) string {
+	switch v := arg.(type) {
+	case string:
+		return v
+	case rune:
+		return string(v)
+	case int:
+		return strconv.Itoa(v)
+	case int64:
+		return strconv.FormatInt(v, 10)
+	case float64:
+		return strconv.FormatFloat(v, 'f', -1, 64)
+	case bool:
+		return strconv.FormatBool(v)
+	case fmt.Stringer:
+		return v.String()
+	case error:
+		return v.Error()
+	default:
+		return fmt.Sprint(v)
+	}
 }
 
 // areAllNil returns true if all the given args are 'nil', false otherwise.
@@ -59,7 +90,7 @@ func (b *BaseEncoder) areAllNil(args ...any) bool {
 }
 
 // printLog prints the given msgBuffer to the given outputType (stdout or stderr).
-func (b *BaseEncoder) printLog(outType s.OutputType, msgBuffer bytes.Buffer, newLine bool) {
+func (b *BaseEncoder) printLog(outType s.OutputType, msgBuffer *bytes.Buffer, newLine bool) {
 	if newLine {
 		msgBuffer.WriteByte('\n')
 	}
@@ -72,6 +103,19 @@ func (b *BaseEncoder) printLog(outType s.OutputType, msgBuffer bytes.Buffer, new
 	}
 }
 
+// getBuffer returns a new bytes buffer from the pool.
+// If the pool is empty, a new buffer is created.
+func (b *BaseEncoder) getBuffer() *bytes.Buffer {
+	return b.bufferSyncPool.Get().(*bytes.Buffer)
+}
+
+// putBuffer puts the given bytes buffer back to the pool.
+func (b *BaseEncoder) putBuffer(buf *bytes.Buffer) {
+	buf.Reset()
+	b.bufferSyncPool.Put(buf)
+}
+
+// GetType returns the encoder type.
 func (b *BaseEncoder) GetType() s.EncoderType {
 	return b.encoderType
 }

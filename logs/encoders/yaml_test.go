@@ -1,15 +1,16 @@
 package encoders
 
 import (
+	"os"
+	"os/exec"
+	"testing"
+	"time"
+
 	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/shared"
 	"github.com/pho3b/tiny-logger/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
-	"os"
-	"os/exec"
-	"testing"
-	"time"
 )
 
 func decodeYamlLogEntry(t *testing.T, logOutput string) shared.YamlLog {

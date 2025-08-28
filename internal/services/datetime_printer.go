@@ -21,12 +21,13 @@ type DateTimePrinter struct {
 // - If neither addDate nor addTime is true, empty strings are returned.
 func (d *DateTimePrinter) RetrieveDateTime(addDate, addTime bool) (string, string, string) {
 	var dateRes, timeRes string
+	now := d.timeNow()
 
 	if addDate {
 		cDate := d.currentDate.Load()
 
 		if cDate == nil {
-			d.currentDate.Store(d.timeNow().Format("02/01/2006"))
+			d.currentDate.Store(now.Format("02/01/2006"))
 			d.dateOnce.Do(func() {
 				go d.updateCurrentDateEveryDay()
 			})
@@ -41,7 +42,7 @@ func (d *DateTimePrinter) RetrieveDateTime(addDate, addTime bool) (string, strin
 		cTime := d.currentTime.Load()
 
 		if cTime == nil {
-			d.currentTime.Store(d.timeNow().Format("15:04:05"))
+			d.currentTime.Store(now.Format("15:04:05"))
 			d.timeOnce.Do(func() {
 				go d.updateCurrentTimeEverySecond()
 			})

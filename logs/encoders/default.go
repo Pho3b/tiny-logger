@@ -123,19 +123,19 @@ func (d *DefaultEncoder) composeMsgInto(
 	buf.Grow(len(msg) + 50)
 
 	dateStr, timeStr, dateTimeStr := d.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
-	dateTime := d.formatDateTimeString(dateStr, timeStr, dateTimeStr)
+	//dateTime := d.formatDateTimeString(dateStr, timeStr, dateTimeStr)
 	colors := d.ColorsPrinter.RetrieveColorsFromLogLevel(headerColorEnabled, ll.LogLvlNameToInt[logLevel])
 	buf.WriteString(string(colors[0]))
 
 	if showLogLevel {
 		buf.WriteString(logLevel.String())
 
-		if dateTime.Len() > 0 {
+		if dateStr != "" || timeStr != "" || dateTimeStr != "" {
 			buf.WriteByte(' ')
 		}
 	}
 
-	buf.Write(dateTime.Bytes())
+	d.formatDateTimeString(buf, dateStr, timeStr, dateTimeStr)
 
 	if showLogLevel || dateEnabled || timeEnabled {
 		buf.WriteByte(':')
@@ -148,31 +148,27 @@ func (d *DefaultEncoder) composeMsgInto(
 
 // formatDateTimeString correctly formats the dateTime string, adding and removing square brackets
 // and white spaces as needed.
-func (d *DefaultEncoder) formatDateTimeString(dateStr, timeStr, dateTimeStr string) bytes.Buffer {
-	var sb bytes.Buffer
-
+func (d *DefaultEncoder) formatDateTimeString(buf *bytes.Buffer, dateStr, timeStr, dateTimeStr string) {
 	if dateStr == "" && timeStr == "" && dateTimeStr == "" {
-		return sb
+		return
 	}
 
-	sb.Grow(averageWordLen)
-	sb.WriteByte('[')
+	buf.Grow(averageWordLen)
+	buf.WriteByte('[')
 
 	if dateTimeStr != "" {
-		sb.WriteString(dateTimeStr)
+		buf.WriteString(dateTimeStr)
 	} else {
-		sb.WriteString(dateStr)
+		buf.WriteString(dateStr)
 
 		if dateStr != "" && timeStr != "" {
-			sb.WriteByte(' ')
+			buf.WriteByte(' ')
 		}
 
-		sb.WriteString(timeStr)
+		buf.WriteString(timeStr)
 	}
 
-	sb.WriteByte(']')
-
-	return sb
+	buf.WriteByte(']')
 }
 
 // NewDefaultEncoder initializes and returns a new DefaultEncoder instance.

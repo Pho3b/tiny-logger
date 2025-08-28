@@ -66,6 +66,47 @@ func (j *JsonMarshaler) Marshal(logEntry JsonLogEntry) []byte {
 	return res.Bytes()
 }
 
+func (j *JsonMarshaler) MarshalInto(buf *bytes.Buffer, logEntry JsonLogEntry) {
+	extrasLen := len(logEntry.Extras)
+	buf.Grow(jsonCharOverhead + (averageExtraLen * extrasLen))
+
+	buf.WriteByte('{')
+	j.writeLogEntryProperties(buf, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.DateTime)
+
+	buf.WriteString("\"msg\":\"")
+	buf.WriteString(logEntry.Message)
+	buf.WriteByte('"')
+
+	if extrasLen > 0 {
+		buf.WriteString(",\"extras\":{")
+
+		for i := 0; i < extrasLen; i += 2 {
+			if i < extrasLen {
+				buf.WriteByte('"')
+				j.writeValue(buf, logEntry.Extras[i], true)
+				buf.WriteString(`":`)
+
+				k := i + 1
+				if k < extrasLen {
+					j.writeValue(buf, logEntry.Extras[k], false)
+
+					if k < extrasLen-1 {
+						buf.WriteByte(',')
+					}
+				}
+			}
+		}
+
+		if extrasLen%2 != 0 {
+			buf.WriteString("null")
+		}
+
+		buf.WriteByte('}')
+	}
+
+	buf.WriteByte('}')
+}
+
 // writeValue writes a value to the buffer with appropriate JSON formatting.
 // The method handles different types (string, rune, int, int64, float64, bool)
 // with special consideration for whether the value is being written as a key or value.
@@ -108,32 +149,32 @@ func (j *JsonMarshaler) writeValue(buf *bytes.Buffer, v any, isKey bool) {
 
 // writeLogEntryProperties writes the standard log entry properties to the buffer.
 // Only non-empty properties are written, each followed by a comma.
-func (j *JsonMarshaler) writeLogEntryProperties(res *bytes.Buffer, level string, date string, time string, dateTime string) {
+func (j *JsonMarshaler) writeLogEntryProperties(buf *bytes.Buffer, level string, date string, time string, dateTime string) {
 	if level != "" {
-		res.WriteString("\"level\":\"")
-		res.WriteString(level)
-		res.WriteByte('"')
-		res.WriteByte(',')
+		buf.WriteString("\"level\":\"")
+		buf.WriteString(level)
+		buf.WriteByte('"')
+		buf.WriteByte(',')
 	}
 
 	if date != "" {
-		res.WriteString("\"date\":\"")
-		res.WriteString(date)
-		res.WriteByte('"')
-		res.WriteByte(',')
+		buf.WriteString("\"date\":\"")
+		buf.WriteString(date)
+		buf.WriteByte('"')
+		buf.WriteByte(',')
 	}
 
 	if time != "" {
-		res.WriteString("\"time\":\"")
-		res.WriteString(time)
-		res.WriteByte('"')
-		res.WriteByte(',')
+		buf.WriteString("\"time\":\"")
+		buf.WriteString(time)
+		buf.WriteByte('"')
+		buf.WriteByte(',')
 	}
 
 	if dateTime != "" {
-		res.WriteString("\"datetime\":\"")
-		res.WriteString(dateTime)
-		res.WriteByte('"')
-		res.WriteByte(',')
+		buf.WriteString("\"datetime\":\"")
+		buf.WriteString(dateTime)
+		buf.WriteByte('"')
+		buf.WriteByte(',')
 	}
 }

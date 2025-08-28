@@ -126,17 +126,16 @@ func (j *JSONEncoder) composeMsgInto(
 		logLevel = ""
 	}
 
-	buf.Write(
-		jsonMarshaler.Marshal(
-			services.JsonLogEntry{
-				Level:    logLevel.String(),
-				Date:     dateStr,
-				DateTime: dateTimeStr,
-				Time:     timeStr,
-				Message:  msg,
-				Extras:   extras,
-			},
-		),
+	jsonMarshaler.MarshalInto(
+		buf,
+		services.JsonLogEntry{
+			Level:    logLevel.String(),
+			Date:     dateStr,
+			DateTime: dateTimeStr,
+			Time:     timeStr,
+			Message:  msg,
+			Extras:   extras,
+		},
 	)
 }
 

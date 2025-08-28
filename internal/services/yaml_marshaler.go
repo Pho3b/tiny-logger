@@ -22,43 +22,40 @@ type YamlMarshaler struct {
 	specialCharsSet map[rune]any
 }
 
-// Marshal converts a YamlLogEntry into a YAML-formatted byte slice.
-// It uses a buffer-based approach to minimize allocations during marshaling.
-func (y *YamlMarshaler) Marshal(logEntry YamlLogEntry) []byte {
-	var res bytes.Buffer
+// MarshalInto converts a YamlLogEntry into a YAML-formatted byte slice and adds it to the given buffer
+// to minimize allocations during marshaling.
+func (y *YamlMarshaler) MarshalInto(buf *bytes.Buffer, logEntry YamlLogEntry) {
 	extrasLen := len(logEntry.Extras)
-	res.Grow(yamlCharOverhead + (averageExtraLen * extrasLen))
+	buf.Grow(yamlCharOverhead + (averageExtraLen * extrasLen))
 
-	y.writeLogEntryProperties(&res, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.DateTime)
+	y.writeLogEntryProperties(buf, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.DateTime)
 
-	res.WriteString("msg: ")
-	res.WriteString(logEntry.Message)
-	res.WriteByte('\n')
+	buf.WriteString("msg: ")
+	buf.WriteString(logEntry.Message)
+	buf.WriteByte('\n')
 
 	if extrasLen > 0 {
-		res.WriteString("extras:\n")
+		buf.WriteString("extras:\n")
 
 		for i := 0; i < extrasLen; i += 2 {
-			res.WriteString("  ")
+			buf.WriteString("  ")
 
 			if i < extrasLen {
-				y.writeStr(&res, logEntry.Extras[i], true)
-				res.WriteString(": ")
+				y.writeStr(buf, logEntry.Extras[i], true)
+				buf.WriteString(": ")
 
 				if i+1 < extrasLen {
-					y.writeStr(&res, logEntry.Extras[i+1], false)
-					res.WriteByte('\n')
+					y.writeStr(buf, logEntry.Extras[i+1], false)
+					buf.WriteByte('\n')
 				}
 			}
 		}
 
 		if extrasLen%2 != 0 {
-			res.WriteString("null")
-			res.WriteByte('\n')
+			buf.WriteString("null")
+			buf.WriteByte('\n')
 		}
 	}
-
-	return res.Bytes()
 }
 
 // writeStr writes a string value to the buffer with appropriate YAML formatting.
@@ -104,29 +101,29 @@ func (y *YamlMarshaler) writeStr(buf *bytes.Buffer, v any, isKey bool) {
 
 // writeLogEntryProperties writes the standard log entry properties to the buffer.
 // Only non-empty properties are written.
-func (y *YamlMarshaler) writeLogEntryProperties(res *bytes.Buffer, level string, date string, time string, dateTime string) {
+func (y *YamlMarshaler) writeLogEntryProperties(buf *bytes.Buffer, level string, date string, time string, dateTime string) {
 	if level != "" {
-		res.WriteString("level: ")
-		res.WriteString(level)
-		res.WriteByte('\n')
+		buf.WriteString("level: ")
+		buf.WriteString(level)
+		buf.WriteByte('\n')
 	}
 
 	if date != "" {
-		res.WriteString("date: ")
-		res.WriteString(date)
-		res.WriteByte('\n')
+		buf.WriteString("date: ")
+		buf.WriteString(date)
+		buf.WriteByte('\n')
 	}
 
 	if time != "" {
-		res.WriteString("time: ")
-		res.WriteString(time)
-		res.WriteByte('\n')
+		buf.WriteString("time: ")
+		buf.WriteString(time)
+		buf.WriteByte('\n')
 	}
 
 	if dateTime != "" {
-		res.WriteString("datetime: ")
-		res.WriteString(dateTime)
-		res.WriteByte('\n')
+		buf.WriteString("datetime: ")
+		buf.WriteString(dateTime)
+		buf.WriteByte('\n')
 	}
 }
 

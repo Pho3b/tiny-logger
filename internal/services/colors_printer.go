@@ -8,7 +8,7 @@ import (
 type ColorsPrinter struct {
 }
 
-// RetrieveColorsFromLogLevel returns an array of colors as strings to be used in log output based on given log level.
+// RetrieveColorsFromLogLevel returns an array of colors as strings to be used in log output based on a given log level.
 // if enableColors is false, it returns an array of empty strings.
 func (d *ColorsPrinter) RetrieveColorsFromLogLevel(enableColors bool, logLevelInt int8) []c.Color {
 	var res = []c.Color{"", ""}

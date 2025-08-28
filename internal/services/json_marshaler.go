@@ -21,51 +21,8 @@ type JsonLogEntry struct {
 type JsonMarshaler struct {
 }
 
-// Marshal converts a JsonLogEntry into a JSON-formatted byte slice.
-// It uses a buffer-based approach to minimize allocations during marshaling.
-func (j *JsonMarshaler) Marshal(logEntry JsonLogEntry) []byte {
-	var res bytes.Buffer
-	extrasLen := len(logEntry.Extras)
-	res.Grow(jsonCharOverhead + (averageExtraLen * extrasLen))
-
-	res.WriteByte('{')
-	j.writeLogEntryProperties(&res, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.DateTime)
-
-	res.WriteString("\"msg\":\"")
-	res.WriteString(logEntry.Message)
-	res.WriteByte('"')
-
-	if extrasLen > 0 {
-		res.WriteString(",\"extras\":{")
-
-		for i := 0; i < extrasLen; i += 2 {
-			if i < extrasLen {
-				res.WriteByte('"')
-				j.writeValue(&res, logEntry.Extras[i], true)
-				res.WriteString(`":`)
-
-				k := i + 1
-				if k < extrasLen {
-					j.writeValue(&res, logEntry.Extras[k], false)
-
-					if k < extrasLen-1 {
-						res.WriteByte(',')
-					}
-				}
-			}
-		}
-
-		if extrasLen%2 != 0 {
-			res.WriteString("null")
-		}
-
-		res.WriteByte('}')
-	}
-
-	res.WriteByte('}')
-	return res.Bytes()
-}
-
+// MarshalInto converts a JsonLogEntry into a JSON-formatted byte slice and adds it to the given buffer
+// to minimize allocations during marshaling.
 func (j *JsonMarshaler) MarshalInto(buf *bytes.Buffer, logEntry JsonLogEntry) {
 	extrasLen := len(logEntry.Extras)
 	buf.Grow(jsonCharOverhead + (averageExtraLen * extrasLen))

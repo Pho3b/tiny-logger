@@ -1,5 +1,5 @@
 package services
 
-const jsonCharOverhead = 100
-const yamlCharOverhead = 100
+const jsonCharOverhead = 80
+const yamlCharOverhead = 70
 const averageExtraLen = 30

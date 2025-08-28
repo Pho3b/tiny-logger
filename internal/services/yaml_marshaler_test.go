@@ -42,9 +42,9 @@ func TestYamlMarshaler_Marshal(t *testing.T) {
 			entry: YamlLogEntry{
 				Level:   "INFO",
 				Message: "test with extras",
-				Extras:  []any{"key1", "value1", "key2", 42},
+				Extras:  []any{"key1", "value1", "key2", 42, "int64", int64(45)},
 			},
-			expected: "level: INFO\nmsg: test with extras\nextras:\n  key1: value1\n  key2: 42\n",
+			expected: "level: INFO\nmsg: test with extras\nextras:\n  key1: value1\n  key2: 42\n  int64: 45\n",
 		},
 		{
 			name: "with special character extras",
@@ -79,13 +79,17 @@ func TestYamlMarshaler_Marshal(t *testing.T) {
 	}
 
 	marshaler := NewYamlMarshaler()
+	buf := bytes.NewBuffer(nil)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := string(marshaler.Marshal(tt.entry))
+			marshaler.MarshalInto(buf, tt.entry)
+			result := buf.String()
+
 			if result != tt.expected {
 				t.Errorf("\nexpected:\n%s\ngot:\n%s", tt.expected, result)
 			}
+			buf.Reset()
 		})
 	}
 }

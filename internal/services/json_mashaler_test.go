@@ -1,41 +1,49 @@
 package services
 
 import (
+	"bytes"
 	"encoding/json"
+	"testing"
+
 	"github.com/pho3b/tiny-logger/shared"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestJsonMarshaler_Marshal_MessageOnly(t *testing.T) {
+	buf := &bytes.Buffer{}
 	m := &JsonMarshaler{}
 	entry := JsonLogEntry{
 		Message: "basic message",
 	}
 
-	got := m.Marshal(entry)
+	m.MarshalInto(buf, entry)
 	want := `{"msg":"basic message"}`
-	if string(got) != want {
+	got := buf.String()
+	if got != want {
 		t.Errorf("Marshal() = %q, want %q", got, want)
 	}
 }
 
 func TestJsonMarshaler_Marshal_SomeFields(t *testing.T) {
+	buf := &bytes.Buffer{}
 	m := &JsonMarshaler{}
 	entry := JsonLogEntry{
 		Level:   "warn",
 		Message: "something odd happened",
 		Time:    "12:34:56",
+		Extras:  []any{"rune", ':', "int", 23},
 	}
 
-	got := m.Marshal(entry)
-	want := `{"level":"warn","time":"12:34:56","msg":"something odd happened"}`
-	if string(got) != want {
+	m.MarshalInto(buf, entry)
+	got := buf.String()
+	want := `{"level":"warn","time":"12:34:56","msg":"something odd happened","extras":{"rune":":","int":23}}`
+	if got != want {
 		t.Errorf("Marshal() = %q, want %q", got, want)
 	}
 }
 
 func TestJsonMarshaler_Marshal_AllFields(t *testing.T) {
+	buf := &bytes.Buffer{}
 	m := &JsonMarshaler{}
 	entry := JsonLogEntry{
 		Level:    "info",
@@ -45,14 +53,16 @@ func TestJsonMarshaler_Marshal_AllFields(t *testing.T) {
 		Message:  "all systems go",
 	}
 
-	got := m.Marshal(entry)
+	m.MarshalInto(buf, entry)
+	got := buf.String()
 	want := `{"level":"info","date":"2025-06-14","time":"20:15:30","datetime":"2025-06-14T20:15:30","msg":"all systems go"}`
-	if string(got) != want {
+	if got != want {
 		t.Errorf("Marshal() = %q, want %q", got, want)
 	}
 }
 
 func TestJsonMarshaler_Marshal_WithExtras(t *testing.T) {
+	buf := &bytes.Buffer{}
 	m := &JsonMarshaler{}
 	entry := JsonLogEntry{
 		Level:    "INFO",
@@ -63,15 +73,17 @@ func TestJsonMarshaler_Marshal_WithExtras(t *testing.T) {
 		Extras:   []any{"bool", true, "int", 3, "float", 4.3, "arr", []int{1, 2, 3}, "rune", 'A', "string", "ciaooo", "null"},
 	}
 
-	got := m.Marshal(entry)
+	m.MarshalInto(buf, entry)
+	got := buf.String()
 	want := "{\"level\":\"INFO\",\"datetime\":\"20/06/2025 08:11:06\",\"msg\":\"all systems go\"," +
 		"\"extras\":{\"bool\":true,\"int\":3,\"float\":4.3,\"arr\":\"[1 2 3]\",\"rune\":\"A\",\"string\":\"ciaooo\",\"null\":null}}"
-	if string(got) != want {
+	if got != want {
 		t.Errorf("got = %q, want %q", got, want)
 	}
 }
 
 func TestJsonMarshaler_Unmarshal_Std_Marshal_Result(t *testing.T) {
+	buf := &bytes.Buffer{}
 	m := JsonMarshaler{}
 	entry := JsonLogEntry{
 		Level:    "INFO",
@@ -82,6 +94,6 @@ func TestJsonMarshaler_Unmarshal_Std_Marshal_Result(t *testing.T) {
 		Extras:   []any{"bool", true, "int", 3, "float", 4.3, "arr", []int{1, 2, 3}, "rune", 'A', "string", "ciaooo", "null"},
 	}
 
-	jsonMsg := m.Marshal(entry)
-	assert.NoError(t, json.Unmarshal(jsonMsg, &shared.JsonLog{}))
+	m.MarshalInto(buf, entry)
+	assert.NoError(t, json.Unmarshal(buf.Bytes(), &shared.JsonLog{}))
 }

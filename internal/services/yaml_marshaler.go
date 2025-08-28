@@ -130,7 +130,6 @@ func (y *YamlMarshaler) writeLogEntryProperties(buf *bytes.Buffer, level string,
 // containsSpecialChars checks if a string contains characters that require quoting in YAML
 func (y *YamlMarshaler) containsSpecialChars(s string) bool {
 	for _, c := range s {
-
 		if _, ok := y.specialCharsSet[c]; ok {
 			return true
 		}

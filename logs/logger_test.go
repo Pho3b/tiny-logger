@@ -2,14 +2,16 @@ package logs
 
 import (
 	"bytes"
+	"io"
+	"os"
+	"regexp"
+	"sync"
+	"testing"
+
 	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/logs/log_level"
 	"github.com/pho3b/tiny-logger/shared"
 	"github.com/stretchr/testify/assert"
-	"io"
-	"os"
-	"sync"
-	"testing"
 )
 
 func TestLoggerLogLvl(t *testing.T) {
@@ -138,6 +140,21 @@ func TestLogger_Error(t *testing.T) {
 	assert.Contains(t, buf.String(), testLog)
 }
 
+func TestLogger_FatalError(t *testing.T) {
+	var buf bytes.Buffer
+	var testLog any
+	originalStdErr := os.Stderr
+	r, w, _ := os.Pipe()
+
+	os.Stderr = w
+	NewLogger().FatalError(testLog)
+
+	_ = w.Close()
+	_, _ = io.Copy(&buf, r)
+	os.Stderr = originalStdErr
+	assert.Equal(t, buf.String(), "")
+}
+
 func TestLogger_BuildingMethods(t *testing.T) {
 	logger := NewLogger()
 	assert.IsType(t, &Logger{}, logger)
@@ -253,6 +270,45 @@ func TestLogger_SetEncoder(t *testing.T) {
 	assert.Equal(t, shared.YamlEncoderType, l.encoder.GetType())
 }
 
+func TestLogger_CorrectLogsFormattingDefaultEncoder(t *testing.T) {
+	logger := NewLogger().SetEncoder(shared.DefaultEncoderType).AddDateTime(true).ShowLogLevel(true)
+	re := regexp.MustCompile(`^([A-Z]+) \[(\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2})\]: (.+)\n?$`)
+
+	outMsg := captureOutput(func() { logger.Debug("testing log") })
+
+	matches := re.FindStringSubmatch(outMsg)
+	assert.Equal(t, "DEBUG", matches[1])
+	assert.NotNil(t, matches[2])
+	assert.Equal(t, "testing log", matches[3])
+
+	outMsg = captureOutput(func() {
+		logger.Warn("testing log")
+	})
+
+	matches = re.FindStringSubmatch(outMsg)
+	assert.Equal(t, "WARN", matches[1])
+	assert.NotNil(t, matches[2])
+	assert.Equal(t, "testing log", matches[3])
+
+	outMsg = captureErrorOutput(func() {
+		logger.Error("testing log")
+	})
+
+	matches = re.FindStringSubmatch(outMsg)
+	assert.Equal(t, "ERROR", matches[1])
+	assert.NotNil(t, matches[2])
+	assert.Equal(t, "testing log", matches[3])
+
+	outMsg = captureOutput(func() {
+		logger.Info("testing log")
+	})
+
+	matches = re.FindStringSubmatch(outMsg)
+	assert.Equal(t, "INFO", matches[1])
+	assert.NotNil(t, matches[2])
+	assert.Equal(t, "testing log", matches[3])
+}
+
 // captureOutput redirects os.Stdout to capture the output of the function f
 func captureOutput(f func()) string {
 	r, w, _ := os.Pipe()
@@ -264,6 +320,23 @@ func captureOutput(f func()) string {
 	f()
 	w.Close()
 	os.Stdout = origStdout
+
+	var buf bytes.Buffer
+	_, _ = buf.ReadFrom(r)
+	return buf.String()
+}
+
+// captureErrorOutput redirects os.Stderr to capture the output of the function f
+func captureErrorOutput(f func()) string {
+	r, w, _ := os.Pipe()
+	defer r.Close()
+
+	origStderr := os.Stderr
+	os.Stderr = w
+
+	f()
+	w.Close()
+	os.Stderr = origStderr
 
 	var buf bytes.Buffer
 	_, _ = buf.ReadFrom(r)

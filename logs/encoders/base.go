@@ -15,13 +15,13 @@ const (
 	defaultCharOverhead = 50
 )
 
-type BaseEncoder struct {
+type baseEncoder struct {
 	encoderType    s.EncoderType
 	bufferSyncPool sync.Pool
 }
 
 // castAndConcatenateInto writes all the given arguments cast to string and concatenated by a white space into the given buffer.
-func (b *BaseEncoder) castAndConcatenateInto(buf *bytes.Buffer, args ...any) {
+func (b *baseEncoder) castAndConcatenateInto(buf *bytes.Buffer, args ...any) {
 	argsLen := len(args)
 	buf.Grow(averageWordLen * argsLen)
 
@@ -55,7 +55,7 @@ func (b *BaseEncoder) castAndConcatenateInto(buf *bytes.Buffer, args ...any) {
 }
 
 // castToString is a fast casting method that returns the given argument as a string.
-func (b *BaseEncoder) castToString(arg any) string {
+func (b *baseEncoder) castToString(arg any) string {
 	switch v := arg.(type) {
 	case string:
 		return v
@@ -79,7 +79,7 @@ func (b *BaseEncoder) castToString(arg any) string {
 }
 
 // areAllNil returns true if all the given args are 'nil', false otherwise.
-func (b *BaseEncoder) areAllNil(args ...any) bool {
+func (b *baseEncoder) areAllNil(args ...any) bool {
 	for _, arg := range args {
 		if arg != nil {
 			return false
@@ -90,7 +90,7 @@ func (b *BaseEncoder) areAllNil(args ...any) bool {
 }
 
 // printLog prints the given msgBuffer to the given outputType (stdout or stderr).
-func (b *BaseEncoder) printLog(outType s.OutputType, msgBuffer *bytes.Buffer, newLine bool) {
+func (b *baseEncoder) printLog(outType s.OutputType, msgBuffer *bytes.Buffer, newLine bool) {
 	if newLine {
 		msgBuffer.WriteByte('\n')
 	}
@@ -105,17 +105,17 @@ func (b *BaseEncoder) printLog(outType s.OutputType, msgBuffer *bytes.Buffer, ne
 
 // getBuffer returns a new bytes buffer from the pool.
 // If the pool is empty, a new buffer is created.
-func (b *BaseEncoder) getBuffer() *bytes.Buffer {
+func (b *baseEncoder) getBuffer() *bytes.Buffer {
 	return b.bufferSyncPool.Get().(*bytes.Buffer)
 }
 
 // putBuffer puts the given bytes buffer back to the pool.
-func (b *BaseEncoder) putBuffer(buf *bytes.Buffer) {
+func (b *baseEncoder) putBuffer(buf *bytes.Buffer) {
 	buf.Reset()
 	b.bufferSyncPool.Put(buf)
 }
 
 // GetType returns the encoder type.
-func (b *BaseEncoder) GetType() s.EncoderType {
+func (b *baseEncoder) GetType() s.EncoderType {
 	return b.encoderType
 }

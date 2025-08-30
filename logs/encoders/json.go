@@ -12,7 +12,7 @@ import (
 )
 
 type JSONEncoder struct {
-	BaseEncoder
+	baseEncoder
 	DateTimePrinter services.DateTimePrinter
 	jsonMarshaler   services.JsonMarshaler
 }
@@ -57,6 +57,7 @@ func (j *JSONEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...any
 // Color formats and prints a colored log message using the specified color.
 //
 // Parameters:
+//   - lConfig: the logger configuration.
 //   - color: the color to apply to the log message.
 //   - args: variadic arguments where the first is treated as the message and the rest are appended.
 func (j *JSONEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, args ...any) {

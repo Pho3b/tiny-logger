@@ -12,7 +12,7 @@ import (
 )
 
 type DefaultEncoder struct {
-	BaseEncoder
+	baseEncoder
 	ColorsPrinter   services.ColorsPrinter
 	DateTimePrinter services.DateTimePrinter
 }

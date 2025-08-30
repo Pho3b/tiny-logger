@@ -120,9 +120,9 @@ func TestBaseEncoder_GetType(t *testing.T) {
 	assert.Equal(t, s.EncoderType(""), baseEncoder.GetType())
 }
 
-// newBaseEncoder initializes and returns a new BaseEncoder instance with initialized bufferSyncPool.
-func newBaseEncoder() *BaseEncoder {
-	encoder := &BaseEncoder{}
+// newBaseEncoder initializes and returns a new baseEncoder instance with initialized bufferSyncPool.
+func newBaseEncoder() *baseEncoder {
+	encoder := &baseEncoder{}
 	encoder.bufferSyncPool = sync.Pool{
 		New: func() any {
 			return new(bytes.Buffer)

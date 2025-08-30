@@ -12,7 +12,7 @@ import (
 )
 
 type YAMLEncoder struct {
-	BaseEncoder
+	baseEncoder
 	DateTimePrinter services.DateTimePrinter
 	yamlMarshaler   services.YamlMarshaler
 }
@@ -56,6 +56,7 @@ func (y *YAMLEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...any
 // Color formats and prints a colored log message using the specified color.
 //
 // Parameters:
+//   - lConfig: the logger configuration.
 //   - color: the color to apply to the log message.
 //   - args: variadic msg arguments.
 func (y *YAMLEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, args ...any) {

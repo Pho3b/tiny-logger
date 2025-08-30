@@ -1,6 +1,6 @@
 package shared
 
-// JsonLog represents the structure of a JSON log and can be used to unmarshal JSON logs.
+// JsonLog represents the structure of a JSON log and can be used to marshal JSON logs.
 type JsonLog struct {
 	Level    string         `json:"level,omitempty"`
 	Date     string         `json:"date,omitempty"`
@@ -10,7 +10,7 @@ type JsonLog struct {
 	Extras   map[string]any `json:"extras,omitempty"`
 }
 
-// YamlLog represents the structure of a YAML log and can be used to unmarshal YAML logs.
+// YamlLog represents the structure of a YAML log and can be used to marshal YAML logs.
 type YamlLog struct {
 	Level    string         `yaml:"level,omitempty"`
 	Date     string         `yaml:"date,omitempty"`

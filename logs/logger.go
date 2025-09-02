@@ -1,6 +1,8 @@
 package logs
 
 import (
+	"os"
+
 	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/logs/encoders"
 	"github.com/pho3b/tiny-logger/logs/log_level"
@@ -117,7 +119,7 @@ func (l *Logger) AddDateTime(addDateTime bool) *Logger {
 	return l
 }
 
-// AddDate enables or disables date in log output based on the provided parameter.
+// AddDate enables or disables the date in log output based on the provided parameter.
 func (l *Logger) AddDate(addDate bool) *Logger {
 	l.dateEnabled = addDate
 
@@ -153,6 +155,28 @@ func (l *Logger) SetEncoder(encoderType shared.EncoderType) *Logger {
 // GetEncoderType returns the currently set Encoder type.
 func (l *Logger) GetEncoderType() shared.EncoderType {
 	return l.encoder.GetType()
+}
+
+func (l *Logger) IsFileLogEnabled() bool {
+	return l.encoder.GetOutFile() != nil
+}
+
+func (l *Logger) SetLogFile(fileURI string) *Logger {
+	f, err := os.OpenFile(fileURI, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	l.FatalError(err)
+
+	l.encoder.SetOutFile(f)
+	return l
+}
+
+func (l *Logger) CloseLogFile() {
+	if l.encoder.GetOutFile() == nil {
+		l.Warn("no log file opened, skipping close")
+		return
+	}
+
+	l.FatalError(l.encoder.GetOutFile().Close())
+	l.encoder.SetOutFile(nil)
 }
 
 // NewLogger creates and returns a new Logger instance with default settings.

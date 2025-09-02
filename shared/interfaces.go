@@ -1,6 +1,8 @@
 package shared
 
 import (
+	"os"
+
 	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/logs/log_level"
 )
@@ -20,6 +22,7 @@ type LoggerConfigsInterface interface {
 	GetLogLvlName() log_level.LogLvlName
 	GetLogLvlIntValue() int8
 	GetEncoderType() EncoderType
+	IsFileLogEnabled() bool
 }
 
 type EncoderInterface interface {
@@ -30,4 +33,6 @@ type EncoderInterface interface {
 	LogFatalError(lConfigs LoggerConfigsInterface, args ...any)
 	Color(lConfigs LoggerConfigsInterface, color colors.Color, args ...any)
 	GetType() EncoderType
+	GetOutFile() *os.File
+	SetOutFile(outFile *os.File)
 }

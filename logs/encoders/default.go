@@ -21,7 +21,7 @@ type DefaultEncoder struct {
 // It includes date and/or time if enabled, with the text in gray if colors are enabled.
 func (d *DefaultEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 {
-		d.log(logger, ll.DebugLvlName, s.StdOutput, args...)
+		d.log(logger, ll.DebugLvlName, s.FileOutput, args...)
 	}
 }
 
@@ -105,6 +105,10 @@ func (d *DefaultEncoder) log(
 		logger.GetShowLogLevel(),
 		args...,
 	)
+
+	if logger.IsFileLogEnabled() {
+		outType = s.FileOutput
+	}
 
 	d.printLog(outType, msgBuffer, true)
 	d.putBuffer(msgBuffer)

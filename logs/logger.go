@@ -163,7 +163,8 @@ func (l *Logger) GetLogFile() *os.File {
 	return l.outFile
 }
 
-// SetLogFile sets the log file to the given file URI. If the file already exists, it is overwritten.
+// SetLogFile creates a new file at the given file URI and sets it as the current log file.
+// If the file already exists, the file is not overwritten, but it will still be used as the current log file.
 func (l *Logger) SetLogFile(fileURI string) *Logger {
 	f, err := os.OpenFile(fileURI, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	l.FatalError(err)

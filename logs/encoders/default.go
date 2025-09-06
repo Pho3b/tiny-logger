@@ -21,7 +21,7 @@ type DefaultEncoder struct {
 // It includes date and/or time if enabled, with the text in gray if colors are enabled.
 func (d *DefaultEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...any) {
 	if len(args) > 0 {
-		d.log(logger, ll.DebugLvlName, s.FileOutput, args...)
+		d.log(logger, ll.DebugLvlName, s.StdOutput, args...)
 	}
 }
 
@@ -60,11 +60,7 @@ func (d *DefaultEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...
 }
 
 // Color formats and prints a colored log message using the specified color.
-//
-// Parameters:
-//   - color: the color to apply to the log message.
-//   - args: variadic msg arguments.
-func (d *DefaultEncoder) Color(_ s.LoggerConfigsInterface, color c.Color, args ...any) {
+func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...any) {
 	if len(args) > 0 {
 		msgBuffer := d.getBuffer()
 		msgBuffer.WriteString(color.String())
@@ -80,7 +76,7 @@ func (d *DefaultEncoder) Color(_ s.LoggerConfigsInterface, color c.Color, args .
 		)
 
 		msgBuffer.WriteString(c.Reset.String())
-		d.printLog(s.StdOutput, msgBuffer, true)
+		d.printLog(s.StdOutput, msgBuffer, true, logger.GetLogFile())
 		d.putBuffer(msgBuffer)
 	}
 }
@@ -106,11 +102,7 @@ func (d *DefaultEncoder) log(
 		args...,
 	)
 
-	if logger.IsFileLogEnabled() {
-		outType = s.FileOutput
-	}
-
-	d.printLog(outType, msgBuffer, true)
+	d.printLog(outType, msgBuffer, true, logger.GetLogFile())
 	d.putBuffer(msgBuffer)
 }
 

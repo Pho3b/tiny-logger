@@ -55,14 +55,9 @@ func (j *JSONEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...any
 }
 
 // Color formats and prints a colored log message using the specified color.
-//
-// Parameters:
-//   - lConfig: the logger configuration.
-//   - color: the color to apply to the log message.
-//   - args: variadic arguments where the first is treated as the message and the rest are appended.
-func (j *JSONEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, args ...any) {
+func (j *JSONEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...any) {
 	if len(args) > 0 {
-		dEnabled, tEnabled := lConfig.GetDateTimeEnabled()
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := j.getBuffer()
 		msgBuffer.WriteString(color.String())
 
@@ -78,7 +73,7 @@ func (j *JSONEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, arg
 		)
 
 		msgBuffer.WriteString(c.Reset.String())
-		j.printLog(s.StdOutput, msgBuffer, true)
+		j.printLog(s.StdOutput, msgBuffer, true, logger.GetLogFile())
 		j.putBuffer(msgBuffer)
 	}
 }
@@ -105,7 +100,7 @@ func (j *JSONEncoder) log(
 		args[1:]...,
 	)
 
-	j.printLog(outType, msgBuffer, true)
+	j.printLog(outType, msgBuffer, true, logger.GetLogFile())
 	j.putBuffer(msgBuffer)
 }
 

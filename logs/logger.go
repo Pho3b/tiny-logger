@@ -16,6 +16,7 @@ type Logger struct {
 	showLogLevel  bool
 	encoder       shared.EncoderInterface
 	logLvl        log_level.LogLevel
+	outFile       *os.File
 }
 
 // Debug logs a debug-level message if the logger's log level allows it.
@@ -157,26 +158,30 @@ func (l *Logger) GetEncoderType() shared.EncoderType {
 	return l.encoder.GetType()
 }
 
-func (l *Logger) IsFileLogEnabled() bool {
-	return l.encoder.GetOutFile() != nil
+// GetLogFile returns the current log file. If no file is set, it returns nil.
+func (l *Logger) GetLogFile() *os.File {
+	return l.outFile
 }
 
+// SetLogFile sets the log file to the given file URI. If the file already exists, it is overwritten.
 func (l *Logger) SetLogFile(fileURI string) *Logger {
 	f, err := os.OpenFile(fileURI, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	l.FatalError(err)
 
-	l.encoder.SetOutFile(f)
+	l.outFile = f
 	return l
 }
 
+// CloseLogFile closes the current log file if it exists. If no file is set, a warning is logged
+// and the method does nothing.
 func (l *Logger) CloseLogFile() {
-	if l.encoder.GetOutFile() == nil {
+	if l.outFile == nil {
 		l.Warn("no log file opened, skipping close")
 		return
 	}
 
-	l.FatalError(l.encoder.GetOutFile().Close())
-	l.encoder.SetOutFile(nil)
+	l.FatalError(l.outFile.Close())
+	l.outFile = nil
 }
 
 // NewLogger creates and returns a new Logger instance with default settings.

@@ -13,5 +13,4 @@ type OutputType int8
 const (
 	StdOutput    OutputType = 0
 	StdErrOutput OutputType = 1
-	FileOutput   OutputType = 2
 )

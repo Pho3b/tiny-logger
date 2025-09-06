@@ -18,7 +18,6 @@ const (
 type baseEncoder struct {
 	encoderType    s.EncoderType
 	bufferSyncPool sync.Pool
-	outFile        *os.File
 }
 
 // castAndConcatenateInto writes all the given arguments cast to string and concatenated by a white space into the given buffer.
@@ -92,9 +91,20 @@ func (b *baseEncoder) areAllNil(args ...any) bool {
 }
 
 // printLog prints the given msgBuffer to the given outputType (stdout or stderr).
-func (b *baseEncoder) printLog(outType s.OutputType, msgBuffer *bytes.Buffer, newLine bool) {
+// If 'file' is not nil, the message is written to the file.
+// If 'newLine' is true, a new line is added at the end of the message.
+func (b *baseEncoder) printLog(outType s.OutputType, msgBuffer *bytes.Buffer, newLine bool, file *os.File) {
 	if newLine {
 		msgBuffer.WriteByte('\n')
+	}
+
+	if file != nil {
+		_, err := file.Write(msgBuffer.Bytes())
+		if err != nil {
+			_, _ = os.Stderr.Write(msgBuffer.Bytes())
+		}
+
+		return
 	}
 
 	switch outType {
@@ -102,11 +112,6 @@ func (b *baseEncoder) printLog(outType s.OutputType, msgBuffer *bytes.Buffer, ne
 		_, _ = os.Stdout.Write(msgBuffer.Bytes())
 	case s.StdErrOutput:
 		_, _ = os.Stderr.Write(msgBuffer.Bytes())
-	case s.FileOutput:
-		_, err := b.outFile.Write(msgBuffer.Bytes())
-		if err != nil {
-			_, _ = os.Stderr.Write(msgBuffer.Bytes())
-		}
 	}
 }
 
@@ -125,12 +130,4 @@ func (b *baseEncoder) putBuffer(buf *bytes.Buffer) {
 // GetType returns the encoder type.
 func (b *baseEncoder) GetType() s.EncoderType {
 	return b.encoderType
-}
-
-func (b *baseEncoder) SetOutFile(outFile *os.File) {
-	b.outFile = outFile
-}
-
-func (b *baseEncoder) GetOutFile() *os.File {
-	return b.outFile
 }

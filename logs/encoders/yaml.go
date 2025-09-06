@@ -54,15 +54,10 @@ func (y *YAMLEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...any
 }
 
 // Color formats and prints a colored log message using the specified color.
-//
-// Parameters:
-//   - lConfig: the logger configuration.
-//   - color: the color to apply to the log message.
-//   - args: variadic msg arguments.
-func (y *YAMLEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, args ...any) {
+func (y *YAMLEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...any) {
 	if len(args) > 0 {
 		msgBuffer := y.getBuffer()
-		dEnabled, tEnabled := lConfig.GetDateTimeEnabled()
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer.WriteString(color.String())
 
 		y.composeMsgInto(
@@ -77,7 +72,7 @@ func (y *YAMLEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, arg
 		)
 
 		msgBuffer.WriteString(c.Reset.String())
-		y.printLog(s.StdOutput, msgBuffer, true)
+		y.printLog(s.StdOutput, msgBuffer, true, logger.GetLogFile())
 		y.putBuffer(msgBuffer)
 	}
 }
@@ -104,7 +99,7 @@ func (y *YAMLEncoder) log(
 		args[1:]...,
 	)
 
-	y.printLog(outType, msgBuffer, true)
+	y.printLog(outType, msgBuffer, true, logger.GetLogFile())
 	y.putBuffer(msgBuffer)
 }
 

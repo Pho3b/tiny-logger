@@ -22,7 +22,7 @@ type LoggerConfigsInterface interface {
 	GetLogLvlName() log_level.LogLvlName
 	GetLogLvlIntValue() int8
 	GetEncoderType() EncoderType
-	IsFileLogEnabled() bool
+	GetLogFile() *os.File
 }
 
 type EncoderInterface interface {
@@ -33,6 +33,4 @@ type EncoderInterface interface {
 	LogFatalError(lConfigs LoggerConfigsInterface, args ...any)
 	Color(lConfigs LoggerConfigsInterface, color colors.Color, args ...any)
 	GetType() EncoderType
-	GetOutFile() *os.File
-	SetOutFile(outFile *os.File)
 }

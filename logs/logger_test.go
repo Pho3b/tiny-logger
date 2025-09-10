@@ -309,6 +309,26 @@ func TestLogger_CorrectLogsFormattingDefaultEncoder(t *testing.T) {
 	assert.Equal(t, "testing log", matches[3])
 }
 
+func TestAreAllNil(t *testing.T) {
+	logger := NewLogger()
+
+	// Test with all nil arguments
+	result := logger.areAllNil(nil, nil, nil)
+	assert.True(t, result)
+
+	// Test with no arguments
+	result = logger.areAllNil()
+	assert.True(t, result)
+
+	// Test with some nil and some non-nil arguments
+	result = logger.areAllNil(nil, "test", nil)
+	assert.False(t, result)
+
+	// Test with all non-nil arguments
+	result = logger.areAllNil("test", 123, true)
+	assert.False(t, result)
+}
+
 // captureOutput redirects os.Stdout to capture the output of the function f
 func captureOutput(f func()) string {
 	r, w, _ := os.Pipe()

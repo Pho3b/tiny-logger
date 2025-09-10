@@ -2,7 +2,6 @@ package encoders
 
 import (
 	"bytes"
-	"os"
 	"sync"
 
 	"github.com/pho3b/tiny-logger/internal/services"
@@ -17,44 +16,7 @@ type JSONEncoder struct {
 	jsonMarshaler   services.JsonMarshaler
 }
 
-// LogDebug formats and prints a debug-level log message in JSON format.
-func (j *JSONEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 {
-		j.log(logger, ll.DebugLvlName, s.StdOutput, args...)
-	}
-}
-
-// LogInfo formats and prints an info-level log message in JSON format.
-func (j *JSONEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 {
-		j.log(logger, ll.InfoLvlName, s.StdOutput, args...)
-	}
-}
-
-// LogWarn formats and prints a warning-level log message in JSON format.
-func (j *JSONEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 {
-		j.log(logger, ll.WarnLvlName, s.StdOutput, args...)
-
-	}
-}
-
-// LogError formats and prints an error-level log message in JSON format.
-func (j *JSONEncoder) LogError(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 && !j.areAllNil(args...) {
-		j.log(logger, ll.ErrorLvlName, s.StdErrOutput, args...)
-	}
-}
-
-// LogFatalError formats and prints a fatal error-level log message in JSON format and exits the program.
-func (j *JSONEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 && !j.areAllNil(args...) {
-		j.log(logger, ll.FatalErrorLvlName, s.StdErrOutput, args...)
-		os.Exit(1)
-	}
-}
-
-// Color formats and prints a colored log message using the specified color.
+// Color formats and prints a colored Log message using the specified color.
 func (j *JSONEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...any) {
 	if len(args) > 0 {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
@@ -78,9 +40,9 @@ func (j *JSONEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 	}
 }
 
-// log formats and prints a log message to the given output type.
+// Log formats and prints a log message to the given output type.
 // Internally used by all the encoder Log methods.
-func (j *JSONEncoder) log(
+func (j *JSONEncoder) Log(
 	logger s.LoggerConfigsInterface,
 	logLvlName ll.LogLvlName,
 	outType s.OutputType,

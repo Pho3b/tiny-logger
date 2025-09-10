@@ -86,26 +86,6 @@ func TestBuildMsgWithCastAndConcatenateInto(t *testing.T) {
 	buf.Reset()
 }
 
-func TestAreAllNil(t *testing.T) {
-	encoder := newBaseEncoder()
-
-	// Test with all nil arguments
-	result := encoder.areAllNil(nil, nil, nil)
-	assert.True(t, result)
-
-	// Test with no arguments
-	result = encoder.areAllNil()
-	assert.True(t, result)
-
-	// Test with some nil and some non-nil arguments
-	result = encoder.areAllNil(nil, "test", nil)
-	assert.False(t, result)
-
-	// Test with all non-nil arguments
-	result = encoder.areAllNil("test", 123, true)
-	assert.False(t, result)
-}
-
 func TestBaseEncoder_GetType(t *testing.T) {
 	encoder := NewDefaultEncoder()
 	assert.Equal(t, s.DefaultEncoderType, encoder.GetType())

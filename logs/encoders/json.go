@@ -16,30 +16,6 @@ type JSONEncoder struct {
 	jsonMarshaler   services.JsonMarshaler
 }
 
-// Color formats and prints a colored Log message using the specified color.
-func (j *JSONEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...any) {
-	if len(args) > 0 {
-		dEnabled, tEnabled := logger.GetDateTimeEnabled()
-		msgBuffer := j.getBuffer()
-		msgBuffer.WriteString(color.String())
-
-		j.composeMsgInto(
-			msgBuffer,
-			j.jsonMarshaler,
-			ll.InfoLvlName,
-			dEnabled,
-			tEnabled,
-			false,
-			j.castToString(args[0]),
-			args[1:]...,
-		)
-
-		msgBuffer.WriteString(c.Reset.String())
-		j.printLog(s.StdOutput, msgBuffer, true, logger.GetLogFile())
-		j.putBuffer(msgBuffer)
-	}
-}
-
 // Log formats and prints a log message to the given output type.
 // Internally used by all the encoder Log methods.
 func (j *JSONEncoder) Log(
@@ -64,6 +40,30 @@ func (j *JSONEncoder) Log(
 
 	j.printLog(outType, msgBuffer, true, logger.GetLogFile())
 	j.putBuffer(msgBuffer)
+}
+
+// Color formats and prints a colored Log message using the specified color.
+func (j *JSONEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...any) {
+	if len(args) > 0 {
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
+		msgBuffer := j.getBuffer()
+		msgBuffer.WriteString(color.String())
+
+		j.composeMsgInto(
+			msgBuffer,
+			j.jsonMarshaler,
+			ll.InfoLvlName,
+			dEnabled,
+			tEnabled,
+			false,
+			j.castToString(args[0]),
+			args[1:]...,
+		)
+
+		msgBuffer.WriteString(c.Reset.String())
+		j.printLog(s.StdOutput, msgBuffer, true, logger.GetLogFile())
+		j.putBuffer(msgBuffer)
+	}
 }
 
 // composeMsgInto formats and writes the given 'msg' into the given buffer.

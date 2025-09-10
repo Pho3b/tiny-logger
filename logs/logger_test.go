@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"os"
+	"os/exec"
 	"regexp"
 	"sync"
 	"testing"
@@ -327,6 +328,156 @@ func TestAreAllNil(t *testing.T) {
 	// Test with all non-nil arguments
 	result = logger.areAllNil("test", 123, true)
 	assert.False(t, result)
+}
+
+func TestLogger_SetLogFile(t *testing.T) {
+	logger := NewLogger()
+	testFileName := "test_log_file.txt"
+
+	// Clean up any existing test file
+	os.Remove(testFileName)
+	defer os.Remove(testFileName)
+
+	// Test setting a new log file
+	result := logger.SetLogFile(testFileName)
+	assert.NotNil(t, result)
+	assert.IsType(t, &Logger{}, result)
+	assert.NotNil(t, logger.outFile)
+	assert.NotNil(t, logger.GetLogFile())
+
+	// Verify file was created
+	_, err := os.Stat(testFileName)
+	assert.NoError(t, err)
+
+	// Test that logging to file works
+	logger.Info("test log message")
+
+	// Read file content
+	content, err := os.ReadFile(testFileName)
+	assert.NoError(t, err)
+	assert.Contains(t, string(content), "test log message")
+
+	// Clean up
+	logger.CloseLogFile()
+}
+
+func TestLogger_SetLogFile_ExistingFile(t *testing.T) {
+	logger := NewLogger()
+	testFileName := "existing_test_log_file.txt"
+
+	// Create file with initial content
+	initialContent := "initial content\n"
+	err := os.WriteFile(testFileName, []byte(initialContent), 0644)
+	assert.NoError(t, err)
+	defer os.Remove(testFileName)
+
+	// Set log file (should append, not overwrite)
+	logger.SetLogFile(testFileName)
+	logger.Info("appended message")
+	logger.CloseLogFile()
+
+	// Verify content was appended
+	content, err := os.ReadFile(testFileName)
+	assert.NoError(t, err)
+	contentStr := string(content)
+	assert.Contains(t, contentStr, "initial content")
+	assert.Contains(t, contentStr, "appended message")
+}
+
+func TestLogger_SetLogFile_InvalidPath(t *testing.T) {
+	// This test verifies the logger handles fatal errors on invalid file paths
+	if os.Getenv("BE_CRASHER") == "1" {
+		logger := NewLogger()
+		// Try to create file in non-existent directory
+		logger.SetLogFile("/non/existent/directory/test.log")
+		return
+	}
+
+	// Run the test in a subprocess to catch the fatal error
+	cmd := exec.Command(os.Args[0], "-test.run=TestLogger_SetLogFile_InvalidPath")
+	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
+	err := cmd.Run()
+	exitError, ok := err.(*exec.ExitError)
+	assert.True(t, ok && !exitError.Success())
+}
+
+func TestLogger_CloseLogFile(t *testing.T) {
+	logger := NewLogger()
+	testFileName := "close_test_log_file.txt"
+
+	// Clean up
+	os.Remove(testFileName)
+	defer os.Remove(testFileName)
+
+	// Set a log file first
+	logger.SetLogFile(testFileName)
+	assert.NotNil(t, logger.GetLogFile())
+
+	// Close the log file
+	logger.CloseLogFile()
+	assert.Nil(t, logger.GetLogFile())
+	assert.Nil(t, logger.outFile)
+}
+
+func TestLogger_CloseLogFile_NoFileSet(t *testing.T) {
+	logger := NewLogger()
+
+	// Test closing when no file is set - should log warning and not crash
+	output := captureOutput(func() {
+		logger.CloseLogFile()
+	})
+
+	assert.Contains(t, output, "no log file opened, skipping close")
+	assert.Nil(t, logger.GetLogFile())
+}
+
+func TestLogger_GetLogFile(t *testing.T) {
+	logger := NewLogger()
+
+	// Initially should return nil
+	assert.Nil(t, logger.GetLogFile())
+
+	// After setting file should return file pointer
+	testFileName := "get_log_file_test.txt"
+	os.Remove(testFileName)
+	defer os.Remove(testFileName)
+
+	logger.SetLogFile(testFileName)
+	file := logger.GetLogFile()
+	assert.NotNil(t, file)
+	assert.IsType(t, &os.File{}, file)
+
+	logger.CloseLogFile()
+	assert.Nil(t, logger.GetLogFile())
+}
+
+func TestLogger_LogsRedirectedToFile(t *testing.T) {
+	logger := NewLogger()
+	testFileName := "redirect_test_log_file.txt"
+
+	os.Remove(testFileName)
+	defer os.Remove(testFileName)
+
+	// Set log file
+	logger.SetLogFile(testFileName)
+
+	// Log various levels
+	logger.Debug("debug message")
+	logger.Info("info message")
+	logger.Warn("warn message")
+	logger.Error("error message")
+
+	logger.CloseLogFile()
+
+	// Verify all messages were written to file
+	content, err := os.ReadFile(testFileName)
+	assert.NoError(t, err)
+	contentStr := string(content)
+
+	assert.Contains(t, contentStr, "debug message")
+	assert.Contains(t, contentStr, "info message")
+	assert.Contains(t, contentStr, "warn message")
+	assert.Contains(t, contentStr, "error message")
 }
 
 // captureOutput redirects os.Stdout to capture the output of the function f

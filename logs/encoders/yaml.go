@@ -16,30 +16,6 @@ type YAMLEncoder struct {
 	yamlMarshaler   services.YamlMarshaler
 }
 
-// Color formats and prints a colored Log message using the specified color.
-func (y *YAMLEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...any) {
-	if len(args) > 0 {
-		msgBuffer := y.getBuffer()
-		dEnabled, tEnabled := logger.GetDateTimeEnabled()
-		msgBuffer.WriteString(color.String())
-
-		y.composeMsgInto(
-			msgBuffer,
-			y.yamlMarshaler,
-			ll.InfoLvlName,
-			dEnabled,
-			tEnabled,
-			false,
-			y.castToString(args[0]),
-			args[1:]...,
-		)
-
-		msgBuffer.WriteString(c.Reset.String())
-		y.printLog(s.StdOutput, msgBuffer, true, logger.GetLogFile())
-		y.putBuffer(msgBuffer)
-	}
-}
-
 // Log formats and prints a log message to the given output type.
 // Internally used by all the encoder Log methods.
 func (y *YAMLEncoder) Log(
@@ -64,6 +40,30 @@ func (y *YAMLEncoder) Log(
 
 	y.printLog(outType, msgBuffer, true, logger.GetLogFile())
 	y.putBuffer(msgBuffer)
+}
+
+// Color formats and prints a colored Log message using the specified color.
+func (y *YAMLEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...any) {
+	if len(args) > 0 {
+		msgBuffer := y.getBuffer()
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
+		msgBuffer.WriteString(color.String())
+
+		y.composeMsgInto(
+			msgBuffer,
+			y.yamlMarshaler,
+			ll.InfoLvlName,
+			dEnabled,
+			tEnabled,
+			false,
+			y.castToString(args[0]),
+			args[1:]...,
+		)
+
+		msgBuffer.WriteString(c.Reset.String())
+		y.printLog(s.StdOutput, msgBuffer, true, logger.GetLogFile())
+		y.putBuffer(msgBuffer)
+	}
 }
 
 // composeMsgInto formats and writes the given 'msg' into the given buffer.

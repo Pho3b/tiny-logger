@@ -16,28 +16,6 @@ type DefaultEncoder struct {
 	DateTimePrinter services.DateTimePrinter
 }
 
-// Color formats and prints a colored Log message using the specified color.
-func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...any) {
-	if len(args) > 0 {
-		msgBuffer := d.getBuffer()
-		msgBuffer.WriteString(color.String())
-
-		d.composeMsgInto(
-			msgBuffer,
-			ll.InfoLvlName,
-			false,
-			false,
-			false,
-			false,
-			args...,
-		)
-
-		msgBuffer.WriteString(c.Reset.String())
-		d.printLog(s.StdOutput, msgBuffer, true, logger.GetLogFile())
-		d.putBuffer(msgBuffer)
-	}
-}
-
 // Log formats and prints a Log message to the given output type.
 func (d *DefaultEncoder) Log(
 	logger s.LoggerConfigsInterface,
@@ -60,6 +38,28 @@ func (d *DefaultEncoder) Log(
 
 	d.printLog(outType, msgBuffer, true, logger.GetLogFile())
 	d.putBuffer(msgBuffer)
+}
+
+// Color formats and prints a colored Log message using the specified color.
+func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...any) {
+	if len(args) > 0 {
+		msgBuffer := d.getBuffer()
+		msgBuffer.WriteString(color.String())
+
+		d.composeMsgInto(
+			msgBuffer,
+			ll.InfoLvlName,
+			false,
+			false,
+			false,
+			false,
+			args...,
+		)
+
+		msgBuffer.WriteString(c.Reset.String())
+		d.printLog(s.StdOutput, msgBuffer, true, logger.GetLogFile())
+		d.putBuffer(msgBuffer)
+	}
 }
 
 // composeMsgInto formats and writes the given 'msg' into the given buffer.

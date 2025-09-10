@@ -79,17 +79,6 @@ func (b *baseEncoder) castToString(arg any) string {
 	}
 }
 
-// areAllNil returns true if all the given args are 'nil', false otherwise.
-func (b *baseEncoder) areAllNil(args ...any) bool {
-	for _, arg := range args {
-		if arg != nil {
-			return false
-		}
-	}
-
-	return true
-}
-
 // printLog prints the given msgBuffer to the given outputType (stdout or stderr).
 // If 'file' is not nil, the message is written to the file.
 // If 'newLine' is true, a new line is added at the end of the message.

@@ -2,7 +2,6 @@ package encoders
 
 import (
 	"bytes"
-	"os"
 	"sync"
 
 	"github.com/pho3b/tiny-logger/internal/services"
@@ -17,49 +16,7 @@ type DefaultEncoder struct {
 	DateTimePrinter services.DateTimePrinter
 }
 
-// LogDebug formats and prints a debug-level log message to stdout.
-// It includes date and/or time if enabled, with the text in gray if colors are enabled.
-func (d *DefaultEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 {
-		d.log(logger, ll.DebugLvlName, s.StdOutput, args...)
-	}
-}
-
-// LogInfo formats and prints an info-level log message to stdout.
-// It includes date and/or time if enabled, with the text in cyan if colors are enabled.
-func (d *DefaultEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 {
-		d.log(logger, ll.InfoLvlName, s.StdOutput, args...)
-	}
-}
-
-// LogWarn formats and prints a warning-level log message to stdout.
-// It includes date and/or time if enabled, with the text in yellow if colors are enabled.
-func (d *DefaultEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 {
-		d.log(logger, ll.WarnLvlName, s.StdOutput, args...)
-	}
-}
-
-// LogError formats and prints an error-level log message to stderr.
-// It includes date and/or time if enabled, with the text in red if colors are enabled.
-func (d *DefaultEncoder) LogError(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 && !d.areAllNil(args...) {
-		d.log(logger, ll.ErrorLvlName, s.StdErrOutput, args...)
-	}
-}
-
-// LogFatalError formats and prints a fatal error-level log message to stderr and terminates the program if any give
-// args is not nil.
-// It includes date and/or time if enabled, with the text in magenta if colors are enabled.
-func (d *DefaultEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 && !d.areAllNil(args...) {
-		d.log(logger, ll.FatalErrorLvlName, s.StdErrOutput, args...)
-		os.Exit(1)
-	}
-}
-
-// Color formats and prints a colored log message using the specified color.
+// Color formats and prints a colored Log message using the specified color.
 func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...any) {
 	if len(args) > 0 {
 		msgBuffer := d.getBuffer()
@@ -81,9 +38,8 @@ func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, a
 	}
 }
 
-// log formats and prints a log message to the given output type.
-// Internally used by all the encoder Log methods.
-func (d *DefaultEncoder) log(
+// Log formats and prints a Log message to the given output type.
+func (d *DefaultEncoder) Log(
 	logger s.LoggerConfigsInterface,
 	logLvlName ll.LogLvlName,
 	outType s.OutputType,

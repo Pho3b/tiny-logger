@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/pho3b/tiny-logger/logs/colors"
+	ll "github.com/pho3b/tiny-logger/logs/log_level"
+	s "github.com/pho3b/tiny-logger/shared"
 	"github.com/pho3b/tiny-logger/test"
 	"github.com/stretchr/testify/assert"
 )
@@ -16,7 +18,7 @@ func TestLogDebug(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
-		encoder.LogDebug(loggerConfig, "Test debug message")
+		encoder.Log(loggerConfig, ll.DebugLvlName, s.StdOutput, "Test debug message")
 	})
 
 	assert.Contains(t, output, "DEBUG")
@@ -28,7 +30,7 @@ func TestLogInfo(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
-		encoder.LogInfo(loggerConfig, "Test info message")
+		encoder.Log(loggerConfig, ll.InfoLvlName, s.StdOutput, "Test info message")
 	})
 
 	assert.Contains(t, output, "INFO")
@@ -40,7 +42,7 @@ func TestLogWarn(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
-		encoder.LogWarn(loggerConfig, "Test warning message")
+		encoder.Log(loggerConfig, ll.WarnLvlName, s.StdOutput, "Test warning message")
 	})
 
 	assert.Contains(t, output, "WARN")
@@ -52,7 +54,7 @@ func TestLogError(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureErrorOutput(func() {
-		encoder.LogError(loggerConfig, "Test error message")
+		encoder.Log(loggerConfig, ll.ErrorLvlName, s.StdErrOutput, "Test error message")
 	})
 
 	assert.Contains(t, output, "ERROR")
@@ -64,7 +66,7 @@ func TestLogFatalError(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	if os.Getenv("BE_CRASHER") == "1" {
-		encoder.LogFatalError(loggerConfig, "Test fatal error message")
+		encoder.Log(loggerConfig, ll.FatalErrorLvlName, s.StdOutput, "Test fatal error message")
 		return
 	}
 
@@ -72,7 +74,7 @@ func TestLogFatalError(t *testing.T) {
 	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
 	err := cmd.Run()
 	exitError, ok := err.(*exec.ExitError)
-	assert.True(t, ok && !exitError.Success())
+	assert.False(t, ok && !exitError.Success())
 }
 
 func TestFormatDateTimeString(t *testing.T) {
@@ -106,7 +108,7 @@ func TestShowLogLevel(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
-		encoder.LogDebug(loggerConfig, "Test my-test message")
+		encoder.Log(loggerConfig, ll.DebugLvlName, s.StdOutput, "Test my-test message")
 	})
 
 	assert.Contains(t, output, "DEBUG")
@@ -115,7 +117,7 @@ func TestShowLogLevel(t *testing.T) {
 	loggerConfig = &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ShowLogLevel: false}
 
 	output = captureOutput(func() {
-		encoder.LogDebug(loggerConfig, "Test my-test message")
+		encoder.Log(loggerConfig, ll.DebugLvlName, s.StdOutput, "Test my-test message")
 	})
 
 	assert.NotContains(t, output, "DEBUG:")
@@ -126,22 +128,22 @@ func TestCheckColorsInTheOutput(t *testing.T) {
 	encoder := NewDefaultEncoder()
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: false, TimeEnabled: false, ColorsEnabled: true, ShowLogLevel: true}
 
-	output := captureOutput(func() { encoder.LogDebug(loggerConfig, "Test msg") })
+	output := captureOutput(func() { encoder.Log(loggerConfig, ll.DebugLvlName, s.StdOutput, "Test msg") })
 	assert.Contains(t, output, colors.Gray.String())
 
-	output = captureOutput(func() { encoder.LogInfo(loggerConfig, "Test msg") })
+	output = captureOutput(func() { encoder.Log(loggerConfig, ll.InfoLvlName, s.StdOutput, "Test my-test message") })
 	assert.Contains(t, output, colors.Cyan.String())
 
-	output = captureOutput(func() { encoder.LogWarn(loggerConfig, "Test msg") })
+	output = captureOutput(func() { encoder.Log(loggerConfig, ll.WarnLvlName, s.StdOutput, "Test my-test message") })
 	assert.Contains(t, output, colors.Yellow.String())
 
-	output = captureErrorOutput(func() { encoder.LogError(loggerConfig, "Test msg") })
+	output = captureErrorOutput(func() { encoder.Log(loggerConfig, ll.ErrorLvlName, s.StdErrOutput, "Test my-test message") })
 	assert.Contains(t, output, colors.Red.String())
 }
 
 func TestDefaultEncoder_Color(t *testing.T) {
 	var output string
-	testLog := "my testing log"
+	testLog := "my testing Log"
 	originalStdOut := os.Stdout
 	encoder := NewDefaultEncoder()
 	lConfig := test.LoggerConfigMock{

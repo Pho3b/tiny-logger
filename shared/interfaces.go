@@ -26,11 +26,7 @@ type LoggerConfigsInterface interface {
 }
 
 type EncoderInterface interface {
-	LogDebug(lConfigs LoggerConfigsInterface, args ...any)
-	LogInfo(lConfigs LoggerConfigsInterface, args ...any)
-	LogWarn(lConfigs LoggerConfigsInterface, args ...any)
-	LogError(lConfigs LoggerConfigsInterface, args ...any)
-	LogFatalError(lConfigs LoggerConfigsInterface, args ...any)
+	Log(logger LoggerConfigsInterface, lvl log_level.LogLvlName, outType OutputType, args ...any)
 	Color(lConfigs LoggerConfigsInterface, color colors.Color, args ...any)
 	GetType() EncoderType
 }

@@ -5,8 +5,8 @@ import (
 
 	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/logs/encoders"
-	"github.com/pho3b/tiny-logger/logs/log_level"
-	"github.com/pho3b/tiny-logger/shared"
+	ll "github.com/pho3b/tiny-logger/logs/log_level"
+	s "github.com/pho3b/tiny-logger/shared"
 )
 
 type Logger struct {
@@ -14,49 +14,52 @@ type Logger struct {
 	timeEnabled   bool
 	colorsEnabled bool
 	showLogLevel  bool
-	encoder       shared.EncoderInterface
-	logLvl        log_level.LogLevel
+	encoder       s.EncoderInterface
+	logLvl        ll.LogLevel
 	outFile       *os.File
 }
 
 // Debug logs a debug-level message if the logger's log level allows it.
 func (l *Logger) Debug(args ...any) {
-	if l.logLvl.Lvl >= log_level.DebugLvl {
-		l.encoder.LogDebug(l, args...)
+	if l.logLvl.Lvl >= ll.DebugLvl && len(args) > 0 {
+		l.encoder.Log(l, ll.DebugLvlName, l.checkOutFile(s.StdOutput), args...)
 	}
 }
 
 // Info logs an informational-level message if the logger's log level allows it.
 func (l *Logger) Info(args ...any) {
-	if l.logLvl.Lvl >= log_level.InfoLvl {
-		l.encoder.LogInfo(l, args...)
+	if l.logLvl.Lvl >= ll.InfoLvl && len(args) > 0 {
+		l.encoder.Log(l, ll.InfoLvlName, l.checkOutFile(s.StdOutput), args...)
 	}
 }
 
 // Warn logs a warning-level message if the logger's log level allows it.
 func (l *Logger) Warn(args ...any) {
-	if l.logLvl.Lvl >= log_level.WarnLvl {
-		l.encoder.LogWarn(l, args...)
+	if l.logLvl.Lvl >= ll.WarnLvl && len(args) > 0 {
+		l.encoder.Log(l, ll.WarnLvlName, l.checkOutFile(s.StdOutput), args...)
 	}
 }
 
 // Error logs an error-level message if the logger's log level allows it.
 func (l *Logger) Error(args ...any) {
-	if l.logLvl.Lvl >= log_level.ErrorLvl {
-		l.encoder.LogError(l, args...)
+	if l.logLvl.Lvl >= ll.ErrorLvl && len(args) > 0 && !l.areAllNil(args...) {
+		l.encoder.Log(l, ll.ErrorLvlName, l.checkOutFile(s.StdErrOutput), args...)
 	}
 }
 
 // FatalError logs a fatal error message and terminates the application only if any given args is not NIl,
 // otherwise the method does nothing.
 func (l *Logger) FatalError(args ...any) {
-	l.encoder.LogFatalError(l, args...)
+	if l.logLvl.Lvl >= ll.ErrorLvl && len(args) > 0 && !l.areAllNil(args...) {
+		l.encoder.Log(l, ll.FatalErrorLvlName, l.checkOutFile(s.StdErrOutput), args...)
+		os.Exit(1)
+	}
 }
 
 // SetLogLvl sets the log level of the logger based on a provided log level name.
 // If the provided name is invalid, it defaults to DebugLvlName.
-func (l *Logger) SetLogLvl(logLvlName log_level.LogLvlName) *Logger {
-	l.logLvl.Lvl = log_level.RetrieveLogLvlIntFromName(logLvlName)
+func (l *Logger) SetLogLvl(logLvlName ll.LogLvlName) *Logger {
+	l.logLvl.Lvl = ll.RetrieveLogLvlIntFromName(logLvlName)
 
 	return l
 }
@@ -64,10 +67,10 @@ func (l *Logger) SetLogLvl(logLvlName log_level.LogLvlName) *Logger {
 // SetLogLvlEnvVariable sets the log level based on an environment variable. If the variable is not found,
 // defaults to DebugLvlName.
 //
-// NOTE: The environment variable value must be a valid log_level.LogLvlName string.
+// NOTE: The environment variable value must be a valid ll.LogLvlName string.
 func (l *Logger) SetLogLvlEnvVariable(envVariableName string) *Logger {
 	l.logLvl.EnvVariable = envVariableName
-	l.logLvl.Lvl = log_level.RetrieveLogLvlFromEnv(l.logLvl.EnvVariable)
+	l.logLvl.Lvl = ll.RetrieveLogLvlFromEnv(l.logLvl.EnvVariable)
 
 	return l
 }
@@ -78,8 +81,8 @@ func (l *Logger) Color(color colors.Color, args ...any) {
 }
 
 // GetLogLvlName returns the current log level name as a string.
-func (l *Logger) GetLogLvlName() log_level.LogLvlName {
-	return log_level.LogLvlIntToName[l.logLvl.Lvl]
+func (l *Logger) GetLogLvlName() ll.LogLvlName {
+	return ll.LogLvlIntToName[l.logLvl.Lvl]
 }
 
 // GetLogLvlIntValue returns the current log level as an int8 value.
@@ -140,13 +143,13 @@ func (l *Logger) GetDateTimeEnabled() (dateEnabled bool, timeEnabled bool) {
 }
 
 // SetEncoder sets the Encoder that will be used to print logs.
-func (l *Logger) SetEncoder(encoderType shared.EncoderType) *Logger {
+func (l *Logger) SetEncoder(encoderType s.EncoderType) *Logger {
 	switch encoderType {
-	case shared.DefaultEncoderType:
+	case s.DefaultEncoderType:
 		l.encoder = encoders.NewDefaultEncoder()
-	case shared.JsonEncoderType:
+	case s.JsonEncoderType:
 		l.encoder = encoders.NewJSONEncoder()
-	case shared.YamlEncoderType:
+	case s.YamlEncoderType:
 		l.encoder = encoders.NewYAMLEncoder()
 	}
 
@@ -154,7 +157,7 @@ func (l *Logger) SetEncoder(encoderType shared.EncoderType) *Logger {
 }
 
 // GetEncoderType returns the currently set Encoder type.
-func (l *Logger) GetEncoderType() shared.EncoderType {
+func (l *Logger) GetEncoderType() s.EncoderType {
 	return l.encoder.GetType()
 }
 
@@ -185,6 +188,26 @@ func (l *Logger) CloseLogFile() {
 	l.outFile = nil
 }
 
+// areAllNil returns true if all the given args are 'nil', false otherwise.
+func (l *Logger) areAllNil(args ...any) bool {
+	for _, arg := range args {
+		if arg != nil {
+			return false
+		}
+	}
+
+	return true
+}
+
+// checkOutFile returns FileOutput if a log file is set, otherwise returns the provided outType.
+func (l *Logger) checkOutFile(outType s.OutputType) s.OutputType {
+	if l.outFile != nil {
+		return s.FileOutput
+	}
+
+	return outType
+}
+
 // NewLogger creates and returns a new Logger instance with default settings.
 func NewLogger() *Logger {
 	logger := &Logger{
@@ -194,7 +217,7 @@ func NewLogger() *Logger {
 		showLogLevel:  true,
 		encoder:       encoders.NewDefaultEncoder(),
 	}
-	logger.SetLogLvlEnvVariable(log_level.DefaultEnvLogLvlVar)
+	logger.SetLogLvlEnvVariable(ll.DefaultEnvLogLvlVar)
 
 	return logger
 }

@@ -2,17 +2,19 @@ package encoders
 
 import (
 	"encoding/json"
-	"github.com/pho3b/tiny-logger/logs/colors"
-	"github.com/pho3b/tiny-logger/shared"
-	"github.com/pho3b/tiny-logger/test"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"os/exec"
 	"testing"
 	"time"
+
+	"github.com/pho3b/tiny-logger/logs/colors"
+	ll "github.com/pho3b/tiny-logger/logs/log_level"
+	"github.com/pho3b/tiny-logger/shared"
+	"github.com/pho3b/tiny-logger/test"
+	"github.com/stretchr/testify/assert"
 )
 
-// decodeLogEntry decodes a JSON-encoded log entry into a JsonLogEntry struct.
+// decodeLogEntry decodes a JSON-encoded Log entry into a JsonLogEntry struct.
 func decodeLogEntry(t *testing.T, logOutput string) shared.JsonLog {
 	var entry shared.JsonLog
 	err := json.Unmarshal([]byte(logOutput), &entry)
@@ -26,7 +28,7 @@ func TestJSONEncoder_LogDebug(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
-		encoder.LogDebug(loggerConfig, "Test debug message")
+		encoder.Log(loggerConfig, ll.DebugLvlName, shared.StdOutput, "Test debug message")
 	})
 
 	entry := decodeLogEntry(t, output)
@@ -39,7 +41,7 @@ func TestJSONEncoder_LogInfo(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
-		encoder.LogInfo(loggerConfig, "Test info message")
+		encoder.Log(loggerConfig, ll.InfoLvlName, shared.StdOutput, "Test info message")
 	})
 
 	entry := decodeLogEntry(t, output)
@@ -52,7 +54,7 @@ func TestJSONEncoder_LogInfoWithExtras(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
-		encoder.LogInfo(loggerConfig, "Test info message")
+		encoder.Log(loggerConfig, ll.InfoLvlName, shared.StdOutput, "Test info message")
 	})
 
 	entry := decodeLogEntry(t, output)
@@ -61,7 +63,7 @@ func TestJSONEncoder_LogInfoWithExtras(t *testing.T) {
 	assert.IsType(t, make(map[string]any), entry.Extras)
 
 	output = captureOutput(func() {
-		encoder.LogInfo(loggerConfig, "Test info message with extras", "Location", "Italy", "Weather", "sunny", "Mood")
+		encoder.Log(loggerConfig, ll.InfoLvlName, shared.StdOutput, "Test info message with extras", "Location", "Italy", "Weather", "sunny", "Mood")
 	})
 
 	entry = decodeLogEntry(t, output)
@@ -77,7 +79,7 @@ func TestJSONEncoder_LogWarn(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
-		encoder.LogWarn(loggerConfig, "Test warning message")
+		encoder.Log(loggerConfig, ll.WarnLvlName, shared.StdOutput, "Test warning message")
 	})
 
 	entry := decodeLogEntry(t, output)
@@ -90,7 +92,7 @@ func TestJSONEncoder_LogError(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureErrorOutput(func() {
-		encoder.LogError(loggerConfig, "Test error message")
+		encoder.Log(loggerConfig, ll.ErrorLvlName, shared.StdErrOutput, "Test error message")
 	})
 
 	entry := decodeLogEntry(t, output)
@@ -103,7 +105,7 @@ func TestJSONEncoder_LogFatalError(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	if os.Getenv("BE_CRASHER") == "1" {
-		encoder.LogFatalError(loggerConfig, "Test fatal error message")
+		encoder.Log(loggerConfig, ll.FatalErrorLvlName, shared.StdErrOutput, "Test fatal error message")
 		return
 	}
 
@@ -111,14 +113,14 @@ func TestJSONEncoder_LogFatalError(t *testing.T) {
 	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
 	err := cmd.Run()
 	exitError, ok := err.(*exec.ExitError)
-	assert.True(t, ok && !exitError.Success())
+	assert.False(t, ok && !exitError.Success())
 }
 
 func TestJSONEncoder_DateTime(t *testing.T) {
 	encoder := NewJSONEncoder()
 	loggerConfig := &test.LoggerConfigMock{TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 	output := captureOutput(func() {
-		encoder.LogWarn(loggerConfig, "Test msg")
+		encoder.Log(loggerConfig, ll.WarnLvlName, shared.StdOutput, "Test msg")
 	})
 
 	entry := decodeLogEntry(t, output)
@@ -129,7 +131,7 @@ func TestJSONEncoder_DateTime(t *testing.T) {
 
 	loggerConfig = &test.LoggerConfigMock{DateEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 	output = captureOutput(func() {
-		encoder.LogWarn(loggerConfig, "Test msg")
+		encoder.Log(loggerConfig, ll.WarnLvlName, shared.StdOutput, "Test msg")
 	})
 
 	entry = decodeLogEntry(t, output)
@@ -140,7 +142,7 @@ func TestJSONEncoder_DateTime(t *testing.T) {
 
 	loggerConfig = &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 	output = captureOutput(func() {
-		encoder.LogWarn(loggerConfig, "Test msg")
+		encoder.Log(loggerConfig, ll.WarnLvlName, shared.StdOutput, "Test msg")
 	})
 
 	entry = decodeLogEntry(t, output)
@@ -155,7 +157,7 @@ func TestJSONEncoder_ExtraMessages(t *testing.T) {
 	lConfig := &test.LoggerConfigMock{DateEnabled: false, TimeEnabled: false, ColorsEnabled: false, ShowLogLevel: false}
 
 	output := captureOutput(func() {
-		jsonEncoder.LogInfo(lConfig, "test", "user", "alice", "ip", "192.168.1.1")
+		jsonEncoder.Log(lConfig, ll.InfoLvlName, shared.StdOutput, "test", "user", "alice", "ip", "192.168.1.1")
 	})
 	entry := decodeLogEntry(t, output)
 	assert.NotNil(t, entry)
@@ -163,14 +165,14 @@ func TestJSONEncoder_ExtraMessages(t *testing.T) {
 	assert.Len(t, entry.Extras, 2)
 
 	output = captureOutput(func() {
-		jsonEncoder.LogInfo(lConfig, "test", "user", "alice", "ip")
+		jsonEncoder.Log(lConfig, ll.InfoLvlName, shared.StdOutput, "test", "user", "alice", "ip")
 	})
 	entry = decodeLogEntry(t, output)
 	assert.Nil(t, entry.Extras["ip"])
 	assert.Len(t, entry.Extras, 2)
 
 	output = captureOutput(func() {
-		jsonEncoder.LogInfo(lConfig, "test", "user", "alice", "ip", "192.168.1.1", "city", "paris", "pass")
+		jsonEncoder.Log(lConfig, ll.InfoLvlName, shared.StdOutput, "test", "user", "alice", "ip", "192.168.1.1", "city", "paris", "pass")
 	})
 	entry = decodeLogEntry(t, output)
 	assert.Len(t, entry.Extras, 4)
@@ -185,7 +187,7 @@ func TestJSONEncoder_ShowLogLevelLt(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
-		encoder.LogDebug(loggerConfig, "Test debug message")
+		encoder.Log(loggerConfig, ll.DebugLvlName, shared.StdOutput, "Test debug message")
 	})
 
 	entry := decodeLogEntry(t, output)
@@ -195,7 +197,7 @@ func TestJSONEncoder_ShowLogLevelLt(t *testing.T) {
 	loggerConfig = &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: false}
 
 	output = captureOutput(func() {
-		encoder.LogDebug(loggerConfig, "Test debug message")
+		encoder.Log(loggerConfig, ll.DebugLvlName, shared.StdOutput, "Test debug message")
 	})
 
 	entry = decodeLogEntry(t, output)
@@ -205,7 +207,7 @@ func TestJSONEncoder_ShowLogLevelLt(t *testing.T) {
 func TestJSONEncoder_Color(t *testing.T) {
 	var output string
 
-	testLog := "my testing log"
+	testLog := "my testing Log"
 	originalStdOut := os.Stdout
 	encoder := NewJSONEncoder()
 	lConfig := test.LoggerConfigMock{
@@ -245,7 +247,7 @@ func TestJSONEncoder_ValidJSONOutput(t *testing.T) {
 	var jsonMsg string
 
 	originalStdOut := os.Stdout
-	testLog := "my testing log"
+	testLog := "my testing Log"
 	jsonEncoder := NewJSONEncoder()
 	lConfig := &test.LoggerConfigMock{
 		DateEnabled:   false,
@@ -254,21 +256,29 @@ func TestJSONEncoder_ValidJSONOutput(t *testing.T) {
 		ShowLogLevel:  false,
 	}
 
-	jsonMsg = captureOutput(func() { jsonEncoder.LogInfo(lConfig, testLog, "id", 3) })
+	jsonMsg = captureOutput(
+		func() {
+			jsonEncoder.Log(lConfig, ll.DebugLvlName, shared.StdOutput, testLog, "id", 3)
+		},
+	)
 	assert.NoError(t, json.Unmarshal([]byte(jsonMsg), &shared.JsonLog{}))
 
-	jsonMsg = captureOutput(func() { jsonEncoder.LogInfo(lConfig, testLog, "id", 3, 34, []string{"test", "test2"}) })
+	jsonMsg = captureOutput(
+		func() {
+			jsonEncoder.Log(lConfig, ll.DebugLvlName, shared.StdOutput, testLog, "id", 3, 34, []string{"test", "test2"})
+		},
+	)
 	assert.NoError(t, json.Unmarshal([]byte(jsonMsg), &shared.JsonLog{}))
 
 	jsonMsg = captureOutput(func() {
-		jsonEncoder.LogInfo(lConfig, testLog, "id", 3, 34, []string{"test", "test2"}, []string{"k", "k2"}, 2.3, 'f', 'A')
+		jsonEncoder.Log(lConfig, ll.DebugLvlName, shared.StdOutput, testLog, "id", 3, 34, []string{"test", "test2"}, []string{"k", "k2"}, 2.3, 'f', 'A')
 	})
 	assert.NoError(t, json.Unmarshal([]byte(jsonMsg), &shared.JsonLog{}))
 
 	jsonMsg = "{{'test'}"
 	assert.Error(t, json.Unmarshal([]byte(jsonMsg), &shared.JsonLog{}))
 
-	jsonMsg = "{\"msg\"\"This is my Warn log\",\"extras\":{\"Test arg\":[\"efsdaf\",\"dfas\"],\"[k3 k2]\":3}}"
+	jsonMsg = "{\"msg\"\"This is my Warn Log\",\"extras\":{\"Test arg\":[\"efsdaf\",\"dfas\"],\"[k3 k2]\":3}}"
 	assert.Error(t, json.Unmarshal([]byte(jsonMsg), &shared.JsonLog{}))
 
 	os.Stdout = originalStdOut

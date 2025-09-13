@@ -1,6 +1,8 @@
 package test
 
 import (
+	"os"
+
 	"github.com/pho3b/tiny-logger/logs/log_level"
 	"github.com/pho3b/tiny-logger/shared"
 )
@@ -33,4 +35,8 @@ func (m *LoggerConfigMock) GetEncoderType() shared.EncoderType {
 
 func (m *LoggerConfigMock) GetShowLogLevel() bool {
 	return m.ShowLogLevel
+}
+
+func (m *LoggerConfigMock) GetLogFile() *os.File {
+	return nil
 }

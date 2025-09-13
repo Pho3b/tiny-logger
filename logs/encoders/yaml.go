@@ -2,7 +2,6 @@ package encoders
 
 import (
 	"bytes"
-	"os"
 	"sync"
 
 	"github.com/pho3b/tiny-logger/internal/services"
@@ -12,78 +11,14 @@ import (
 )
 
 type YAMLEncoder struct {
-	BaseEncoder
+	baseEncoder
 	DateTimePrinter services.DateTimePrinter
 	yamlMarshaler   services.YamlMarshaler
 }
 
-// LogDebug formats and prints a debug-level log message in YAML format.
-func (y *YAMLEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 {
-		y.log(logger, ll.DebugLvlName, s.StdOutput, args...)
-	}
-}
-
-// LogInfo formats and prints an info-level log message in YAML format.
-func (y *YAMLEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 {
-		y.log(logger, ll.InfoLvlName, s.StdOutput, args...)
-	}
-}
-
-// LogWarn formats and prints a warning-level log message in YAML format.
-func (y *YAMLEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 {
-		y.log(logger, ll.WarnLvlName, s.StdOutput, args...)
-	}
-}
-
-// LogError formats and prints an error-level log message in YAML format.
-func (y *YAMLEncoder) LogError(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 && !y.areAllNil(args...) {
-		y.log(logger, ll.ErrorLvlName, s.StdErrOutput, args...)
-	}
-}
-
-// LogFatalError formats and prints a fatal error-level log message in YAML format and exits the program.
-func (y *YAMLEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 && !y.areAllNil(args...) {
-		y.log(logger, ll.FatalErrorLvlName, s.StdErrOutput, args...)
-		os.Exit(1)
-	}
-}
-
-// Color formats and prints a colored log message using the specified color.
-//
-// Parameters:
-//   - color: the color to apply to the log message.
-//   - args: variadic msg arguments.
-func (y *YAMLEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, args ...any) {
-	if len(args) > 0 {
-		msgBuffer := y.getBuffer()
-		dEnabled, tEnabled := lConfig.GetDateTimeEnabled()
-		msgBuffer.WriteString(color.String())
-
-		y.composeMsgInto(
-			msgBuffer,
-			y.yamlMarshaler,
-			ll.InfoLvlName,
-			dEnabled,
-			tEnabled,
-			false,
-			y.castToString(args[0]),
-			args[1:]...,
-		)
-
-		msgBuffer.WriteString(c.Reset.String())
-		y.printLog(s.StdOutput, msgBuffer, true)
-		y.putBuffer(msgBuffer)
-	}
-}
-
-// log formats and prints a log message to the given output type.
+// Log formats and prints a log message to the given output type.
 // Internally used by all the encoder Log methods.
-func (y *YAMLEncoder) log(
+func (y *YAMLEncoder) Log(
 	logger s.LoggerConfigsInterface,
 	logLvlName ll.LogLvlName,
 	outType s.OutputType,
@@ -103,8 +38,32 @@ func (y *YAMLEncoder) log(
 		args[1:]...,
 	)
 
-	y.printLog(outType, msgBuffer, true)
+	y.printLog(outType, msgBuffer, true, logger.GetLogFile())
 	y.putBuffer(msgBuffer)
+}
+
+// Color formats and prints a colored Log message using the specified color.
+func (y *YAMLEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...any) {
+	if len(args) > 0 {
+		msgBuffer := y.getBuffer()
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
+		msgBuffer.WriteString(color.String())
+
+		y.composeMsgInto(
+			msgBuffer,
+			y.yamlMarshaler,
+			ll.InfoLvlName,
+			dEnabled,
+			tEnabled,
+			false,
+			y.castToString(args[0]),
+			args[1:]...,
+		)
+
+		msgBuffer.WriteString(c.Reset.String())
+		y.printLog(s.StdOutput, msgBuffer, true, logger.GetLogFile())
+		y.putBuffer(msgBuffer)
+	}
 }
 
 // composeMsgInto formats and writes the given 'msg' into the given buffer.

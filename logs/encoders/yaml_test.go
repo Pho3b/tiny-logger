@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/pho3b/tiny-logger/logs/colors"
+	ll "github.com/pho3b/tiny-logger/logs/log_level"
 	"github.com/pho3b/tiny-logger/shared"
 	"github.com/pho3b/tiny-logger/test"
 	"github.com/stretchr/testify/assert"
@@ -26,7 +27,7 @@ func TestYAMLEncoder_LogDebug(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
-		encoder.LogDebug(loggerConfig, "Test debug message")
+		encoder.Log(loggerConfig, ll.DebugLvlName, shared.StdOutput, "Test debug message")
 	})
 
 	entry := decodeYamlLogEntry(t, output)
@@ -39,7 +40,7 @@ func TestYAMLEncoder_LogInfo(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
-		encoder.LogInfo(loggerConfig, "Test info message")
+		encoder.Log(loggerConfig, ll.InfoLvlName, shared.StdOutput, "Test info message")
 	})
 
 	entry := decodeYamlLogEntry(t, output)
@@ -47,12 +48,37 @@ func TestYAMLEncoder_LogInfo(t *testing.T) {
 	assert.Equal(t, "Test info message", entry.Message)
 }
 
+func TestYAMLEncoder_LogInfoWithExtras(t *testing.T) {
+	encoder := NewYAMLEncoder()
+	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+
+	output := captureOutput(func() {
+		encoder.Log(loggerConfig, ll.InfoLvlName, shared.StdOutput, "Test info message")
+	})
+
+	entry := decodeYamlLogEntry(t, output)
+	assert.Equal(t, "INFO", entry.Level)
+	assert.Equal(t, "Test info message", entry.Message)
+	assert.IsType(t, make(map[string]any), entry.Extras)
+
+	output = captureOutput(func() {
+		encoder.Log(loggerConfig, ll.InfoLvlName, shared.StdOutput, "Test info message with extras", "Location", "Italy", "Weather", "sunny", "Mood")
+	})
+
+	entry = decodeYamlLogEntry(t, output)
+	assert.Equal(t, "Test info message with extras", entry.Message)
+	assert.IsType(t, make(map[string]any), entry.Extras)
+	assert.Equal(t, "Italy", entry.Extras["Location"])
+	assert.Equal(t, "sunny", entry.Extras["Weather"])
+	assert.Equal(t, nil, entry.Extras["Mood"])
+}
+
 func TestYAMLEncoder_LogWarn(t *testing.T) {
 	encoder := NewYAMLEncoder()
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
-		encoder.LogWarn(loggerConfig, "Test warning message")
+		encoder.Log(loggerConfig, ll.WarnLvlName, shared.StdOutput, "Test warning message")
 	})
 
 	entry := decodeYamlLogEntry(t, output)
@@ -65,7 +91,7 @@ func TestYAMLEncoder_LogError(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureErrorOutput(func() {
-		encoder.LogError(loggerConfig, "Test error message")
+		encoder.Log(loggerConfig, ll.ErrorLvlName, shared.StdErrOutput, "Test error message")
 	})
 
 	entry := decodeYamlLogEntry(t, output)
@@ -78,7 +104,7 @@ func TestYAMLEncoder_LogFatalError(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	if os.Getenv("BE_CRASHER") == "1" {
-		encoder.LogFatalError(loggerConfig, "Test fatal error message")
+		encoder.Log(loggerConfig, ll.FatalErrorLvlName, shared.StdErrOutput, "Test fatal error message")
 		return
 	}
 
@@ -86,7 +112,73 @@ func TestYAMLEncoder_LogFatalError(t *testing.T) {
 	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
 	err := cmd.Run()
 	exitError, ok := err.(*exec.ExitError)
-	assert.True(t, ok && !exitError.Success())
+	assert.False(t, ok && !exitError.Success())
+}
+
+func TestYAMLEncoder_DateTime(t *testing.T) {
+	encoder := NewYAMLEncoder()
+	loggerConfig := &test.LoggerConfigMock{TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	output := captureOutput(func() {
+		encoder.Log(loggerConfig, ll.WarnLvlName, shared.StdOutput, "Test msg")
+	})
+
+	entry := decodeYamlLogEntry(t, output)
+	assert.Equal(t, "Test msg", entry.Message)
+	assert.Empty(t, entry.Date)
+	assert.Empty(t, entry.DateTime)
+	assert.NotEmpty(t, entry.Time)
+
+	loggerConfig = &test.LoggerConfigMock{DateEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	output = captureOutput(func() {
+		encoder.Log(loggerConfig, ll.WarnLvlName, shared.StdOutput, "Test msg")
+	})
+
+	entry = decodeYamlLogEntry(t, output)
+	assert.Equal(t, "Test msg", entry.Message)
+	assert.Empty(t, entry.Time)
+	assert.Empty(t, entry.DateTime)
+	assert.NotEmpty(t, entry.Date)
+
+	loggerConfig = &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
+	output = captureOutput(func() {
+		encoder.Log(loggerConfig, ll.WarnLvlName, shared.StdOutput, "Test msg")
+	})
+
+	entry = decodeYamlLogEntry(t, output)
+	assert.Equal(t, "Test msg", entry.Message)
+	assert.Empty(t, entry.Time)
+	assert.Empty(t, entry.Date)
+	assert.NotEmpty(t, entry.DateTime)
+}
+
+func TestYAMLEncoder_ExtraMessages(t *testing.T) {
+	yamlEncoder := NewYAMLEncoder()
+	lConfig := &test.LoggerConfigMock{DateEnabled: false, TimeEnabled: false, ColorsEnabled: false, ShowLogLevel: false}
+
+	output := captureOutput(func() {
+		yamlEncoder.Log(lConfig, ll.InfoLvlName, shared.StdOutput, "test", "user", "alice", "ip", "192.168.1.1")
+	})
+	entry := decodeYamlLogEntry(t, output)
+	assert.NotNil(t, entry)
+	assert.NotNil(t, entry.Extras["ip"])
+	assert.Len(t, entry.Extras, 2)
+
+	output = captureOutput(func() {
+		yamlEncoder.Log(lConfig, ll.InfoLvlName, shared.StdOutput, "test", "user", "alice", "ip")
+	})
+	entry = decodeYamlLogEntry(t, output)
+	assert.Nil(t, entry.Extras["ip"])
+	assert.Len(t, entry.Extras, 2)
+
+	output = captureOutput(func() {
+		yamlEncoder.Log(lConfig, ll.InfoLvlName, shared.StdOutput, "test", "user", "alice", "ip", "192.168.1.1", "city", "paris", "pass")
+	})
+	entry = decodeYamlLogEntry(t, output)
+	assert.Len(t, entry.Extras, 4)
+	assert.Equal(t, "alice", entry.Extras["user"])
+	assert.Equal(t, "192.168.1.1", entry.Extras["ip"])
+	assert.Equal(t, "paris", entry.Extras["city"])
+	assert.Equal(t, nil, entry.Extras["pass"])
 }
 
 func TestYAMLEncoder_ShowLogLevelLt(t *testing.T) {
@@ -94,7 +186,7 @@ func TestYAMLEncoder_ShowLogLevelLt(t *testing.T) {
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
-		encoder.LogDebug(loggerConfig, "Test debug message")
+		encoder.Log(loggerConfig, ll.DebugLvlName, shared.StdOutput, "Test debug message")
 	})
 
 	entry := decodeYamlLogEntry(t, output)
@@ -104,7 +196,7 @@ func TestYAMLEncoder_ShowLogLevelLt(t *testing.T) {
 	loggerConfig = &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: false}
 
 	output = captureOutput(func() {
-		encoder.LogDebug(loggerConfig, "Test debug message")
+		encoder.Log(loggerConfig, ll.DebugLvlName, shared.StdOutput, "Test debug message")
 	})
 
 	entry = decodeYamlLogEntry(t, output)
@@ -113,7 +205,7 @@ func TestYAMLEncoder_ShowLogLevelLt(t *testing.T) {
 
 func TestYAMLEncoder_Color(t *testing.T) {
 	var output string
-	testLog := "my testing log"
+	testLog := "my testing Log"
 	originalStdOut := os.Stdout
 	encoder := NewYAMLEncoder()
 	lConfig := test.LoggerConfigMock{
@@ -153,7 +245,7 @@ func TestYAMLEncoder_ValidYAMLOutput(t *testing.T) {
 	var yamlMsg string
 
 	originalStdOut := os.Stdout
-	testLog := "my testing log"
+	testLog := "my testing Log"
 	yamlEncoder := NewYAMLEncoder()
 	lConfig := &test.LoggerConfigMock{
 		DateEnabled:   false,
@@ -162,21 +254,29 @@ func TestYAMLEncoder_ValidYAMLOutput(t *testing.T) {
 		ShowLogLevel:  false,
 	}
 
-	yamlMsg = captureOutput(func() { yamlEncoder.LogInfo(lConfig, testLog, "id", 3) })
+	yamlMsg = captureOutput(
+		func() {
+			yamlEncoder.Log(lConfig, ll.DebugLvlName, shared.StdOutput, testLog, "id", 3)
+		},
+	)
 	assert.NoError(t, yaml.Unmarshal([]byte(yamlMsg), &shared.YamlLog{}))
 
-	yamlMsg = captureOutput(func() { yamlEncoder.LogInfo(lConfig, testLog, "id", 3, 34, []string{"test", "test2"}) })
+	yamlMsg = captureOutput(
+		func() {
+			yamlEncoder.Log(lConfig, ll.DebugLvlName, shared.StdOutput, testLog, "id", 3, 34, []string{"test", "test2"})
+		},
+	)
 	assert.NoError(t, yaml.Unmarshal([]byte(yamlMsg), &shared.YamlLog{}))
 
 	yamlMsg = captureOutput(func() {
-		yamlEncoder.LogInfo(lConfig, testLog, "id", 3, 34, []string{"test", "test2"}, []string{"k", "k2"}, 2.3, 'f', 'A')
+		yamlEncoder.Log(lConfig, ll.DebugLvlName, shared.StdOutput, testLog, "id", 3, 34, []string{"test", "test2"}, []string{"k", "k2"}, 2.3, 'f', 'A')
 	})
 	assert.NoError(t, yaml.Unmarshal([]byte(yamlMsg), &shared.YamlLog{}))
 
 	yamlMsg = ":'test'}"
 	assert.Error(t, yaml.Unmarshal([]byte(yamlMsg), &shared.YamlLog{}))
 
-	yamlMsg = "level: DEBUG\ndatetime: 21/06/2025 11:34:56\nmsg: my testing log\nextras:\n  id: 3\n  34: [test test2]\n  [k k2]: 2.3\n  f: \"A\""
+	yamlMsg = "level: DEBUG\ndatetime: 21/06/2025 11:34:56\nmsg: my testing Log\nextras:\n  id: 3\n  34: [test test2]\n  [k k2]: 2.3\n  f: \"A\""
 	assert.Error(t, yaml.Unmarshal([]byte(yamlMsg), &shared.YamlLog{}))
 
 	os.Stdout = originalStdOut

@@ -2,7 +2,6 @@ package encoders
 
 import (
 	"bytes"
-	"os"
 	"sync"
 
 	"github.com/pho3b/tiny-logger/internal/services"
@@ -12,79 +11,14 @@ import (
 )
 
 type JSONEncoder struct {
-	BaseEncoder
+	baseEncoder
 	DateTimePrinter services.DateTimePrinter
 	jsonMarshaler   services.JsonMarshaler
 }
 
-// LogDebug formats and prints a debug-level log message in JSON format.
-func (j *JSONEncoder) LogDebug(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 {
-		j.log(logger, ll.DebugLvlName, s.StdOutput, args...)
-	}
-}
-
-// LogInfo formats and prints an info-level log message in JSON format.
-func (j *JSONEncoder) LogInfo(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 {
-		j.log(logger, ll.InfoLvlName, s.StdOutput, args...)
-	}
-}
-
-// LogWarn formats and prints a warning-level log message in JSON format.
-func (j *JSONEncoder) LogWarn(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 {
-		j.log(logger, ll.WarnLvlName, s.StdOutput, args...)
-
-	}
-}
-
-// LogError formats and prints an error-level log message in JSON format.
-func (j *JSONEncoder) LogError(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 && !j.areAllNil(args...) {
-		j.log(logger, ll.ErrorLvlName, s.StdErrOutput, args...)
-	}
-}
-
-// LogFatalError formats and prints a fatal error-level log message in JSON format and exits the program.
-func (j *JSONEncoder) LogFatalError(logger s.LoggerConfigsInterface, args ...any) {
-	if len(args) > 0 && !j.areAllNil(args...) {
-		j.log(logger, ll.FatalErrorLvlName, s.StdErrOutput, args...)
-		os.Exit(1)
-	}
-}
-
-// Color formats and prints a colored log message using the specified color.
-//
-// Parameters:
-//   - color: the color to apply to the log message.
-//   - args: variadic arguments where the first is treated as the message and the rest are appended.
-func (j *JSONEncoder) Color(lConfig s.LoggerConfigsInterface, color c.Color, args ...any) {
-	if len(args) > 0 {
-		dEnabled, tEnabled := lConfig.GetDateTimeEnabled()
-		msgBuffer := j.getBuffer()
-		msgBuffer.WriteString(color.String())
-
-		j.composeMsgInto(
-			msgBuffer,
-			j.jsonMarshaler,
-			ll.InfoLvlName,
-			dEnabled,
-			tEnabled,
-			false,
-			j.castToString(args[0]),
-			args[1:]...,
-		)
-
-		msgBuffer.WriteString(c.Reset.String())
-		j.printLog(s.StdOutput, msgBuffer, true)
-		j.putBuffer(msgBuffer)
-	}
-}
-
-// log formats and prints a log message to the given output type.
+// Log formats and prints a log message to the given output type.
 // Internally used by all the encoder Log methods.
-func (j *JSONEncoder) log(
+func (j *JSONEncoder) Log(
 	logger s.LoggerConfigsInterface,
 	logLvlName ll.LogLvlName,
 	outType s.OutputType,
@@ -104,8 +38,32 @@ func (j *JSONEncoder) log(
 		args[1:]...,
 	)
 
-	j.printLog(outType, msgBuffer, true)
+	j.printLog(outType, msgBuffer, true, logger.GetLogFile())
 	j.putBuffer(msgBuffer)
+}
+
+// Color formats and prints a colored Log message using the specified color.
+func (j *JSONEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...any) {
+	if len(args) > 0 {
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
+		msgBuffer := j.getBuffer()
+		msgBuffer.WriteString(color.String())
+
+		j.composeMsgInto(
+			msgBuffer,
+			j.jsonMarshaler,
+			ll.InfoLvlName,
+			dEnabled,
+			tEnabled,
+			false,
+			j.castToString(args[0]),
+			args[1:]...,
+		)
+
+		msgBuffer.WriteString(c.Reset.String())
+		j.printLog(s.StdOutput, msgBuffer, true, logger.GetLogFile())
+		j.putBuffer(msgBuffer)
+	}
 }
 
 // composeMsgInto formats and writes the given 'msg' into the given buffer.

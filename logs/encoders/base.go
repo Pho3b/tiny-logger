@@ -74,6 +74,7 @@ func (b *BaseEncoder) castToString(arg any) string {
 	case error:
 		return v.Error()
 	default:
+		// Using the slower fmt.Sprint only for unknown types
 		return fmt.Sprint(v)
 	}
 }

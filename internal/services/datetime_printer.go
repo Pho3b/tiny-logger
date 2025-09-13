@@ -61,32 +61,27 @@ func (d *DateTimePrinter) RetrieveDateTime(addDate, addTime bool) (string, strin
 }
 
 // updateCurrentDateEveryDay synchronizes with the system clock and updates the DateTimePrinter's
-// currentDate property every full Day.
+// currentDate property every midnight.
 func (d *DateTimePrinter) updateCurrentDateEveryDay() {
-	now := d.timeNow()
-	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	initialDelay := now.Sub(midnight) // Time since midnight
-	time.Sleep(initialDelay)
+	for {
+		now := d.timeNow()
+		d.currentDate.Store(now.Format("02/01/2006"))
 
-	ticker := time.NewTicker(24 * time.Hour)
-	defer ticker.Stop()
-
-	for t := range ticker.C {
-		d.currentDate.Store(t.Format("02/01/2006"))
+		// computing next midnight in local time zone
+		nextMidnight := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, now.Location())
+		time.Sleep(time.Until(nextMidnight))
 	}
 }
 
 // updateCurrentTimeEverySecond synchronizes with the system clock and updates the DateTimePrinter's
 // currentTime property every full second.
 func (d *DateTimePrinter) updateCurrentTimeEverySecond() {
-	initialDelay := 1*time.Second - time.Duration(d.timeNow().Nanosecond())*time.Nanosecond
-	time.Sleep(initialDelay)
+	for {
+		now := d.timeNow()
+		d.currentTime.Store(now.Format("15:04:05"))
 
-	ticker := time.NewTicker(1 * time.Second)
-	defer ticker.Stop()
-
-	for t := range ticker.C {
-		d.currentTime.Store(t.Format("15:04:05"))
+		nextSecond := now.Truncate(time.Second).Add(time.Second)
+		time.Sleep(time.Until(nextSecond))
 	}
 }
 

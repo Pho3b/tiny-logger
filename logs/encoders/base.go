@@ -87,20 +87,18 @@ func (b *baseEncoder) printLog(outType s.OutputType, msgBuffer *bytes.Buffer, ne
 		msgBuffer.WriteByte('\n')
 	}
 
-	if file != nil {
-		_, err := file.Write(msgBuffer.Bytes())
-		if err != nil {
-			_, _ = os.Stderr.Write(msgBuffer.Bytes())
-		}
-
-		return
-	}
-
 	switch outType {
 	case s.StdOutput:
 		_, _ = os.Stdout.Write(msgBuffer.Bytes())
 	case s.StdErrOutput:
 		_, _ = os.Stderr.Write(msgBuffer.Bytes())
+	case s.FileOutput:
+		if file == nil {
+			_, _ = os.Stderr.Write([]byte("error: file is nil"))
+			return
+		}
+
+		_, _ = file.Write(msgBuffer.Bytes())
 	}
 }
 

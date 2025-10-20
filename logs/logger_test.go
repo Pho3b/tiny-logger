@@ -2,6 +2,7 @@ package logs
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"regexp"
@@ -309,6 +310,168 @@ func TestLogger_CorrectLogsFormattingDefaultEncoder(t *testing.T) {
 	assert.Equal(t, "testing log", matches[3])
 }
 
+func TestAreAllNil(t *testing.T) {
+	logger := NewLogger()
+
+	// Test with all nil arguments
+	result := logger.areAllNil(nil, nil, nil)
+	assert.True(t, result)
+
+	// Test with no arguments
+	result = logger.areAllNil()
+	assert.True(t, result)
+
+	// Test with some nil and some non-nil arguments
+	result = logger.areAllNil(nil, "test", nil)
+	assert.False(t, result)
+
+	// Test with all non-nil arguments
+	result = logger.areAllNil("test", 123, true)
+	assert.False(t, result)
+}
+
+func TestLogger_SetLogFile(t *testing.T) {
+	logger := NewLogger()
+	testFileName := "test_log_file.txt"
+	file := createMockOutFile(testFileName)
+
+	// Clean up any existing test file
+	defer os.Remove(testFileName)
+
+	// Test setting a new log file
+	result := logger.SetLogFile(file)
+	assert.NotNil(t, result)
+	assert.IsType(t, &Logger{}, result)
+	assert.NotNil(t, logger.outFile)
+	assert.NotNil(t, logger.GetLogFile())
+
+	// Verify the file was created
+	_, err := os.Stat(testFileName)
+	assert.NoError(t, err)
+
+	// Test that logging to a file works
+	logger.Info("test log message")
+
+	// Read file content
+	content, err := os.ReadFile(testFileName)
+	assert.NoError(t, err)
+	assert.Contains(t, string(content), "test log message")
+
+	// Clean up
+	logger.CloseLogFile()
+}
+
+func TestLogger_SetLogFile_ExistingFile(t *testing.T) {
+	logger := NewLogger()
+	testFileName := "existing_test_log_file.txt"
+	file := createMockOutFile(testFileName)
+
+	// Create a file with initial content
+	initialContent := "initial content\n"
+	err := os.WriteFile(testFileName, []byte(initialContent), 0644)
+	assert.NoError(t, err)
+	defer os.Remove(testFileName)
+
+	// Set the log file (should append, not overwrite)
+	logger.SetLogFile(file)
+	logger.Info("appended message")
+	logger.CloseLogFile()
+
+	// Verify content was appended
+	content, err := os.ReadFile(testFileName)
+	assert.NoError(t, err)
+	contentStr := string(content)
+	assert.Contains(t, contentStr, "initial content")
+	assert.Contains(t, contentStr, "appended message")
+}
+
+func TestLogger_SetLogFile_Nil(t *testing.T) {
+	logger := NewLogger()
+	warnOut := captureOutput(func() { logger.SetLogFile(nil) })
+	assert.Equal(t, "WARN: the given log file is nil, skipping logs redirection\n", warnOut)
+	assert.Nil(t, logger.outFile)
+	assert.Nil(t, logger.GetLogFile())
+}
+
+func TestLogger_CloseLogFile(t *testing.T) {
+	logger := NewLogger()
+	testFileName := "close_test_log_file.txt"
+	file := createMockOutFile(testFileName)
+
+	// Clean up
+	os.Remove(testFileName)
+	defer os.Remove(testFileName)
+
+	// Set a log file first
+	logger.SetLogFile(file)
+	assert.NotNil(t, logger.GetLogFile())
+
+	// Close the log file
+	logger.CloseLogFile()
+	assert.Nil(t, logger.GetLogFile())
+	assert.Nil(t, logger.outFile)
+}
+
+func TestLogger_CloseLogFile_NoFileSet(t *testing.T) {
+	logger := NewLogger()
+
+	// Test closing when no file is set - should log warning and not crash
+	output := captureOutput(func() {
+		logger.CloseLogFile()
+	})
+
+	assert.Contains(t, output, "no log file opened, skipping close")
+	assert.Nil(t, logger.GetLogFile())
+}
+
+func TestLogger_GetLogFile(t *testing.T) {
+	logger := NewLogger()
+
+	// Initially should return nil
+	assert.Nil(t, logger.GetLogFile())
+
+	// After setting a file should return a file pointer
+	testFileName := "get_log_file_test.txt"
+	file := createMockOutFile(testFileName)
+	defer os.Remove(testFileName)
+
+	logger.SetLogFile(file)
+	lFile := logger.GetLogFile()
+	assert.NotNil(t, lFile)
+	assert.IsType(t, &os.File{}, lFile)
+
+	logger.CloseLogFile()
+	assert.Nil(t, logger.GetLogFile())
+}
+
+func TestLogger_LogsRedirectedToFile(t *testing.T) {
+	logger := NewLogger()
+	testFileName := "redirect_test_log_file.txt"
+	file := createMockOutFile(testFileName)
+	defer os.Remove(testFileName)
+
+	// Set the log file
+	logger.SetLogFile(file)
+
+	// Log various levels
+	logger.Debug("debug message")
+	logger.Info("info message")
+	logger.Warn("warn message")
+	logger.Error("error message")
+
+	logger.CloseLogFile()
+
+	// Verify all messages were written to file
+	content, err := os.ReadFile(testFileName)
+	assert.NoError(t, err)
+	contentStr := string(content)
+
+	assert.Contains(t, contentStr, "debug message")
+	assert.Contains(t, contentStr, "info message")
+	assert.Contains(t, contentStr, "warn message")
+	assert.Contains(t, contentStr, "error message")
+}
+
 // captureOutput redirects os.Stdout to capture the output of the function f
 func captureOutput(f func()) string {
 	r, w, _ := os.Pipe()
@@ -341,4 +504,14 @@ func captureErrorOutput(f func()) string {
 	var buf bytes.Buffer
 	_, _ = buf.ReadFrom(r)
 	return buf.String()
+}
+
+func createMockOutFile(fileName string) *os.File {
+	file, err := os.OpenFile(fmt.Sprintf("./%s", fileName), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		println("ERROR: cannot open out file", err)
+		return nil
+	}
+
+	return file
 }

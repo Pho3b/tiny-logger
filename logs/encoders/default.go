@@ -91,7 +91,7 @@ func (d *DefaultEncoder) composeMsgInto(
 		d.addFormattedDateTime(buf, dateStr, timeStr, dateTimeStr)
 	}
 
-	if showLogLevel || dateEnabled || timeEnabled {
+	if showLogLevel || isDateOrTimeEnabled {
 		buf.WriteByte(':')
 		buf.WriteByte(' ')
 	}

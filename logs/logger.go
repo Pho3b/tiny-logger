@@ -166,26 +166,32 @@ func (l *Logger) GetLogFile() *os.File {
 	return l.outFile
 }
 
-// SetLogFile creates a new file at the given file URI and sets it as the current log file.
-// If the file already exists, the file is not overwritten, but it will still be used as the current log file.
-func (l *Logger) SetLogFile(fileURI string) *Logger {
-	f, err := os.OpenFile(fileURI, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	l.FatalError(err)
+// SetLogFile sets the given os.File as the current Logger output log file.
+// If the given file is nil, a warning is logged and the method does nothing.
+func (l *Logger) SetLogFile(file *os.File) *Logger {
+	if file == nil {
+		l.Warn("the given log file is nil, skipping logs redirection")
+		return l
+	}
 
-	l.outFile = f
+	l.outFile = file
 	return l
 }
 
 // CloseLogFile closes the current log file if it exists. If no file is set, a warning is logged
 // and the method does nothing.
-func (l *Logger) CloseLogFile() {
+func (l *Logger) CloseLogFile() error {
 	if l.outFile == nil {
 		l.Warn("no log file opened, skipping close")
-		return
+		return nil
 	}
 
-	l.FatalError(l.outFile.Close())
+	if err := l.outFile.Close(); err != nil {
+		return err
+	}
+
 	l.outFile = nil
+	return nil
 }
 
 // areAllNil returns true if all the given args are 'nil', false otherwise.

@@ -1,15 +1,15 @@
 # Tiny Logger
 
 A fast, lightweight, zero-dependency logging solution for Go applications that prioritizes performance and
-simplicity.
-
+simplicity.    
 Compatible with Go version 1.18.x and above
 
 ## ✅ Key Features
 
-- *Lightweight**: No external dependencies mean faster builds and smaller binaries.
+- **Lightweight**: No external dependencies mean faster builds and smaller binaries.
 - **Simplicity**: Clean API design with a minimal learning curve. You'll set it up in seconds.
-- **Performance**: The library is benchmarked to be very fast. It implements custom JSON marshaling specifically optimized for logging
+- **Performance**: The library is benchmarked to be very fast. It implements custom JSON marshaling specifically
+  optimized for logging
     - Up to 1.4x faster JSON marshaling than `encoding/json`
     - Up to 5x faster YAML marshaling than `gopkg.in/yaml.v3`
 - **Color Support**: Built-in ANSI color support for terminal output
@@ -21,12 +21,14 @@ Compatible with Go version 1.18.x and above
 ## 🎯 Use Examples
 
 ````go
+/******************** Basic Logging methods usage ********************/
 logger := logs.NewLogger()
 logger.Warn("my warning test") // stdout: 'WARN: my warning test'
 logger.Info("my", "into", "test", 2) // stdout: 'INFO: my info test 2'
 logger.Debug("hey", "check this", "debug") // stdout: 'DEBUG: hey check this debug'
 logger.Error("here is the error") // stderr: 'ERROR: here is the error'
 
+/******************** Configuration setup example ********************/
 logger := logs.NewLogger().
 SetLogLvl(ll.WarnLvlName).
 EnableColors(true).
@@ -40,11 +42,26 @@ logger.Debug("This is my Debug log", "Test arg") // stdout: {"level":"DEBUG","da
 
 logger.AddTime(false)
 logger.Debug("This is my Debug log", "Test arg") // stdout: {"level":"DEBUG","date":"03/11/2024","message":"This is my Debug log Test second arg"}
+
+/******************** Logging to a file example ********************/
+file, err := os.OpenFile("./my-out-file.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+if err != nil {
+    println("ERROR: cannot open out file", err)
+}
+
+// From this point on loggers logs will be redirected to the file
+logger := logs.NewLogger().SetLogFile(file)
+
+logger.Debug("This is my Debug log", "Test arg")
+// Close the file
+logger.CloseLogFile()
+
 ````
 
 ## 📊 Benchmark Results
 
-Data retrieved by executing the `./test/benchmark_test.go` file on my personal computer.
+This is the result of running the `./test/benchmark_test.go` benchmark on my machine, (ns/op)times do not include the
+terminal graphical visualization time.
 
 | Encoder             | Configuration      | ns/op | B/op | allocs/op |
 |---------------------|--------------------|-------|------|-----------|

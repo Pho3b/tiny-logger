@@ -2,9 +2,9 @@ package logs
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"regexp"
 	"sync"
 	"testing"
@@ -333,23 +333,23 @@ func TestAreAllNil(t *testing.T) {
 func TestLogger_SetLogFile(t *testing.T) {
 	logger := NewLogger()
 	testFileName := "test_log_file.txt"
+	file := createMockOutFile(testFileName)
 
 	// Clean up any existing test file
-	os.Remove(testFileName)
 	defer os.Remove(testFileName)
 
 	// Test setting a new log file
-	result := logger.SetLogFile(testFileName)
+	result := logger.SetLogFile(file)
 	assert.NotNil(t, result)
 	assert.IsType(t, &Logger{}, result)
 	assert.NotNil(t, logger.outFile)
 	assert.NotNil(t, logger.GetLogFile())
 
-	// Verify file was created
+	// Verify the file was created
 	_, err := os.Stat(testFileName)
 	assert.NoError(t, err)
 
-	// Test that logging to file works
+	// Test that logging to a file works
 	logger.Info("test log message")
 
 	// Read file content
@@ -364,15 +364,16 @@ func TestLogger_SetLogFile(t *testing.T) {
 func TestLogger_SetLogFile_ExistingFile(t *testing.T) {
 	logger := NewLogger()
 	testFileName := "existing_test_log_file.txt"
+	file := createMockOutFile(testFileName)
 
-	// Create file with initial content
+	// Create a file with initial content
 	initialContent := "initial content\n"
 	err := os.WriteFile(testFileName, []byte(initialContent), 0644)
 	assert.NoError(t, err)
 	defer os.Remove(testFileName)
 
-	// Set log file (should append, not overwrite)
-	logger.SetLogFile(testFileName)
+	// Set the log file (should append, not overwrite)
+	logger.SetLogFile(file)
 	logger.Info("appended message")
 	logger.CloseLogFile()
 
@@ -384,33 +385,25 @@ func TestLogger_SetLogFile_ExistingFile(t *testing.T) {
 	assert.Contains(t, contentStr, "appended message")
 }
 
-func TestLogger_SetLogFile_InvalidPath(t *testing.T) {
-	// This test verifies the logger handles fatal errors on invalid file paths
-	if os.Getenv("BE_CRASHER") == "1" {
-		logger := NewLogger()
-		// Try to create file in non-existent directory
-		logger.SetLogFile("/non/existent/directory/test.log")
-		return
-	}
-
-	// Run the test in a subprocess to catch the fatal error
-	cmd := exec.Command(os.Args[0], "-test.run=TestLogger_SetLogFile_InvalidPath")
-	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
-	err := cmd.Run()
-	exitError, ok := err.(*exec.ExitError)
-	assert.True(t, ok && !exitError.Success())
+func TestLogger_SetLogFile_Nil(t *testing.T) {
+	logger := NewLogger()
+	warnOut := captureOutput(func() { logger.SetLogFile(nil) })
+	assert.Equal(t, "WARN: the given log file is nil, skipping logs redirection\n", warnOut)
+	assert.Nil(t, logger.outFile)
+	assert.Nil(t, logger.GetLogFile())
 }
 
 func TestLogger_CloseLogFile(t *testing.T) {
 	logger := NewLogger()
 	testFileName := "close_test_log_file.txt"
+	file := createMockOutFile(testFileName)
 
 	// Clean up
 	os.Remove(testFileName)
 	defer os.Remove(testFileName)
 
 	// Set a log file first
-	logger.SetLogFile(testFileName)
+	logger.SetLogFile(file)
 	assert.NotNil(t, logger.GetLogFile())
 
 	// Close the log file
@@ -437,15 +430,15 @@ func TestLogger_GetLogFile(t *testing.T) {
 	// Initially should return nil
 	assert.Nil(t, logger.GetLogFile())
 
-	// After setting file should return file pointer
+	// After setting a file should return a file pointer
 	testFileName := "get_log_file_test.txt"
-	os.Remove(testFileName)
+	file := createMockOutFile(testFileName)
 	defer os.Remove(testFileName)
 
-	logger.SetLogFile(testFileName)
-	file := logger.GetLogFile()
-	assert.NotNil(t, file)
-	assert.IsType(t, &os.File{}, file)
+	logger.SetLogFile(file)
+	lFile := logger.GetLogFile()
+	assert.NotNil(t, lFile)
+	assert.IsType(t, &os.File{}, lFile)
 
 	logger.CloseLogFile()
 	assert.Nil(t, logger.GetLogFile())
@@ -454,12 +447,11 @@ func TestLogger_GetLogFile(t *testing.T) {
 func TestLogger_LogsRedirectedToFile(t *testing.T) {
 	logger := NewLogger()
 	testFileName := "redirect_test_log_file.txt"
-
-	os.Remove(testFileName)
+	file := createMockOutFile(testFileName)
 	defer os.Remove(testFileName)
 
-	// Set log file
-	logger.SetLogFile(testFileName)
+	// Set the log file
+	logger.SetLogFile(file)
 
 	// Log various levels
 	logger.Debug("debug message")
@@ -512,4 +504,14 @@ func captureErrorOutput(f func()) string {
 	var buf bytes.Buffer
 	_, _ = buf.ReadFrom(r)
 	return buf.String()
+}
+
+func createMockOutFile(fileName string) *os.File {
+	file, err := os.OpenFile(fmt.Sprintf("./%s", fileName), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		println("ERROR: cannot open out file", err)
+		return nil
+	}
+
+	return file
 }

@@ -8,15 +8,15 @@ Compatible with Go version 1.18.x and above
 
 - **Lightweight**: No external dependencies mean faster builds and smaller binaries.
 - **Simplicity**: Clean API design with a minimal learning curve. You'll set it up in seconds.
-- **Performance**: The library is benchmarked to be very fast. It implements custom JSON marshaling specifically
-  optimized for logging
+- **Performance**: The library is benchmarked to be very fast. It implements custom JSON and YAML marshaling 
+specifically optimized for logging
     - Up to 1.4x faster JSON marshaling than `encoding/json`
     - Up to 5x faster YAML marshaling than `gopkg.in/yaml.v3`
 - **Color Support**: Built-in ANSI color support for terminal output
 - **Thread-Safe**: Concurrent-safe logging with atomic operations
-- **Time-Optimized**: Efficient date/time print handling with minimal allocations
+- **Time-Optimized**: Efficient date/time print built-int logic with minimal allocations
 - **Reliability**: Thoroughly tested with high test coverage
-- **Maintainability**: Small, focused codebase makes it easy to understand and modify
+- **Maintainability**: A small, focused codebase makes it easy to understand and modify at will
 
 ## 🎯 Use Examples
 
@@ -55,7 +55,6 @@ logger := logs.NewLogger().SetLogFile(file)
 logger.Debug("This is my Debug log", "Test arg")
 // Close the file
 logger.CloseLogFile()
-
 ````
 
 ## 📊 Benchmark Results

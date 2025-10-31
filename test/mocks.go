@@ -40,3 +40,7 @@ func (m *LoggerConfigMock) GetShowLogLevel() bool {
 func (m *LoggerConfigMock) GetLogFile() *os.File {
 	return nil
 }
+
+func (m *LoggerConfigMock) GetDateTimeFormat() shared.DateTimeFormat {
+	return shared.IT
+}

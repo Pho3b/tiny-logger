@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/pho3b/tiny-logger/shared"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,28 +17,28 @@ func TestDateTimePrinter_PrintDateTime(t *testing.T) {
 	}
 
 	t.Run("Return both date and time", func(t *testing.T) {
-		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(true, true)
+		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(true, true, shared.IT)
 		assert.Empty(t, dateRes)
 		assert.Empty(t, timeRes)
 		assert.Equal(t, "01/11/2023 15:30:45", dateTimeRes)
 	})
 
 	t.Run("Return date only", func(t *testing.T) {
-		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(true, false)
+		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(true, false, shared.IT)
 		assert.Equal(t, "01/11/2023", dateRes)
 		assert.Equal(t, "", timeRes)
 		assert.Equal(t, "", dateTimeRes)
 	})
 
 	t.Run("Return time only", func(t *testing.T) {
-		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(false, true)
+		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(false, true, shared.IT)
 		assert.Equal(t, "", dateRes)
 		assert.Equal(t, "15:30:45", timeRes)
 		assert.Equal(t, "", dateTimeRes)
 	})
 
 	t.Run("Return empty string when both flags are false", func(t *testing.T) {
-		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(false, false)
+		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(false, false, shared.IT)
 		assert.Equal(t, "", dateRes)
 		assert.Equal(t, "", timeRes)
 		assert.Equal(t, "", dateTimeRes)
@@ -53,7 +54,7 @@ func TestDateTimePrinter_FullSecondUpdate(t *testing.T) {
 	dateTimePrinter := NewDateTimePrinter()
 
 	t.Run("Return both date and time", func(t *testing.T) {
-		dateRes, timeRes, _ := dateTimePrinter.RetrieveDateTime(true, true)
+		dateRes, timeRes, _ := dateTimePrinter.RetrieveDateTime(true, true, shared.IT)
 		assert.Empty(t, dateRes)
 		assert.Empty(t, timeRes)
 

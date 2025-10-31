@@ -35,6 +35,7 @@ func (y *YAMLEncoder) Log(
 		tEnabled,
 		logger.GetShowLogLevel(),
 		y.castToString(args[0]),
+		logger.GetDateTimeFormat(),
 		args[1:]...,
 	)
 
@@ -57,6 +58,7 @@ func (y *YAMLEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 			tEnabled,
 			false,
 			y.castToString(args[0]),
+			logger.GetDateTimeFormat(),
 			args[1:]...,
 		)
 
@@ -75,10 +77,11 @@ func (y *YAMLEncoder) composeMsgInto(
 	timeEnabled bool,
 	showLogLevel bool,
 	msg string,
+	dateTimeFormat s.DateTimeFormat,
 	extras ...any,
 ) {
 	buf.Grow((averageWordLen * len(extras)) + len(msg) + 60)
-	date, time, dateTime := y.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
+	date, time, dateTime := y.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled, dateTimeFormat)
 
 	if !showLogLevel {
 		logLevel = ""

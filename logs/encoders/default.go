@@ -33,6 +33,7 @@ func (d *DefaultEncoder) Log(
 		tEnabled,
 		logger.GetColorsEnabled(),
 		logger.GetShowLogLevel(),
+		logger.GetDateTimeFormat(),
 		args...,
 	)
 
@@ -53,6 +54,7 @@ func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, a
 			false,
 			false,
 			false,
+			logger.GetDateTimeFormat(),
 			args...,
 		)
 
@@ -70,6 +72,7 @@ func (d *DefaultEncoder) composeMsgInto(
 	timeEnabled bool,
 	headerColorEnabled bool,
 	showLogLevel bool,
+	dateTimeFormat s.DateTimeFormat,
 	args ...any,
 ) {
 	buf.Grow(len(args)*averageWordLen + defaultCharOverhead)
@@ -87,7 +90,7 @@ func (d *DefaultEncoder) composeMsgInto(
 	}
 
 	if isDateOrTimeEnabled {
-		dateStr, timeStr, dateTimeStr := d.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
+		dateStr, timeStr, dateTimeStr := d.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled, dateTimeFormat)
 		d.addFormattedDateTime(buf, dateStr, timeStr, dateTimeStr)
 	}
 

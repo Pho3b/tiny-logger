@@ -23,6 +23,7 @@ type LoggerConfigsInterface interface {
 	GetLogLvlIntValue() int8
 	GetEncoderType() EncoderType
 	GetLogFile() *os.File
+	GetDateTimeFormat() DateTimeFormat
 }
 
 type EncoderInterface interface {

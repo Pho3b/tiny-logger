@@ -10,13 +10,14 @@ import (
 )
 
 type Logger struct {
-	dateEnabled   bool
-	timeEnabled   bool
-	colorsEnabled bool
-	showLogLevel  bool
-	encoder       s.EncoderInterface
-	logLvl        ll.LogLevel
-	outFile       *os.File
+	dateEnabled    bool
+	timeEnabled    bool
+	colorsEnabled  bool
+	showLogLevel   bool
+	encoder        s.EncoderInterface
+	logLvl         ll.LogLevel
+	outFile        *os.File
+	dateTimeFormat s.DateTimeFormat
 }
 
 // Debug logs a debug-level message if the logger's log level allows it.
@@ -56,6 +57,21 @@ func (l *Logger) FatalError(args ...any) {
 	}
 }
 
+// Color formats and prints a colored log message using the specified color.
+func (l *Logger) Color(color colors.Color, args ...any) {
+	l.encoder.Color(l, color, args...)
+}
+
+// GetLogLvlName returns the current log level name as a string.
+func (l *Logger) GetLogLvlName() ll.LogLvlName {
+	return ll.LogLvlIntToName[l.logLvl.Lvl]
+}
+
+// GetLogLvlIntValue returns the current log level as an int8 value.
+func (l *Logger) GetLogLvlIntValue() int8 {
+	return l.logLvl.Lvl
+}
+
 // SetLogLvl sets the log level of the logger based on a provided log level name.
 // If the provided name is invalid, it defaults to DebugLvlName.
 func (l *Logger) SetLogLvl(logLvlName ll.LogLvlName) *Logger {
@@ -75,19 +91,9 @@ func (l *Logger) SetLogLvlEnvVariable(envVariableName string) *Logger {
 	return l
 }
 
-// Color formats and prints a colored log message using the specified color.
-func (l *Logger) Color(color colors.Color, args ...any) {
-	l.encoder.Color(l, color, args...)
-}
-
-// GetLogLvlName returns the current log level name as a string.
-func (l *Logger) GetLogLvlName() ll.LogLvlName {
-	return ll.LogLvlIntToName[l.logLvl.Lvl]
-}
-
-// GetLogLvlIntValue returns the current log level as an int8 value.
-func (l *Logger) GetLogLvlIntValue() int8 {
-	return l.logLvl.Lvl
+// GetColorsEnabled returns true if color output is enabled, false otherwise.
+func (l *Logger) GetColorsEnabled() bool {
+	return l.colorsEnabled
 }
 
 // EnableColors enables or disables color output in the logger based on the given parameter.
@@ -98,9 +104,9 @@ func (l *Logger) EnableColors(enable bool) *Logger {
 	return l
 }
 
-// GetColorsEnabled returns true if color output is enabled, false otherwise.
-func (l *Logger) GetColorsEnabled() bool {
-	return l.colorsEnabled
+// GetShowLogLevel returns the showLogLevel value of the logger.
+func (l *Logger) GetShowLogLevel() bool {
+	return l.showLogLevel
 }
 
 // ShowLogLevel enables/disables the log level visibility of the logger.
@@ -110,9 +116,9 @@ func (l *Logger) ShowLogLevel(enable bool) *Logger {
 	return l
 }
 
-// GetShowLogLevel returns the showLogLevel value of the logger.
-func (l *Logger) GetShowLogLevel() bool {
-	return l.showLogLevel
+// GetDateTimeEnabled returns the current date and time settings of the logger.
+func (l *Logger) GetDateTimeEnabled() (dateEnabled bool, timeEnabled bool) {
+	return l.dateEnabled, l.timeEnabled
 }
 
 // AddDateTime enables or disables both date and time in log output.
@@ -137,9 +143,9 @@ func (l *Logger) AddTime(addTime bool) *Logger {
 	return l
 }
 
-// GetDateTimeEnabled returns the current date and time settings of the logger.
-func (l *Logger) GetDateTimeEnabled() (dateEnabled bool, timeEnabled bool) {
-	return l.dateEnabled, l.timeEnabled
+// GetEncoderType returns the currently set Encoder type.
+func (l *Logger) GetEncoderType() s.EncoderType {
+	return l.encoder.GetType()
 }
 
 // SetEncoder sets the Encoder that will be used to print logs.
@@ -154,11 +160,6 @@ func (l *Logger) SetEncoder(encoderType s.EncoderType) *Logger {
 	}
 
 	return l
-}
-
-// GetEncoderType returns the currently set Encoder type.
-func (l *Logger) GetEncoderType() s.EncoderType {
-	return l.encoder.GetType()
 }
 
 // GetLogFile returns the current log file. If no file is set, it returns nil.
@@ -194,6 +195,19 @@ func (l *Logger) CloseLogFile() error {
 	return nil
 }
 
+// GetDateTimeFormat returns the current DateTimeFormat of the logger.
+func (l *Logger) GetDateTimeFormat() s.DateTimeFormat {
+	return l.dateTimeFormat
+}
+
+// SetDateTimeFormat sets the DateTimeFormat of the logger.
+func (l *Logger) SetDateTimeFormat(format s.DateTimeFormat) *Logger {
+	l.dateTimeFormat = format
+	l.SetEncoder(l.GetEncoderType())
+
+	return l
+}
+
 // areAllNil returns true if all the given args are 'nil', false otherwise.
 func (l *Logger) areAllNil(args ...any) bool {
 	for _, arg := range args {
@@ -216,14 +230,9 @@ func (l *Logger) checkOutFile(outType s.OutputType) s.OutputType {
 
 // NewLogger creates and returns a new Logger instance with default settings.
 func NewLogger() *Logger {
-	logger := &Logger{
-		dateEnabled:   false,
-		timeEnabled:   false,
-		colorsEnabled: false,
-		showLogLevel:  true,
-		encoder:       encoders.NewDefaultEncoder(),
-	}
+	logger := &Logger{showLogLevel: true, dateTimeFormat: s.IT}
 	logger.SetLogLvlEnvVariable(ll.DefaultEnvLogLvlVar)
+	logger.SetEncoder(s.DefaultEncoderType)
 
 	return logger
 }

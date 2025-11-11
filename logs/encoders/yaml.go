@@ -39,7 +39,8 @@ func (y *YAMLEncoder) Log(
 		args[1:]...,
 	)
 
-	y.printLog(outType, msgBuffer, true, logger.GetLogFile())
+	msgBuffer.WriteByte('\n')
+	y.printLog(outType, msgBuffer, logger.GetLogFile())
 	y.putBuffer(msgBuffer)
 }
 
@@ -63,7 +64,8 @@ func (y *YAMLEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 		)
 
 		msgBuffer.WriteString(c.Reset.String())
-		y.printLog(s.StdOutput, msgBuffer, true, logger.GetLogFile())
+		msgBuffer.WriteByte('\n')
+		y.printLog(s.StdOutput, msgBuffer, logger.GetLogFile())
 		y.putBuffer(msgBuffer)
 	}
 }

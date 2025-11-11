@@ -1,6 +1,7 @@
 package services
 
 import (
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -24,6 +25,7 @@ type DateTimePrinter struct {
 	timeNow     func() time.Time // Function to get current time, allows mocking for tests
 	currentDate atomic.Value
 	currentTime atomic.Value
+	currentUnix atomic.Value
 	dateOnce    sync.Once
 	timeOnce    sync.Once
 }
@@ -35,12 +37,28 @@ type DateTimePrinter struct {
 // - If neither addDate nor addTime is true, empty strings are returned.
 func (d *DateTimePrinter) RetrieveDateTime(addDate, addTime bool, format s.DateTimeFormat) (string, string, string) {
 	var dateRes, timeRes string
-	now := d.timeNow()
+
+	if format == s.UnixTimestamp {
+		unixTs := d.currentUnix.Load()
+
+		if unixTs == nil || unixTs.(string) == "" {
+			now := d.timeNow()
+			d.currentUnix.Store(strconv.FormatInt(now.Unix(), 10))
+			d.timeOnce.Do(func() {
+				go d.updateCurrentTimeEverySecond(format)
+			})
+
+			unixTs = d.currentUnix.Load()
+		}
+
+		return "", "", unixTs.(string)
+	}
 
 	if addDate {
 		cDate := d.currentDate.Load()
 
-		if cDate == nil {
+		if cDate == nil || cDate.(string) == "" {
+			now := d.timeNow()
 			d.currentDate.Store(now.Format(dateFormat[format]))
 			d.dateOnce.Do(func() {
 				go d.updateCurrentDateEveryDay(format)
@@ -55,8 +73,10 @@ func (d *DateTimePrinter) RetrieveDateTime(addDate, addTime bool, format s.DateT
 	if addTime {
 		cTime := d.currentTime.Load()
 
-		if cTime == nil {
+		if cTime == nil || cTime.(string) == "" {
+			now := d.timeNow()
 			d.currentTime.Store(now.Format(timeFormat[format]))
+			d.currentUnix.Store("")
 			d.timeOnce.Do(func() {
 				go d.updateCurrentTimeEverySecond(format)
 			})
@@ -92,7 +112,12 @@ func (d *DateTimePrinter) updateCurrentDateEveryDay(format s.DateTimeFormat) {
 func (d *DateTimePrinter) updateCurrentTimeEverySecond(format s.DateTimeFormat) {
 	for {
 		now := d.timeNow()
-		d.currentTime.Store(now.Format(timeFormat[format]))
+
+		if format == s.UnixTimestamp {
+			d.currentUnix.Store(strconv.FormatInt(now.Unix(), 10))
+		} else {
+			d.currentTime.Store(now.Format(timeFormat[format]))
+		}
 
 		nextSecond := now.Truncate(time.Second).Add(time.Second)
 		time.Sleep(time.Until(nextSecond))

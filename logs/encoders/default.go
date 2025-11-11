@@ -37,7 +37,8 @@ func (d *DefaultEncoder) Log(
 		args...,
 	)
 
-	d.printLog(outType, msgBuffer, true, logger.GetLogFile())
+	msgBuffer.WriteByte('\n')
+	d.printLog(outType, msgBuffer, logger.GetLogFile())
 	d.putBuffer(msgBuffer)
 }
 
@@ -59,7 +60,8 @@ func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, a
 		)
 
 		msgBuffer.WriteString(c.Reset.String())
-		d.printLog(s.StdOutput, msgBuffer, true, logger.GetLogFile())
+		msgBuffer.WriteByte('\n')
+		d.printLog(s.StdOutput, msgBuffer, logger.GetLogFile())
 		d.putBuffer(msgBuffer)
 	}
 }

@@ -22,4 +22,5 @@ const (
 	IT DateTimeFormat = iota
 	JP
 	US
+	UnixTimestamp
 )

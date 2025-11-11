@@ -81,12 +81,7 @@ func (b *baseEncoder) castToString(arg any) string {
 
 // printLog prints the given msgBuffer to the given outputType (stdout or stderr).
 // If 'file' is not nil, the message is written to the file.
-// If 'newLine' is true, a new line is added at the end of the message.
-func (b *baseEncoder) printLog(outType s.OutputType, msgBuffer *bytes.Buffer, newLine bool, file *os.File) {
-	if newLine {
-		msgBuffer.WriteByte('\n')
-	}
-
+func (b *baseEncoder) printLog(outType s.OutputType, msgBuffer *bytes.Buffer, file *os.File) {
 	switch outType {
 	case s.StdOutput:
 		_, _ = os.Stdout.Write(msgBuffer.Bytes())

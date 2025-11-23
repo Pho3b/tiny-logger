@@ -6,7 +6,8 @@ Compatible with Go version 1.18.x and above
 
 ## ✅ Key Features
 
-- **Lightweight**: No external dependencies mean faster builds and smaller binaries.
+- **Lightweight**: No external dependencies mean faster builds and smaller binaries <br>
+  The dependencies that you see in the `go.mod` file are not included in the final binary since they are only used in `_test` files.
 - **Simplicity**: Clean API design with a minimal learning curve. You'll set it up in seconds.
 - **Performance**: The library is benchmarked to be very fast. It implements custom JSON and YAML marshaling
   specifically optimized for logging

@@ -32,8 +32,10 @@ type DateTimePrinter struct {
 	unixOnce      sync.Once
 }
 
-// RetrieveDateTime returns the current date, time and/or unix timestamp depending on the parameters.
-// If no date or time is enabled, the corresponding string is empty.
+// RetrieveDateTime returns the current date, time, and combined/unix string based on the configuration.
+// Returns: (dateString, timeString, combinedOrUnixString).
+// If the format is UnixTimestamp, the timestamp is returned as the third value, ignoring the boolean flags.
+// Otherwise, 'addDate' and 'addTime' control which components are generated.
 func (d *DateTimePrinter) RetrieveDateTime(addDate, addTime bool) (string, string, string) {
 	var dateRes, timeRes string
 	currentFmt := d.currentFormat.Load().(s.DateTimeFormat)

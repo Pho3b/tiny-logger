@@ -12,7 +12,7 @@ import (
 func TestJsonMarshaler_Marshal_MessageOnly(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := &JsonMarshaler{}
-	entry := &JsonLogEntry{
+	entry := JsonLogEntry{
 		Message: "basic message",
 	}
 
@@ -27,7 +27,7 @@ func TestJsonMarshaler_Marshal_MessageOnly(t *testing.T) {
 func TestJsonMarshaler_Marshal_SomeFields(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := &JsonMarshaler{}
-	entry := &JsonLogEntry{
+	entry := JsonLogEntry{
 		Level:   "warn",
 		Message: "something odd happened",
 		Time:    "12:34:56",
@@ -45,7 +45,7 @@ func TestJsonMarshaler_Marshal_SomeFields(t *testing.T) {
 func TestJsonMarshaler_Marshal_AllFields(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := &JsonMarshaler{}
-	entry := &JsonLogEntry{
+	entry := JsonLogEntry{
 		Level:          "info",
 		Date:           "2025-06-14",
 		Time:           "20:15:30",
@@ -65,7 +65,7 @@ func TestJsonMarshaler_Marshal_AllFields(t *testing.T) {
 func TestJsonMarshaler_Marshal_WithExtras(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := &JsonMarshaler{}
-	entry := &JsonLogEntry{
+	entry := JsonLogEntry{
 		Level:    "INFO",
 		Date:     "",
 		Time:     "",
@@ -86,7 +86,7 @@ func TestJsonMarshaler_Marshal_WithExtras(t *testing.T) {
 func TestJsonMarshaler_Unmarshal_Std_Marshal_Result(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := JsonMarshaler{}
-	entry := &JsonLogEntry{
+	entry := JsonLogEntry{
 		Level:    "INFO",
 		Date:     "",
 		Time:     "",
@@ -102,7 +102,7 @@ func TestJsonMarshaler_Unmarshal_Std_Marshal_Result(t *testing.T) {
 func TestJsonMarshaler_Marshal_UnixTimestamp(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := &JsonMarshaler{}
-	entry := &JsonLogEntry{
+	entry := JsonLogEntry{
 		Level:          "info",
 		DateTime:       "1700000000",
 		Message:        "unix time",
@@ -121,7 +121,7 @@ func TestJsonMarshaler_Marshal_UnixTimestamp(t *testing.T) {
 func TestJsonMarshaler_Marshal_OnlyDate(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := &JsonMarshaler{}
-	entry := &JsonLogEntry{
+	entry := JsonLogEntry{
 		Level:   "info",
 		Date:    "23/10/2022",
 		Message: "only date",
@@ -139,7 +139,7 @@ func TestJsonMarshaler_Marshal_OnlyDate(t *testing.T) {
 func TestJsonMarshaler_Marshal_OnlyTime(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := &JsonMarshaler{}
-	entry := &JsonLogEntry{
+	entry := JsonLogEntry{
 		Level:   "info",
 		Time:    "16:00",
 		Message: "only time",

@@ -27,7 +27,7 @@ type YamlMarshaler struct {
 
 // MarshalInto converts a YamlLogEntry into a YAML-formatted byte slice and adds it to the given buffer
 // to minimize allocations during marshaling.
-func (y *YamlMarshaler) MarshalInto(buf *bytes.Buffer, logEntry *YamlLogEntry) {
+func (y *YamlMarshaler) MarshalInto(buf *bytes.Buffer, logEntry YamlLogEntry) {
 	extrasLen := len(logEntry.Extras)
 	buf.Grow(yamlCharOverhead + (averageExtraLen * extrasLen))
 

@@ -85,7 +85,7 @@ func TestYamlMarshaler_Marshal(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			marshaler.MarshalInto(buf, &tt.entry)
+			marshaler.MarshalInto(buf, tt.entry)
 			result := buf.String()
 
 			if result != tt.expected {
@@ -165,7 +165,7 @@ func TestYamlMarshaler_WriteValue(t *testing.T) {
 func TestYamlMarshaler_Marshal_UnixTimestamp(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := NewYamlMarshaler()
-	entry := &YamlLogEntry{
+	entry := YamlLogEntry{
 		Level:          "debug",
 		DateTime:       "1715421234", // Unix timestamp string
 		Message:        "unix timestamp test",
@@ -186,7 +186,7 @@ func TestYamlMarshaler_Marshal_UnixTimestamp(t *testing.T) {
 func TestYamlMarshaler_Marshal_OnlyDate(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := &YamlMarshaler{}
-	entry := &YamlLogEntry{
+	entry := YamlLogEntry{
 		Level:   "debug",
 		Date:    "23/10/2022",
 		Message: "only date",
@@ -204,7 +204,7 @@ func TestYamlMarshaler_Marshal_OnlyDate(t *testing.T) {
 func TestYamlMarshaler_Marshal_OnlyTime(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := &YamlMarshaler{}
-	entry := &YamlLogEntry{
+	entry := YamlLogEntry{
 		Level:   "debug",
 		Time:    "16:00",
 		Message: "only time",

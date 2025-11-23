@@ -26,7 +26,7 @@ type JsonMarshaler struct {
 
 // MarshalInto converts a JsonLogEntry into a JSON-formatted byte slice and adds it to the given buffer
 // to minimize allocations during marshaling.
-func (j *JsonMarshaler) MarshalInto(buf *bytes.Buffer, logEntry *JsonLogEntry) {
+func (j *JsonMarshaler) MarshalInto(buf *bytes.Buffer, logEntry JsonLogEntry) {
 	extrasLen := len(logEntry.Extras)
 	buf.Grow(jsonCharOverhead + (averageExtraLen * extrasLen))
 

@@ -97,7 +97,7 @@ func (j *JSONEncoder) composeMsgInto(
 
 	jsonMarshaler.MarshalInto(
 		buf,
-		&services.JsonLogEntry{
+		services.JsonLogEntry{
 			Level:          logLevel.String(),
 			Date:           dateStr,
 			DateTime:       dateTimeStr,

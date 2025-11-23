@@ -2,6 +2,8 @@ package encoders
 
 import (
 	"bytes"
+	"fmt"
+	"os"
 	"sync"
 
 	"github.com/pho3b/tiny-logger/internal/services"
@@ -38,7 +40,9 @@ func (d *DefaultEncoder) Log(
 	)
 
 	msgBuffer.WriteByte('\n')
-	d.printLog(outType, msgBuffer, logger.GetLogFile())
+	if err := d.printLog(outType, msgBuffer, logger.GetLogFile()); err != nil {
+		fmt.Fprintf(os.Stderr, "tiny-logger: write error: %v\n", err)
+	}
 	d.putBuffer(msgBuffer)
 }
 
@@ -60,7 +64,9 @@ func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, a
 
 		msgBuffer.WriteString(c.Reset.String())
 		msgBuffer.WriteByte('\n')
-		d.printLog(s.StdOutput, msgBuffer, logger.GetLogFile())
+		if err := d.printLog(s.StdOutput, msgBuffer, logger.GetLogFile()); err != nil {
+			fmt.Fprintf(os.Stderr, "tiny-logger: write error: %v\n", err)
+		}
 		d.putBuffer(msgBuffer)
 	}
 }

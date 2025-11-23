@@ -81,20 +81,24 @@ func (b *baseEncoder) castToString(arg any) string {
 
 // printLog prints the given msgBuffer to the given outputType (stdout or stderr).
 // If 'file' is not nil, the message is written to the file.
-func (b *baseEncoder) printLog(outType s.OutputType, msgBuffer *bytes.Buffer, file *os.File) {
+func (b *baseEncoder) printLog(outType s.OutputType, msgBuffer *bytes.Buffer, file *os.File) error {
 	switch outType {
 	case s.StdOutput:
-		_, _ = os.Stdout.Write(msgBuffer.Bytes())
+		_, err := os.Stdout.Write(msgBuffer.Bytes())
+		return err
 	case s.StdErrOutput:
-		_, _ = os.Stderr.Write(msgBuffer.Bytes())
+		_, err := os.Stderr.Write(msgBuffer.Bytes())
+		return err
 	case s.FileOutput:
 		if file == nil {
-			_, _ = os.Stderr.Write([]byte("error: file is nil"))
-			return
+			_, err := os.Stderr.Write([]byte("error: file is nil"))
+			return err
 		}
 
-		_, _ = file.Write(msgBuffer.Bytes())
+		_, err := file.Write(msgBuffer.Bytes())
+		return err
 	}
+	return nil
 }
 
 // getBuffer returns a new bytes buffer from the pool.

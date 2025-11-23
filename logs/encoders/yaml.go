@@ -2,8 +2,6 @@ package encoders
 
 import (
 	"bytes"
-	"fmt"
-	"os"
 	"sync"
 
 	"github.com/pho3b/tiny-logger/internal/services"
@@ -42,9 +40,7 @@ func (y *YAMLEncoder) Log(
 	)
 
 	msgBuffer.WriteByte('\n')
-	if err := y.printLog(outType, msgBuffer, logger.GetLogFile()); err != nil {
-		fmt.Fprintf(os.Stderr, "tiny-logger: write error: %v\n", err)
-	}
+	y.printLog(outType, msgBuffer, logger.GetLogFile())
 	y.putBuffer(msgBuffer)
 }
 
@@ -69,9 +65,7 @@ func (y *YAMLEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 
 		msgBuffer.WriteString(c.Reset.String())
 		msgBuffer.WriteByte('\n')
-		if err := y.printLog(s.StdOutput, msgBuffer, logger.GetLogFile()); err != nil {
-			fmt.Fprintf(os.Stderr, "tiny-logger: write error: %v\n", err)
-		}
+		y.printLog(s.StdOutput, msgBuffer, logger.GetLogFile())
 		y.putBuffer(msgBuffer)
 	}
 }

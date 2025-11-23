@@ -159,6 +159,7 @@ func (l *Logger) SetEncoder(encoderType s.EncoderType) *Logger {
 		l.encoder = encoders.NewYAMLEncoder()
 	}
 
+	l.encoder.SetDateTimeFormat(l.dateTimeFormat)
 	return l
 }
 
@@ -203,6 +204,8 @@ func (l *Logger) GetDateTimeFormat() s.DateTimeFormat {
 // SetDateTimeFormat sets the DateTimeFormat of the logger.
 func (l *Logger) SetDateTimeFormat(format s.DateTimeFormat) *Logger {
 	l.dateTimeFormat = format
+	l.encoder.SetDateTimeFormat(l.dateTimeFormat)
+
 	return l
 }
 

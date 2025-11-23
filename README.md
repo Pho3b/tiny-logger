@@ -8,8 +8,8 @@ Compatible with Go version 1.18.x and above
 
 - **Lightweight**: No external dependencies mean faster builds and smaller binaries.
 - **Simplicity**: Clean API design with a minimal learning curve. You'll set it up in seconds.
-- **Performance**: The library is benchmarked to be very fast. It implements custom JSON and YAML marshaling 
-specifically optimized for logging
+- **Performance**: The library is benchmarked to be very fast. It implements custom JSON and YAML marshaling
+  specifically optimized for logging
     - Up to 1.4x faster JSON marshaling than `encoding/json`
     - Up to 5x faster YAML marshaling than `gopkg.in/yaml.v3`
 - **Color Support**: Built-in ANSI color support for terminal output
@@ -30,10 +30,10 @@ logger.Error("here is the error") // stderr: 'ERROR: here is the error'
 
 /******************** Configuration setup example ********************/
 logger := logs.NewLogger().
-SetLogLvl(ll.WarnLvlName).
-EnableColors(true).
-AddTime(true).
-AddDate(true)
+    SetLogLvl(ll.WarnLvlName).
+    EnableColors(true).
+    AddTime(true).
+    AddDate(true)
 
 logger.Warn("This is my Warn log", "Test arg") // stdout: WARN[03/11/2024 18:35:43]: This is my Warn log Test arg
 
@@ -49,12 +49,18 @@ if err != nil {
     println("ERROR: cannot open out file", err)
 }
 
-// From this point on loggers logs will be redirected to the file
-logger := logs.NewLogger().SetLogFile(file)
-
+logger := logs.NewLogger().SetLogFile(file) // From this point on loggers logs will be redirected to the file
 logger.Debug("This is my Debug log", "Test arg")
-// Close the file
+
 logger.CloseLogFile()
+
+/******************** Date Time Formatting example ********************/
+logger := logs.NewLogger().SetDateTimeFormat(shared.IT)
+logger.Debug("This is my Debug log", "Test arg") // stdout: 03/11/2024 18:35:43: This is my Debug log Test arg
+logger.SetDateTimeFormat(shared.US)
+logger.Debug("This is my Debug log", "Test arg") // stdout: 11/03/2024 18:35:43: This is my Debug log Test arg
+logger.SetDateTimeFormat(shared.UnixTimestamp)
+logger.Debug("This is my Debug log", "Test arg") // stdout: 1690982143.000000 This is my Debug log Test arg
 ````
 
 ## 📊 Benchmark Results
@@ -64,12 +70,12 @@ terminal graphical visualization time.
 
 | Encoder             | Configuration      | ns/op | B/op | allocs/op |
 |---------------------|--------------------|-------|------|-----------|
-| **Default Encoder** | All Properties OFF | 468.6 | 80   | 1         |
-|                     | All Properties ON  | 580.9 | 104  | 2         |
-| **JSON Encoder**    | All Properties OFF | 513.3 | 80   | 1         |
-|                     | All Properties ON  | 595.7 | 104  | 2         |
-| **YAML Encoder**    | All Properties OFF | 566.0 | 80   | 1         |
-|                     | All Properties ON  | 657.5 | 104  | 2         |
+| **Default Encoder** | All Properties OFF | 472.5 | 80   | 1         |
+|                     | All Properties ON  | 540.1 | 104  | 2         |
+| **JSON Encoder**    | All Properties OFF | 516.7 | 80   | 1         |
+|                     | All Properties ON  | 560.5 | 104  | 2         |
+| **YAML Encoder**    | All Properties OFF | 533.5 | 80   | 1         |
+|                     | All Properties ON  | 592.5 | 104  | 2         |
 
 ## 🤝 Contributing
 

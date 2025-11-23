@@ -12,7 +12,7 @@ import (
 
 type JSONEncoder struct {
 	baseEncoder
-	DateTimePrinter services.DateTimePrinter
+	DateTimePrinter *services.DateTimePrinter
 	jsonMarshaler   services.JsonMarshaler
 }
 
@@ -35,7 +35,6 @@ func (j *JSONEncoder) Log(
 		tEnabled,
 		logger.GetShowLogLevel(),
 		j.castToString(args[0]),
-		logger.GetDateTimeFormat(),
 		args[1:]...,
 	)
 
@@ -59,7 +58,6 @@ func (j *JSONEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 			tEnabled,
 			false,
 			j.castToString(args[0]),
-			logger.GetDateTimeFormat(),
 			args[1:]...,
 		)
 
@@ -68,6 +66,12 @@ func (j *JSONEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 		j.printLog(s.StdOutput, msgBuffer, logger.GetLogFile())
 		j.putBuffer(msgBuffer)
 	}
+}
+
+// SetDateTimeFormat updates the date and time format used by the encoder's DateTimePrinter.
+// This method triggers an immediate update of the cached date and time strings to match the new format.
+func (j *JSONEncoder) SetDateTimeFormat(format s.DateTimeFormat) {
+	j.DateTimePrinter.UpdateDateTimeFormat(format)
 }
 
 // composeMsgInto formats and writes the given 'msg' into the given buffer.
@@ -79,11 +83,10 @@ func (j *JSONEncoder) composeMsgInto(
 	timeEnabled bool,
 	showLogLevel bool,
 	msg string,
-	dateTimeFormat s.DateTimeFormat,
 	extras ...any,
 ) {
 	buf.Grow((averageWordLen * len(extras)) + len(msg) + 60)
-	dateStr, timeStr, dateTimeStr := j.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled, dateTimeFormat)
+	dateStr, timeStr, dateTimeStr := j.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
 
 	if !showLogLevel {
 		logLevel = ""

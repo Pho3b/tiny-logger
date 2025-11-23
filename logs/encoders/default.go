@@ -12,8 +12,9 @@ import (
 
 type DefaultEncoder struct {
 	baseEncoder
+	dateTimeFormat  s.DateTimeFormat
 	ColorsPrinter   services.ColorsPrinter
-	DateTimePrinter services.DateTimePrinter
+	DateTimePrinter *services.DateTimePrinter
 }
 
 // Log formats and prints a Log message to the given output type.
@@ -33,7 +34,6 @@ func (d *DefaultEncoder) Log(
 		tEnabled,
 		logger.GetColorsEnabled(),
 		logger.GetShowLogLevel(),
-		logger.GetDateTimeFormat(),
 		args...,
 	)
 
@@ -55,7 +55,6 @@ func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, a
 			false,
 			false,
 			false,
-			logger.GetDateTimeFormat(),
 			args...,
 		)
 
@@ -66,6 +65,12 @@ func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, a
 	}
 }
 
+// SetDateTimeFormat updates the date and time format used by the encoder's DateTimePrinter.
+// This method triggers an immediate update of the cached date and time strings to match the new format.
+func (d *DefaultEncoder) SetDateTimeFormat(format s.DateTimeFormat) {
+	d.DateTimePrinter.UpdateDateTimeFormat(format)
+}
+
 // composeMsgInto formats and writes the given 'msg' into the given buffer.
 func (d *DefaultEncoder) composeMsgInto(
 	buf *bytes.Buffer,
@@ -74,7 +79,6 @@ func (d *DefaultEncoder) composeMsgInto(
 	timeEnabled bool,
 	headerColorEnabled bool,
 	showLogLevel bool,
-	dateTimeFormat s.DateTimeFormat,
 	args ...any,
 ) {
 	buf.Grow(len(args)*averageWordLen + defaultCharOverhead)
@@ -92,7 +96,7 @@ func (d *DefaultEncoder) composeMsgInto(
 	}
 
 	if isDateOrTimeEnabled {
-		dateStr, timeStr, dateTimeStr := d.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled, dateTimeFormat)
+		dateStr, timeStr, dateTimeStr := d.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
 		d.addFormattedDateTime(buf, dateStr, timeStr, dateTimeStr)
 	}
 

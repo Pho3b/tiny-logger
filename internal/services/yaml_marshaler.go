@@ -118,7 +118,7 @@ func (y *YamlMarshaler) writeLogEntryProperties(
 		buf.WriteByte('\n')
 	}
 
-	if dateTime != "" {
+	if dateTime != "" || (date != "" && time != "") {
 		if dateTimeFormat == s.UnixTimestamp {
 			buf.WriteString("ts: ")
 		} else {

@@ -40,7 +40,7 @@ func (d *DateTimePrinter) RetrieveDateTime(addDate, addTime bool) (string, strin
 	var dateRes, timeRes string
 	currentFmt := d.currentFormat.Load().(s.DateTimeFormat)
 
-	if currentFmt == s.UnixTimestamp {
+	if currentFmt == s.UnixTimestamp && (addDate || addTime) {
 		d.unixOnce.Do(func() {
 			d.currentUnix.Store(strconv.FormatInt(d.timeNow().Unix(), 10))
 			go d.updateCurrentUnixEverySecond()

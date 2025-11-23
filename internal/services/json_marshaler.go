@@ -124,7 +124,7 @@ func (j *JsonMarshaler) writeLogEntryProperties(
 		buf.WriteByte(',')
 	}
 
-	if dateTime != "" {
+	if dateTime != "" || (date != "" && time != "") {
 		if dateTimeFormat == s.UnixTimestamp {
 			buf.WriteString("\"ts\":\"")
 		} else {

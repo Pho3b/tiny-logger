@@ -3,6 +3,8 @@ package services
 import (
 	"bytes"
 	"testing"
+
+	"github.com/pho3b/tiny-logger/shared"
 )
 
 func TestYamlMarshaler_Marshal(t *testing.T) {
@@ -35,7 +37,7 @@ func TestYamlMarshaler_Marshal(t *testing.T) {
 				DateTime: "2024-03-21T15:04:05",
 				Message:  "full test message",
 			},
-			expected: "level: DEBUG\ndate: 2024-03-21\ntime: 15:04:05\ndatetime: 2024-03-21T15:04:05\nmsg: full test message\n",
+			expected: "level: DEBUG\ndatetime: 2024-03-21T15:04:05\nmsg: full test message\n",
 		},
 		{
 			name: "with simple extras",
@@ -83,7 +85,7 @@ func TestYamlMarshaler_Marshal(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			marshaler.MarshalInto(buf, tt.entry)
+			marshaler.MarshalInto(buf, &tt.entry)
 			result := buf.String()
 
 			if result != tt.expected {
@@ -157,5 +159,62 @@ func TestYamlMarshaler_WriteValue(t *testing.T) {
 					tt.value, tt.isKey, buf.String(), tt.expected)
 			}
 		})
+	}
+}
+
+func TestYamlMarshaler_Marshal_UnixTimestamp(t *testing.T) {
+	buf := &bytes.Buffer{}
+	m := NewYamlMarshaler()
+	entry := &YamlLogEntry{
+		Level:          "debug",
+		DateTime:       "1715421234", // Unix timestamp string
+		Message:        "unix timestamp test",
+		DateTimeFormat: shared.UnixTimestamp,
+	}
+
+	// Pass pointer to m because MarshalInto is defined on *YamlMarshaler
+	(&m).MarshalInto(buf, entry)
+
+	got := buf.String()
+	want := "level: debug\nts: 1715421234\nmsg: unix timestamp test\n"
+
+	if got != want {
+		t.Errorf("Marshal() = %q, want %q", got, want)
+	}
+}
+
+func TestYamlMarshaler_Marshal_OnlyDate(t *testing.T) {
+	buf := &bytes.Buffer{}
+	m := &YamlMarshaler{}
+	entry := &YamlLogEntry{
+		Level:   "debug",
+		Date:    "23/10/2022",
+		Message: "only date",
+	}
+
+	m.MarshalInto(buf, entry)
+	got := buf.String()
+	// Expecting "ts" key instead of "datetime"
+	want := "level: debug\ndate: 23/10/2022\nmsg: only date\n"
+	if got != want {
+		t.Errorf("Marshal() = %q, want %q", got, want)
+	}
+}
+
+func TestYamlMarshaler_Marshal_OnlyTime(t *testing.T) {
+	buf := &bytes.Buffer{}
+	m := &YamlMarshaler{}
+	entry := &YamlLogEntry{
+		Level:   "debug",
+		Time:    "16:00",
+		Message: "only time",
+	}
+
+	m.MarshalInto(buf, entry)
+	got := buf.String()
+	// Expecting "ts" key instead of "datetime"
+	want := "level: debug\ntime: 16:00\nmsg: only time\n"
+	if got != want {
+		t.Errorf("Marshal() = %q, want %q", got, want)
 	}
 }

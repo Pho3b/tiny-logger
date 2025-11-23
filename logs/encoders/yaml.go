@@ -12,7 +12,7 @@ import (
 
 type YAMLEncoder struct {
 	baseEncoder
-	DateTimePrinter services.DateTimePrinter
+	DateTimePrinter *services.DateTimePrinter
 	yamlMarshaler   services.YamlMarshaler
 }
 
@@ -34,11 +34,13 @@ func (y *YAMLEncoder) Log(
 		dEnabled,
 		tEnabled,
 		logger.GetShowLogLevel(),
+		logger.GetDateTimeFormat(),
 		y.castToString(args[0]),
 		args[1:]...,
 	)
 
-	y.printLog(outType, msgBuffer, true, logger.GetLogFile())
+	msgBuffer.WriteByte('\n')
+	y.printLog(outType, msgBuffer, logger.GetLogFile())
 	y.putBuffer(msgBuffer)
 }
 
@@ -56,14 +58,22 @@ func (y *YAMLEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 			dEnabled,
 			tEnabled,
 			false,
+			logger.GetDateTimeFormat(),
 			y.castToString(args[0]),
 			args[1:]...,
 		)
 
 		msgBuffer.WriteString(c.Reset.String())
-		y.printLog(s.StdOutput, msgBuffer, true, logger.GetLogFile())
+		msgBuffer.WriteByte('\n')
+		y.printLog(s.StdOutput, msgBuffer, logger.GetLogFile())
 		y.putBuffer(msgBuffer)
 	}
+}
+
+// SetDateTimeFormat updates the date and time format used by the encoder's DateTimePrinter.
+// This method triggers an immediate update of the cached date and time strings to match the new format.
+func (y *YAMLEncoder) SetDateTimeFormat(format s.DateTimeFormat) {
+	y.DateTimePrinter.UpdateDateTimeFormat(format)
 }
 
 // composeMsgInto formats and writes the given 'msg' into the given buffer.
@@ -74,6 +84,7 @@ func (y *YAMLEncoder) composeMsgInto(
 	dateEnabled bool,
 	timeEnabled bool,
 	showLogLevel bool,
+	dateTimeFormat s.DateTimeFormat,
 	msg string,
 	extras ...any,
 ) {
@@ -87,12 +98,13 @@ func (y *YAMLEncoder) composeMsgInto(
 	yamlMarshaler.MarshalInto(
 		buf,
 		services.YamlLogEntry{
-			Level:    logLevel.String(),
-			Date:     date,
-			Time:     time,
-			DateTime: dateTime,
-			Message:  msg,
-			Extras:   extras,
+			Level:          logLevel.String(),
+			Date:           date,
+			Time:           time,
+			DateTime:       dateTime,
+			DateTimeFormat: dateTimeFormat,
+			Message:        msg,
+			Extras:         extras,
 		},
 	)
 }

@@ -46,16 +46,17 @@ func TestJsonMarshaler_Marshal_AllFields(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := &JsonMarshaler{}
 	entry := JsonLogEntry{
-		Level:    "info",
-		Date:     "2025-06-14",
-		Time:     "20:15:30",
-		DateTime: "2025-06-14T20:15:30",
-		Message:  "all systems go",
+		Level:          "info",
+		Date:           "2025-06-14",
+		Time:           "20:15:30",
+		DateTime:       "2025-06-14T20:15:30",
+		Message:        "all systems go",
+		DateTimeFormat: shared.IT,
 	}
 
 	m.MarshalInto(buf, entry)
 	got := buf.String()
-	want := `{"level":"info","date":"2025-06-14","time":"20:15:30","datetime":"2025-06-14T20:15:30","msg":"all systems go"}`
+	want := `{"level":"info","datetime":"2025-06-14T20:15:30","msg":"all systems go"}`
 	if got != want {
 		t.Errorf("Marshal() = %q, want %q", got, want)
 	}
@@ -96,4 +97,59 @@ func TestJsonMarshaler_Unmarshal_Std_Marshal_Result(t *testing.T) {
 
 	m.MarshalInto(buf, entry)
 	assert.NoError(t, json.Unmarshal(buf.Bytes(), &shared.JsonLog{}))
+}
+
+func TestJsonMarshaler_Marshal_UnixTimestamp(t *testing.T) {
+	buf := &bytes.Buffer{}
+	m := &JsonMarshaler{}
+	entry := JsonLogEntry{
+		Level:          "info",
+		DateTime:       "1700000000",
+		Message:        "unix time",
+		DateTimeFormat: shared.UnixTimestamp,
+	}
+
+	m.MarshalInto(buf, entry)
+	got := buf.String()
+	// Expecting "ts" key instead of "datetime"
+	want := `{"level":"info","ts":"1700000000","msg":"unix time"}`
+	if got != want {
+		t.Errorf("Marshal() = %q, want %q", got, want)
+	}
+}
+
+func TestJsonMarshaler_Marshal_OnlyDate(t *testing.T) {
+	buf := &bytes.Buffer{}
+	m := &JsonMarshaler{}
+	entry := JsonLogEntry{
+		Level:   "info",
+		Date:    "23/10/2022",
+		Message: "only date",
+	}
+
+	m.MarshalInto(buf, entry)
+	got := buf.String()
+	// Expecting "ts" key instead of "datetime"
+	want := `{"level":"info","date":"23/10/2022","msg":"only date"}`
+	if got != want {
+		t.Errorf("Marshal() = %q, want %q", got, want)
+	}
+}
+
+func TestJsonMarshaler_Marshal_OnlyTime(t *testing.T) {
+	buf := &bytes.Buffer{}
+	m := &JsonMarshaler{}
+	entry := JsonLogEntry{
+		Level:   "info",
+		Time:    "16:00",
+		Message: "only time",
+	}
+
+	m.MarshalInto(buf, entry)
+	got := buf.String()
+	// Expecting "ts" key instead of "datetime"
+	want := `{"level":"info","time":"16:00","msg":"only time"}`
+	if got != want {
+		t.Errorf("Marshal() = %q, want %q", got, want)
+	}
 }

@@ -23,10 +23,12 @@ type LoggerConfigsInterface interface {
 	GetLogLvlIntValue() int8
 	GetEncoderType() EncoderType
 	GetLogFile() *os.File
+	GetDateTimeFormat() DateTimeFormat
 }
 
 type EncoderInterface interface {
 	Log(logger LoggerConfigsInterface, lvl log_level.LogLvlName, outType OutputType, args ...any)
 	Color(lConfigs LoggerConfigsInterface, color colors.Color, args ...any)
 	GetType() EncoderType
+	SetDateTimeFormat(format DateTimeFormat)
 }

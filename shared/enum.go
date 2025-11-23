@@ -15,3 +15,12 @@ const (
 	StdErrOutput OutputType = 1
 	FileOutput   OutputType = 2
 )
+
+type DateTimeFormat int8
+
+const (
+	IT DateTimeFormat = iota
+	JP
+	US
+	UnixTimestamp
+)

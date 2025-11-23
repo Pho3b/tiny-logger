@@ -12,7 +12,7 @@ import (
 
 type JSONEncoder struct {
 	baseEncoder
-	DateTimePrinter services.DateTimePrinter
+	DateTimePrinter *services.DateTimePrinter
 	jsonMarshaler   services.JsonMarshaler
 }
 
@@ -34,11 +34,13 @@ func (j *JSONEncoder) Log(
 		dEnabled,
 		tEnabled,
 		logger.GetShowLogLevel(),
+		logger.GetDateTimeFormat(),
 		j.castToString(args[0]),
 		args[1:]...,
 	)
 
-	j.printLog(outType, msgBuffer, true, logger.GetLogFile())
+	msgBuffer.WriteByte('\n')
+	j.printLog(outType, msgBuffer, logger.GetLogFile())
 	j.putBuffer(msgBuffer)
 }
 
@@ -56,14 +58,22 @@ func (j *JSONEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 			dEnabled,
 			tEnabled,
 			false,
+			logger.GetDateTimeFormat(),
 			j.castToString(args[0]),
 			args[1:]...,
 		)
 
 		msgBuffer.WriteString(c.Reset.String())
-		j.printLog(s.StdOutput, msgBuffer, true, logger.GetLogFile())
+		msgBuffer.WriteByte('\n')
+		j.printLog(s.StdOutput, msgBuffer, logger.GetLogFile())
 		j.putBuffer(msgBuffer)
 	}
+}
+
+// SetDateTimeFormat updates the date and time format used by the encoder's DateTimePrinter.
+// This method triggers an immediate update of the cached date and time strings to match the new format.
+func (j *JSONEncoder) SetDateTimeFormat(format s.DateTimeFormat) {
+	j.DateTimePrinter.UpdateDateTimeFormat(format)
 }
 
 // composeMsgInto formats and writes the given 'msg' into the given buffer.
@@ -74,6 +84,7 @@ func (j *JSONEncoder) composeMsgInto(
 	dateEnabled bool,
 	timeEnabled bool,
 	showLogLevel bool,
+	dateTimeFormat s.DateTimeFormat,
 	msg string,
 	extras ...any,
 ) {
@@ -87,12 +98,13 @@ func (j *JSONEncoder) composeMsgInto(
 	jsonMarshaler.MarshalInto(
 		buf,
 		services.JsonLogEntry{
-			Level:    logLevel.String(),
-			Date:     dateStr,
-			DateTime: dateTimeStr,
-			Time:     timeStr,
-			Message:  msg,
-			Extras:   extras,
+			Level:          logLevel.String(),
+			Date:           dateStr,
+			DateTime:       dateTimeStr,
+			Time:           timeStr,
+			DateTimeFormat: dateTimeFormat,
+			Message:        msg,
+			Extras:         extras,
 		},
 	)
 }

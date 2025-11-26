@@ -52,7 +52,7 @@ func (d *DateTimePrinter) RetrieveDateTime(addDate, addTime bool) (string, strin
 	if addDate {
 		d.dateOnce.Do(func() {
 			d.currentDate.Store(d.timeNow().Format(dateFormat[currentFmt]))
-			go d.updateCurrentDateEveryDay()
+			go d.updateCurrentDateEvery30Minutes()
 		})
 
 		dateRes = d.currentDate.Load().(string)
@@ -84,17 +84,16 @@ func (d *DateTimePrinter) UpdateDateTimeFormat(format s.DateTimeFormat) {
 	d.currentTime.Store(now.Format(timeFormat[format]))
 }
 
-// updateCurrentDateEveryDay synchronizes with the system clock and updates the DateTimePrinter's
-// currentDate property every midnight.
-func (d *DateTimePrinter) updateCurrentDateEveryDay() {
+// updateCurrentDateEvery30Minutes synchronizes with the system clock and updates the DateTimePrinter's
+// currentDate property every 30 minutes.
+func (d *DateTimePrinter) updateCurrentDateEvery30Minutes() {
 	for {
 		now := d.timeNow()
 		currentFmt := d.currentFormat.Load().(s.DateTimeFormat)
 		d.currentDate.Store(now.Format(dateFormat[currentFmt]))
 
-		// computing next midnight in local time zone
-		nextMidnight := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, now.Location())
-		time.Sleep(time.Until(nextMidnight))
+		nextTick := now.Truncate(time.Minute).Add(time.Minute * 30)
+		time.Sleep(time.Until(nextTick))
 	}
 }
 

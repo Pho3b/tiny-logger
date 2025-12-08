@@ -2,6 +2,7 @@ package shared
 
 import (
 	"os"
+	"time"
 
 	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/logs/log_level"
@@ -24,6 +25,7 @@ type LoggerConfigsInterface interface {
 	GetEncoderType() EncoderType
 	GetLogFile() *os.File
 	GetDateTimeFormat() DateTimeFormat
+	GetBufferFlushInterval() time.Duration
 }
 
 type EncoderInterface interface {

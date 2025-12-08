@@ -6,24 +6,32 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"github.com/pho3b/tiny-logger/shared"
 )
 
 type LogsBuffer struct {
-	StopLogs     context.CancelFunc
-	msgBuf       *bytes.Buffer
-	mtx          sync.Mutex
-	logsInterval time.Duration
-	ctx          context.Context
+	StopLogs context.CancelFunc
+	printer  PrinterService
+	msgBuf   *bytes.Buffer
+	mtx      sync.Mutex
+	configs  shared.LoggerConfigsInterface
+	ctx      context.Context
+	logFile  *os.File
 }
 
-func (l *LogsBuffer) AddLogFrom(buf *bytes.Buffer) {
+func (l *LogsBuffer) AddLog(buf *bytes.Buffer) {
 	l.mtx.Lock()
 	l.msgBuf.Write(buf.Bytes())
 	l.mtx.Unlock()
 }
 
+func (l *LogsBuffer) UpdateLogFile(file *os.File) {
+	l.logFile = file
+}
+
 func (l *LogsBuffer) startInternalTicker() {
-	ticker := time.NewTicker(l.logsInterval)
+	ticker := time.NewTicker(l.configs.GetBufferFlushInterval())
 
 	go func() {
 		defer ticker.Stop()
@@ -31,6 +39,7 @@ func (l *LogsBuffer) startInternalTicker() {
 		for {
 			select {
 			case <-l.ctx.Done():
+				l.flushLogs()
 				_, _ = os.Stdout.Write([]byte("Stopping logs buffer..."))
 				return
 
@@ -49,19 +58,19 @@ func (l *LogsBuffer) flushLogs() {
 		return
 	}
 
-	// TODO: Update it to actually follow the Logger configurations
-	_, _ = os.Stdout.Write(l.msgBuf.Bytes())
+	l.printer.PrintLog(shared.StdOutput, l.msgBuf, l.logFile)
 	l.msgBuf.Reset()
 }
 
-func NewLogsBuffer() *LogsBuffer {
+func NewLogsBuffer(loggerConfigs shared.LoggerConfigsInterface) *LogsBuffer {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	b := &LogsBuffer{
-		StopLogs:     cancel,
-		ctx:          ctx,
-		msgBuf:       &bytes.Buffer{},
-		logsInterval: (time.Second * 2),
+		StopLogs: cancel,
+		ctx:      ctx,
+		msgBuf:   &bytes.Buffer{},
+		configs:  loggerConfigs,
+		logFile:  loggerConfigs.GetLogFile(),
 	}
 
 	b.msgBuf.Grow(10000000)

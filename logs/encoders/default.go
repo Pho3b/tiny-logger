@@ -13,7 +13,7 @@ import (
 type DefaultEncoder struct {
 	baseEncoder
 	dateTimeFormat  s.DateTimeFormat
-	ColorsPrinter   services.ColorsPrinter
+	PrinterService  services.PrinterService
 	DateTimePrinter *services.DateTimePrinter
 }
 
@@ -38,7 +38,8 @@ func (d *DefaultEncoder) Log(
 	)
 
 	msgBuffer.WriteByte('\n')
-	d.printLog(outType, msgBuffer, logger.GetLogFile())
+
+	d.PrinterService.PrintLog(outType, msgBuffer, logger.GetLogFile())
 	d.putBuffer(msgBuffer)
 }
 
@@ -60,7 +61,7 @@ func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, a
 
 		msgBuffer.WriteString(c.Reset.String())
 		msgBuffer.WriteByte('\n')
-		d.printLog(s.StdOutput, msgBuffer, logger.GetLogFile())
+		d.PrinterService.PrintLog(s.StdOutput, msgBuffer, logger.GetLogFile())
 		d.putBuffer(msgBuffer)
 	}
 }
@@ -84,7 +85,7 @@ func (d *DefaultEncoder) composeMsgInto(
 	buf.Grow(len(args)*averageWordLen + defaultCharOverhead)
 
 	isDateOrTimeEnabled := dateEnabled || timeEnabled
-	colors := d.ColorsPrinter.RetrieveColorsFromLogLevel(headerColorEnabled, ll.LogLvlNameToInt[logLevel])
+	colors := d.PrinterService.RetrieveColorsFromLogLevel(headerColorEnabled, ll.LogLvlNameToInt[logLevel])
 	buf.WriteString(string(colors[0]))
 
 	if showLogLevel {
@@ -137,7 +138,10 @@ func (d *DefaultEncoder) addFormattedDateTime(buf *bytes.Buffer, dateStr, timeSt
 
 // NewDefaultEncoder initializes and returns a new DefaultEncoder instance.
 func NewDefaultEncoder() *DefaultEncoder {
-	encoder := &DefaultEncoder{DateTimePrinter: services.NewDateTimePrinter(), ColorsPrinter: services.ColorsPrinter{}}
+	encoder := &DefaultEncoder{
+		PrinterService:  services.NewPrinterService(),
+		DateTimePrinter: services.NewDateTimePrinter(),
+	}
 	encoder.encoderType = s.DefaultEncoderType
 	encoder.bufferSyncPool = sync.Pool{
 		New: func() any {

@@ -2,7 +2,9 @@ package logs
 
 import (
 	"os"
+	"time"
 
+	"github.com/pho3b/tiny-logger/internal/services"
 	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/logs/encoders"
 	ll "github.com/pho3b/tiny-logger/logs/log_level"
@@ -207,6 +209,21 @@ func (l *Logger) SetDateTimeFormat(format s.DateTimeFormat) *Logger {
 	l.encoder.SetDateTimeFormat(l.dateTimeFormat)
 
 	return l
+}
+
+func (l *Logger) EnableBufferedLogs(_ time.Duration) *Logger {
+	buf := services.NewLogsBuffer(l)
+
+	go func() {
+		time.Sleep(25 * time.Second)
+		buf.StopLogs()
+	}()
+
+	return l
+}
+
+func (l *Logger) GetBufferFlushInterval() time.Duration {
+	return 3000 * time.Millisecond
 }
 
 // areAllNil returns true if all the given args are 'nil', false otherwise.

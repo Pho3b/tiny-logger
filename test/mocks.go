@@ -2,6 +2,7 @@ package test
 
 import (
 	"os"
+	"time"
 
 	"github.com/pho3b/tiny-logger/logs/log_level"
 	"github.com/pho3b/tiny-logger/shared"
@@ -43,4 +44,8 @@ func (m *LoggerConfigMock) GetLogFile() *os.File {
 
 func (m *LoggerConfigMock) GetDateTimeFormat() shared.DateTimeFormat {
 	return shared.IT
+}
+
+func (m *LoggerConfigMock) GetBufferFlushInterval() time.Duration {
+	return 1 * time.Second
 }

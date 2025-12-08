@@ -40,7 +40,7 @@ func (j *JSONEncoder) Log(
 	)
 
 	msgBuffer.WriteByte('\n')
-	j.printLog(outType, msgBuffer, logger.GetLogFile())
+	PrintLog(outType, msgBuffer, logger.GetLogFile())
 	j.putBuffer(msgBuffer)
 }
 
@@ -65,7 +65,7 @@ func (j *JSONEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 
 		msgBuffer.WriteString(c.Reset.String())
 		msgBuffer.WriteByte('\n')
-		j.printLog(s.StdOutput, msgBuffer, logger.GetLogFile())
+		PrintLog(s.StdOutput, msgBuffer, logger.GetLogFile())
 		j.putBuffer(msgBuffer)
 	}
 }

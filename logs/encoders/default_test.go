@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/pho3b/tiny-logger/internal/services"
 	"github.com/pho3b/tiny-logger/logs/colors"
 	ll "github.com/pho3b/tiny-logger/logs/log_level"
 	s "github.com/pho3b/tiny-logger/shared"
@@ -14,7 +15,7 @@ import (
 )
 
 func TestLogDebug(t *testing.T) {
-	encoder := NewDefaultEncoder()
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
@@ -26,7 +27,7 @@ func TestLogDebug(t *testing.T) {
 }
 
 func TestLogInfo(t *testing.T) {
-	encoder := NewDefaultEncoder()
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
@@ -38,7 +39,7 @@ func TestLogInfo(t *testing.T) {
 }
 
 func TestLogWarn(t *testing.T) {
-	encoder := NewDefaultEncoder()
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
@@ -50,7 +51,7 @@ func TestLogWarn(t *testing.T) {
 }
 
 func TestLogError(t *testing.T) {
-	encoder := NewDefaultEncoder()
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureErrorOutput(func() {
@@ -62,7 +63,7 @@ func TestLogError(t *testing.T) {
 }
 
 func TestLogFatalError(t *testing.T) {
-	encoder := NewDefaultEncoder()
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	if os.Getenv("BE_CRASHER") == "1" {
@@ -79,7 +80,7 @@ func TestLogFatalError(t *testing.T) {
 
 func TestFormatDateTimeString(t *testing.T) {
 	b := bytes.NewBuffer([]byte{})
-	encoder := NewDefaultEncoder()
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 
 	encoder.addFormattedDateTime(b, "dateTest", "timeTest", "")
 	assert.Contains(t, b.String(), "[")
@@ -104,7 +105,7 @@ func TestFormatDateTimeString(t *testing.T) {
 }
 
 func TestShowLogLevel(t *testing.T) {
-	encoder := NewDefaultEncoder()
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() {
@@ -125,7 +126,7 @@ func TestShowLogLevel(t *testing.T) {
 }
 
 func TestCheckColorsInTheOutput(t *testing.T) {
-	encoder := NewDefaultEncoder()
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: false, TimeEnabled: false, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := captureOutput(func() { encoder.Log(loggerConfig, ll.DebugLvlName, s.StdOutput, "Test msg") })
@@ -145,7 +146,7 @@ func TestDefaultEncoder_Color(t *testing.T) {
 	var output string
 	testLog := "my testing Log"
 	originalStdOut := os.Stdout
-	encoder := NewDefaultEncoder()
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 	lConfig := test.LoggerConfigMock{
 		DateEnabled:   false,
 		TimeEnabled:   false,

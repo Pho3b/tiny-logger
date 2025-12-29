@@ -152,3 +152,7 @@ func (j *JsonMarshaler) writeLogEntryProperties(
 		buf.WriteByte(',')
 	}
 }
+
+func NewJsonMarshaler() JsonMarshaler {
+	return JsonMarshaler{}
+}

@@ -43,7 +43,7 @@ func (d *DateTimePrinter) RetrieveDateTime(addDate, addTime bool) (string, strin
 	if currentFmt == s.UnixTimestamp && (addDate || addTime) {
 		d.unixOnce.Do(func() {
 			d.currentUnix.Store(strconv.FormatInt(d.timeNow().Unix(), 10))
-			go d.updateCurrentUnixEverySecond()
+			go d.updateCurrentUnix()
 		})
 
 		return "", "", d.currentUnix.Load().(string)
@@ -52,7 +52,7 @@ func (d *DateTimePrinter) RetrieveDateTime(addDate, addTime bool) (string, strin
 	if addDate {
 		d.dateOnce.Do(func() {
 			d.currentDate.Store(d.timeNow().Format(dateFormat[currentFmt]))
-			go d.updateCurrentDateEveryDay()
+			go d.updateCurrentDate()
 		})
 
 		dateRes = d.currentDate.Load().(string)
@@ -61,7 +61,7 @@ func (d *DateTimePrinter) RetrieveDateTime(addDate, addTime bool) (string, strin
 	if addTime {
 		d.timeOnce.Do(func() {
 			d.currentTime.Store(d.timeNow().Format(timeFormat[currentFmt]))
-			go d.updateCurrentTimeEverySecond()
+			go d.updateCurrentTime()
 		})
 
 		timeRes = d.currentTime.Load().(string)
@@ -85,22 +85,20 @@ func (d *DateTimePrinter) UpdateDateTimeFormat(format s.DateTimeFormat) {
 }
 
 // updateCurrentDateEveryDay synchronizes with the system clock and updates the DateTimePrinter's
-// currentDate property every midnight.
-func (d *DateTimePrinter) updateCurrentDateEveryDay() {
+// currentDate property every 10 minutes.
+func (d *DateTimePrinter) updateCurrentDate() {
 	for {
 		now := d.timeNow()
 		currentFmt := d.currentFormat.Load().(s.DateTimeFormat)
 		d.currentDate.Store(now.Format(dateFormat[currentFmt]))
 
-		// computing next midnight in local time zone
-		nextMidnight := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, now.Location())
-		time.Sleep(time.Until(nextMidnight))
+		time.Sleep(time.Minute * 10)
 	}
 }
 
-// updateCurrentTimeEverySecond synchronizes with the system clock and updates the DateTimePrinter's
+// updateCurrentTime synchronizes with the system clock and updates the DateTimePrinter's
 // currentTime property every full second.
-func (d *DateTimePrinter) updateCurrentTimeEverySecond() {
+func (d *DateTimePrinter) updateCurrentTime() {
 	for {
 		now := d.timeNow()
 		currentFmt := d.currentFormat.Load().(s.DateTimeFormat)
@@ -111,9 +109,9 @@ func (d *DateTimePrinter) updateCurrentTimeEverySecond() {
 	}
 }
 
-// updateCurrentUnixEverySecond synchronizes with the system clock and updates the DateTimePrinter's
+// updateCurrentUnix synchronizes with the system clock and updates the DateTimePrinter's
 // currentTime property every full second.
-func (d *DateTimePrinter) updateCurrentUnixEverySecond() {
+func (d *DateTimePrinter) updateCurrentUnix() {
 	for {
 		now := d.timeNow()
 		d.currentUnix.Store(strconv.FormatInt(now.Unix(), 10))

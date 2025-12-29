@@ -1,15 +1,16 @@
 package services
 
 import (
-	"github.com/pho3b/tiny-logger/logs/log_level"
 	"testing"
+
+	"github.com/pho3b/tiny-logger/logs/log_level"
 
 	c "github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPrintColors_EnableColorsTrue(t *testing.T) {
-	printer := ColorsPrinter{}
+	printer := Printer{}
 
 	result := printer.RetrieveColorsFromLogLevel(true, log_level.FatalErrorLvl)
 	assert.Equal(t, c.Magenta, result[0], "Expected first element to be the provided color")
@@ -33,7 +34,7 @@ func TestPrintColors_EnableColorsTrue(t *testing.T) {
 }
 
 func TestPrintColors_EnableColorsFalse(t *testing.T) {
-	printer := ColorsPrinter{}
+	printer := Printer{}
 
 	result := printer.RetrieveColorsFromLogLevel(false, log_level.DebugLvl)
 	assert.Equal(t, c.Color(""), result[0], "Expected first element to be an empty string when colors are disabled")

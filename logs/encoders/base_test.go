@@ -7,6 +7,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/pho3b/tiny-logger/internal/services"
 	s "github.com/pho3b/tiny-logger/shared"
 	"github.com/stretchr/testify/assert"
 )
@@ -87,13 +88,13 @@ func TestBuildMsgWithCastAndConcatenateInto(t *testing.T) {
 }
 
 func TestBaseEncoder_GetType(t *testing.T) {
-	encoder := NewDefaultEncoder()
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 	assert.Equal(t, s.DefaultEncoderType, encoder.GetType())
 
-	jsonEncoder := NewJSONEncoder()
+	jsonEncoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.NewDateTimePrinter())
 	assert.Equal(t, s.JsonEncoderType, jsonEncoder.GetType())
 
-	yamlEncoder := NewYAMLEncoder()
+	yamlEncoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.NewDateTimePrinter())
 	assert.Equal(t, s.YamlEncoderType, yamlEncoder.GetType())
 
 	baseEncoder := newBaseEncoder()

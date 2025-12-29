@@ -14,6 +14,7 @@ type YAMLEncoder struct {
 	baseEncoder
 	DateTimePrinter *services.DateTimePrinter
 	yamlMarshaler   services.YamlMarshaler
+	printer         services.Printer
 }
 
 // Log formats and prints a log message to the given output type.
@@ -40,7 +41,7 @@ func (y *YAMLEncoder) Log(
 	)
 
 	msgBuffer.WriteByte('\n')
-	y.printLog(outType, msgBuffer, logger.GetLogFile())
+	y.printer.PrintLog(outType, msgBuffer, logger.GetLogFile())
 	y.putBuffer(msgBuffer)
 }
 
@@ -65,15 +66,9 @@ func (y *YAMLEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 
 		msgBuffer.WriteString(c.Reset.String())
 		msgBuffer.WriteByte('\n')
-		y.printLog(s.StdOutput, msgBuffer, logger.GetLogFile())
+		y.printer.PrintLog(s.StdOutput, msgBuffer, logger.GetLogFile())
 		y.putBuffer(msgBuffer)
 	}
-}
-
-// SetDateTimeFormat updates the date and time format used by the encoder's DateTimePrinter.
-// This method triggers an immediate update of the cached date and time strings to match the new format.
-func (y *YAMLEncoder) SetDateTimeFormat(format s.DateTimeFormat) {
-	y.DateTimePrinter.UpdateDateTimeFormat(format)
 }
 
 // composeMsgInto formats and writes the given 'msg' into the given buffer.
@@ -110,8 +105,12 @@ func (y *YAMLEncoder) composeMsgInto(
 }
 
 // NewYAMLEncoder initializes and returns a new YAMLEncoder instance.
-func NewYAMLEncoder() *YAMLEncoder {
-	encoder := &YAMLEncoder{DateTimePrinter: services.NewDateTimePrinter(), yamlMarshaler: services.NewYamlMarshaler()}
+func NewYAMLEncoder(
+	printer services.Printer,
+	yamlMarshaler services.YamlMarshaler,
+	dateTimePrinter *services.DateTimePrinter,
+) *YAMLEncoder {
+	encoder := &YAMLEncoder{DateTimePrinter: dateTimePrinter, yamlMarshaler: yamlMarshaler, printer: printer}
 	encoder.encoderType = s.YamlEncoderType
 	encoder.bufferSyncPool = sync.Pool{
 		New: func() any {

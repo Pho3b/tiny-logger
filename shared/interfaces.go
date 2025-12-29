@@ -33,4 +33,6 @@ type EncoderInterface interface {
 	Color(lConfigs LoggerConfigsInterface, color colors.Color, args ...any)
 	GetType() EncoderType
 	SetDateTimeFormat(format DateTimeFormat)
+	SetBufferFlushInterval(interval time.Duration)
+	FlushBuffer()
 }

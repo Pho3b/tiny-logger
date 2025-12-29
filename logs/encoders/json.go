@@ -12,6 +12,7 @@ import (
 
 type JSONEncoder struct {
 	baseEncoder
+	PrinterService  services.Printer
 	DateTimePrinter *services.DateTimePrinter
 	jsonMarshaler   services.JsonMarshaler
 }
@@ -40,7 +41,7 @@ func (j *JSONEncoder) Log(
 	)
 
 	msgBuffer.WriteByte('\n')
-	PrintLog(outType, msgBuffer, logger.GetLogFile())
+	j.PrinterService.PrintLog(outType, msgBuffer, logger.GetLogFile())
 	j.putBuffer(msgBuffer)
 }
 
@@ -65,7 +66,7 @@ func (j *JSONEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 
 		msgBuffer.WriteString(c.Reset.String())
 		msgBuffer.WriteByte('\n')
-		PrintLog(s.StdOutput, msgBuffer, logger.GetLogFile())
+		j.PrinterService.PrintLog(s.StdOutput, msgBuffer, logger.GetLogFile())
 		j.putBuffer(msgBuffer)
 	}
 }
@@ -111,7 +112,12 @@ func (j *JSONEncoder) composeMsgInto(
 
 // NewJSONEncoder initializes and returns a new JSONEncoder instance.
 func NewJSONEncoder() *JSONEncoder {
-	encoder := &JSONEncoder{DateTimePrinter: services.NewDateTimePrinter(), jsonMarshaler: services.JsonMarshaler{}}
+	encoder := &JSONEncoder{
+		PrinterService:  services.NewPrinterService(),
+		DateTimePrinter: services.NewDateTimePrinter(),
+		jsonMarshaler:   services.JsonMarshaler{},
+	}
+
 	encoder.encoderType = s.JsonEncoderType
 	encoder.bufferSyncPool = sync.Pool{
 		New: func() any {

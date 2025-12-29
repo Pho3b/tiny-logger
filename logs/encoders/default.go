@@ -3,6 +3,7 @@ package encoders
 import (
 	"bytes"
 	"sync"
+	"time"
 
 	"github.com/pho3b/tiny-logger/internal/services"
 	c "github.com/pho3b/tiny-logger/logs/colors"
@@ -13,8 +14,9 @@ import (
 type DefaultEncoder struct {
 	baseEncoder
 	dateTimeFormat  s.DateTimeFormat
-	PrinterService  services.PrinterService
+	PrinterService  services.Printer
 	DateTimePrinter *services.DateTimePrinter
+	LogsBuffer      *services.LogsBuffer
 }
 
 // Log formats and prints a Log message to the given output type.
@@ -39,7 +41,12 @@ func (d *DefaultEncoder) Log(
 
 	msgBuffer.WriteByte('\n')
 
-	d.PrinterService.PrintLog(outType, msgBuffer, logger.GetLogFile())
+	if logger.GetBufferFlushInterval() == 0 {
+		d.PrinterService.PrintLog(outType, msgBuffer, logger.GetLogFile())
+	} else {
+		d.LogsBuffer.AddLog(msgBuffer)
+	}
+
 	d.putBuffer(msgBuffer)
 }
 
@@ -70,6 +77,14 @@ func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, a
 // This method triggers an immediate update of the cached date and time strings to match the new format.
 func (d *DefaultEncoder) SetDateTimeFormat(format s.DateTimeFormat) {
 	d.DateTimePrinter.UpdateDateTimeFormat(format)
+}
+
+func (d *DefaultEncoder) SetBufferFlushInterval(interval time.Duration) {
+	d.LogsBuffer.SetBufferFlushInterval(interval)
+}
+
+func (d *DefaultEncoder) FlushBuffer() {
+	d.LogsBuffer.FlushLogs()
 }
 
 // composeMsgInto formats and writes the given 'msg' into the given buffer.
@@ -138,9 +153,11 @@ func (d *DefaultEncoder) addFormattedDateTime(buf *bytes.Buffer, dateStr, timeSt
 
 // NewDefaultEncoder initializes and returns a new DefaultEncoder instance.
 func NewDefaultEncoder() *DefaultEncoder {
+	printer := services.NewPrinterService()
 	encoder := &DefaultEncoder{
 		PrinterService:  services.NewPrinterService(),
 		DateTimePrinter: services.NewDateTimePrinter(),
+		LogsBuffer:      services.NewLogsBuffer(0, nil, printer),
 	}
 	encoder.encoderType = s.DefaultEncoderType
 	encoder.bufferSyncPool = sync.Pool{

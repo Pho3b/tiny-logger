@@ -9,12 +9,12 @@ import (
 	s "github.com/pho3b/tiny-logger/shared"
 )
 
-type PrinterService struct {
+type Printer struct {
 }
 
 // PrintLog prints the given msgBuffer to the given outputType (stdout or stderr).
 // If 'file' is not nil, the message is written to the file.
-func (p *PrinterService) PrintLog(outType s.OutputType, msgBuffer *bytes.Buffer, file *os.File) {
+func (p *Printer) PrintLog(outType s.OutputType, msgBuffer *bytes.Buffer, file *os.File) {
 	var err error
 
 	switch outType {
@@ -47,7 +47,7 @@ func (p *PrinterService) PrintLog(outType s.OutputType, msgBuffer *bytes.Buffer,
 //
 // If enableColors is false, both elements of the returned slice will be empty
 // strings, resulting in no color formatting.
-func (p *PrinterService) RetrieveColorsFromLogLevel(enableColors bool, logLevelInt int8) []c.Color {
+func (p *Printer) RetrieveColorsFromLogLevel(enableColors bool, logLevelInt int8) []c.Color {
 	var res = []c.Color{"", ""}
 
 	if enableColors {
@@ -70,6 +70,6 @@ func (p *PrinterService) RetrieveColorsFromLogLevel(enableColors bool, logLevelI
 	return res
 }
 
-func NewPrinterService() PrinterService {
-	return PrinterService{}
+func NewPrinterService() Printer {
+	return Printer{}
 }

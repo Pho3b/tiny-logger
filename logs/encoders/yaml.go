@@ -12,6 +12,7 @@ import (
 
 type YAMLEncoder struct {
 	baseEncoder
+	PrinterService  services.Printer
 	DateTimePrinter *services.DateTimePrinter
 	yamlMarshaler   services.YamlMarshaler
 }
@@ -40,7 +41,7 @@ func (y *YAMLEncoder) Log(
 	)
 
 	msgBuffer.WriteByte('\n')
-	PrintLog(outType, msgBuffer, logger.GetLogFile())
+	y.PrinterService.PrintLog(outType, msgBuffer, logger.GetLogFile())
 	y.putBuffer(msgBuffer)
 }
 
@@ -65,7 +66,7 @@ func (y *YAMLEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 
 		msgBuffer.WriteString(c.Reset.String())
 		msgBuffer.WriteByte('\n')
-		PrintLog(s.StdOutput, msgBuffer, logger.GetLogFile())
+		y.PrinterService.PrintLog(s.StdOutput, msgBuffer, logger.GetLogFile())
 		y.putBuffer(msgBuffer)
 	}
 }
@@ -111,7 +112,11 @@ func (y *YAMLEncoder) composeMsgInto(
 
 // NewYAMLEncoder initializes and returns a new YAMLEncoder instance.
 func NewYAMLEncoder() *YAMLEncoder {
-	encoder := &YAMLEncoder{DateTimePrinter: services.NewDateTimePrinter(), yamlMarshaler: services.NewYamlMarshaler()}
+	encoder := &YAMLEncoder{
+		PrinterService:  services.NewPrinterService(),
+		DateTimePrinter: services.NewDateTimePrinter(),
+		yamlMarshaler:   services.NewYamlMarshaler(),
+	}
 	encoder.encoderType = s.YamlEncoderType
 	encoder.bufferSyncPool = sync.Pool{
 		New: func() any {

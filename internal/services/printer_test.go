@@ -9,7 +9,7 @@ import (
 )
 
 func TestPrintColors_EnableColorsTrue(t *testing.T) {
-	printer := PrinterService{}
+	printer := Printer{}
 
 	result := printer.RetrieveColorsFromLogLevel(true, log_level.FatalErrorLvl)
 	assert.Equal(t, c.Magenta, result[0], "Expected first element to be the provided color")
@@ -33,7 +33,7 @@ func TestPrintColors_EnableColorsTrue(t *testing.T) {
 }
 
 func TestPrintColors_EnableColorsFalse(t *testing.T) {
-	printer := PrinterService{}
+	printer := Printer{}
 
 	result := printer.RetrieveColorsFromLogLevel(false, log_level.DebugLvl)
 	assert.Equal(t, c.Color(""), result[0], "Expected first element to be an empty string when colors are disabled")

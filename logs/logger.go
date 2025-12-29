@@ -4,7 +4,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/pho3b/tiny-logger/internal/services"
 	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/logs/encoders"
 	ll "github.com/pho3b/tiny-logger/logs/log_level"
@@ -12,14 +11,15 @@ import (
 )
 
 type Logger struct {
-	dateEnabled    bool
-	timeEnabled    bool
-	colorsEnabled  bool
-	showLogLevel   bool
-	encoder        s.EncoderInterface
-	logLvl         ll.LogLevel
-	outFile        *os.File
-	dateTimeFormat s.DateTimeFormat
+	dateEnabled             bool
+	timeEnabled             bool
+	colorsEnabled           bool
+	showLogLevel            bool
+	encoder                 s.EncoderInterface
+	logLvl                  ll.LogLevel
+	outFile                 *os.File
+	dateTimeFormat          s.DateTimeFormat
+	logsBufferFlushInterval time.Duration
 }
 
 // Debug logs a debug-level message if the logger's log level allows it.
@@ -155,10 +155,10 @@ func (l *Logger) SetEncoder(encoderType s.EncoderType) *Logger {
 	switch encoderType {
 	case s.DefaultEncoderType:
 		l.encoder = encoders.NewDefaultEncoder()
-	case s.JsonEncoderType:
-		l.encoder = encoders.NewJSONEncoder()
-	case s.YamlEncoderType:
-		l.encoder = encoders.NewYAMLEncoder()
+		//case s.JsonEncoderType:
+		//	l.encoder = encoders.NewJSONEncoder()
+		//case s.YamlEncoderType:
+		//	l.encoder = encoders.NewYAMLEncoder()
 	}
 
 	l.encoder.SetDateTimeFormat(l.dateTimeFormat)
@@ -211,19 +211,21 @@ func (l *Logger) SetDateTimeFormat(format s.DateTimeFormat) *Logger {
 	return l
 }
 
-func (l *Logger) EnableBufferedLogs(_ time.Duration) *Logger {
-	buf := services.NewLogsBuffer(l)
+func (l *Logger) GetBufferFlushInterval() time.Duration {
+	return l.logsBufferFlushInterval
+}
 
-	go func() {
-		time.Sleep(25 * time.Second)
-		buf.StopLogs()
-	}()
+// SetBufferFlushInterval sets the interval at which the logs buffer will flush its logs to the output file.
+// If the given interval is <= 0, the buffered log is stopped and logs will be printed in real time.
+func (l *Logger) SetBufferFlushInterval(interval time.Duration) *Logger {
+	l.logsBufferFlushInterval = interval
+	l.encoder.SetBufferFlushInterval(interval)
 
 	return l
 }
 
-func (l *Logger) GetBufferFlushInterval() time.Duration {
-	return 3000 * time.Millisecond
+func (l *Logger) FlushBuffer() {
+	l.encoder.FlushBuffer()
 }
 
 // areAllNil returns true if all the given args are 'nil', false otherwise.

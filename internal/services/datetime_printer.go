@@ -84,8 +84,9 @@ func (d *DateTimePrinter) UpdateDateTimeFormat(format s.DateTimeFormat) {
 	d.currentTime.Store(now.Format(timeFormat[format]))
 }
 
-// updateCurrentDateEveryDay synchronizes with the system clock and updates the DateTimePrinter's
-// currentDate property every 10 minutes.
+// updateCurrentDate periodically refreshes d.currentDate based on the latest time and
+// the current date format.
+// Updates the stored date every 10 minutes.
 func (d *DateTimePrinter) updateCurrentDate() {
 	for {
 		now := d.timeNow()

@@ -19,6 +19,7 @@ type Logger struct {
 	logLvl          ll.LogLevel
 	outFile         *os.File
 	dateTimeFormat  s.DateTimeFormat
+	printer         services.Printer
 	dateTimePrinter *services.DateTimePrinter
 }
 
@@ -154,11 +155,11 @@ func (l *Logger) GetEncoderType() s.EncoderType {
 func (l *Logger) SetEncoder(encoderType s.EncoderType) *Logger {
 	switch encoderType {
 	case s.DefaultEncoderType:
-		l.encoder = encoders.NewDefaultEncoder(services.NewPrinter(), l.dateTimePrinter)
+		l.encoder = encoders.NewDefaultEncoder(l.printer, l.dateTimePrinter)
 	case s.JsonEncoderType:
-		l.encoder = encoders.NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), l.dateTimePrinter)
+		l.encoder = encoders.NewJSONEncoder(l.printer, services.NewJsonMarshaler(), l.dateTimePrinter)
 	case s.YamlEncoderType:
-		l.encoder = encoders.NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), l.dateTimePrinter)
+		l.encoder = encoders.NewYAMLEncoder(l.printer, services.NewYamlMarshaler(), l.dateTimePrinter)
 	}
 
 	return l
@@ -234,6 +235,7 @@ func (l *Logger) checkOutFile(outType s.OutputType) s.OutputType {
 func NewLogger() *Logger {
 	logger := &Logger{showLogLevel: true, dateTimeFormat: s.IT}
 	logger.SetLogLvlEnvVariable(ll.DefaultEnvLogLvlVar)
+	logger.printer = services.NewPrinter()
 	logger.dateTimePrinter = services.NewDateTimePrinter()
 	logger.SetEncoder(s.DefaultEncoderType)
 

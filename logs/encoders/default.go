@@ -111,7 +111,6 @@ func (d *DefaultEncoder) addFormattedDateTime(buf *bytes.Buffer, dateStr, timeSt
 		return
 	}
 
-	buf.Grow(averageWordLen)
 	buf.WriteByte('[')
 
 	if dateTimeStr != "" {

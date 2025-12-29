@@ -103,9 +103,7 @@ func (d *DefaultEncoder) composeMsgInto(
 	d.castAndConcatenateInto(buf, args...)
 }
 
-// addFormattedDateTime correctly formats the dateTime string, adding and removing square brackets
-// and white spaces as needed.
-// While formatting, it adds the dateTime string to the given buffer.
+// addFormattedDateTime formats and adds the date and time strings enclosed in square brackets to the given buffer.
 func (d *DefaultEncoder) addFormattedDateTime(buf *bytes.Buffer, dateStr, timeStr string) {
 	if dateStr == "" && timeStr == "" {
 		return
@@ -119,7 +117,6 @@ func (d *DefaultEncoder) addFormattedDateTime(buf *bytes.Buffer, dateStr, timeSt
 	}
 
 	buf.WriteString(timeStr)
-
 	buf.WriteByte(']')
 }
 

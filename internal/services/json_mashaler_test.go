@@ -46,17 +46,16 @@ func TestJsonMarshaler_Marshal_AllFields(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := &JsonMarshaler{}
 	entry := JsonLogEntry{
-		Level:          "info",
-		Date:           "2025-06-14",
-		Time:           "20:15:30",
-		DateTime:       "2025-06-14T20:15:30",
-		Message:        "all systems go",
-		DateTimeFormat: shared.IT,
+		Level:   "info",
+		Date:    "2025-06-14",
+		Time:    "20:15:30",
+		Message: "all systems go",
+		UnixTS:  "",
 	}
 
 	m.MarshalInto(buf, entry)
 	got := buf.String()
-	want := `{"level":"info","datetime":"2025-06-14T20:15:30","msg":"all systems go"}`
+	want := `{"level":"info","datetime":"2025-06-14 20:15:30","msg":"all systems go"}`
 	if got != want {
 		t.Errorf("Marshal() = %q, want %q", got, want)
 	}
@@ -66,12 +65,11 @@ func TestJsonMarshaler_Marshal_WithExtras(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := &JsonMarshaler{}
 	entry := JsonLogEntry{
-		Level:    "INFO",
-		Date:     "",
-		Time:     "",
-		DateTime: "20/06/2025 08:11:06",
-		Message:  "all systems go",
-		Extras:   []any{"bool", true, "int", 3, "float", 4.3, "arr", []int{1, 2, 3}, "rune", 'A', "string", "ciaooo", "null"},
+		Level:   "INFO",
+		Date:    "20/06/2025",
+		Time:    "08:11:06",
+		Message: "all systems go",
+		Extras:  []any{"bool", true, "int", 3, "float", 4.3, "arr", []int{1, 2, 3}, "rune", 'A', "string", "ciaooo", "null"},
 	}
 
 	m.MarshalInto(buf, entry)
@@ -87,12 +85,11 @@ func TestJsonMarshaler_Unmarshal_Std_Marshal_Result(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := JsonMarshaler{}
 	entry := JsonLogEntry{
-		Level:    "INFO",
-		Date:     "",
-		Time:     "",
-		DateTime: "20/06/2025 08:11:06",
-		Message:  "all systems go",
-		Extras:   []any{"bool", true, "int", 3, "float", 4.3, "arr", []int{1, 2, 3}, "rune", 'A', "string", "ciaooo", "null"},
+		Level:   "INFO",
+		Date:    "20/06/2025",
+		Time:    "08:11:06",
+		Message: "all systems go",
+		Extras:  []any{"bool", true, "int", 3, "float", 4.3, "arr", []int{1, 2, 3}, "rune", 'A', "string", "ciaooo", "null"},
 	}
 
 	m.MarshalInto(buf, entry)
@@ -103,10 +100,9 @@ func TestJsonMarshaler_Marshal_UnixTimestamp(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := &JsonMarshaler{}
 	entry := JsonLogEntry{
-		Level:          "info",
-		DateTime:       "1700000000",
-		Message:        "unix time",
-		DateTimeFormat: shared.UnixTimestamp,
+		Level:   "info",
+		Message: "unix time",
+		UnixTS:  "1700000000",
 	}
 
 	m.MarshalInto(buf, entry)

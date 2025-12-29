@@ -12,6 +12,7 @@ import (
 	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/logs/log_level"
 	"github.com/pho3b/tiny-logger/shared"
+	"github.com/pho3b/tiny-logger/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -224,16 +225,16 @@ func TestLogger_Color(t *testing.T) {
 	originalStdOut := os.Stdout
 	logger := NewLogger()
 
-	output = captureOutput(func() { logger.Color(colors.Magenta, testLog) })
+	output = test.CaptureOutput(func() { logger.Color(colors.Magenta, testLog) })
 	assert.Contains(t, output, colors.Magenta.String()+testLog)
 
-	output = captureOutput(func() { logger.Color(colors.Cyan, testLog) })
+	output = test.CaptureOutput(func() { logger.Color(colors.Cyan, testLog) })
 	assert.Contains(t, output, colors.Cyan.String()+testLog+colors.Reset.String())
 
-	output = captureOutput(func() { logger.Color(colors.Gray, testLog) })
+	output = test.CaptureOutput(func() { logger.Color(colors.Gray, testLog) })
 	assert.Contains(t, output, colors.Gray.String()+testLog+colors.Reset.String())
 
-	output = captureOutput(func() { logger.Color(colors.Blue, testLog) })
+	output = test.CaptureOutput(func() { logger.Color(colors.Blue, testLog) })
 	assert.Contains(t, output, colors.Blue.String()+testLog+colors.Reset.String())
 
 	os.Stdout = originalStdOut
@@ -244,13 +245,13 @@ func TestLogger_ShowLogLevel(t *testing.T) {
 		ShowLogLevel(true).
 		EnableColors(false)
 
-	output := captureOutput(func() {
+	output := test.CaptureOutput(func() {
 		logger.Info("my testing log")
 	})
 	assert.Contains(t, output, "INFO: my testing log")
 
 	logger.ShowLogLevel(false)
-	output = captureOutput(func() {
+	output = test.CaptureOutput(func() {
 		logger.Info("my testing log")
 	})
 	assert.NotContains(t, output, "INFO: my testing log")
@@ -275,14 +276,14 @@ func TestLogger_CorrectLogsFormattingDefaultEncoder(t *testing.T) {
 	logger := NewLogger().SetEncoder(shared.DefaultEncoderType).AddDateTime(true).ShowLogLevel(true)
 	re := regexp.MustCompile(`^([A-Z]+) \[(\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2})\]: (.+)\n?$`)
 
-	outMsg := captureOutput(func() { logger.Debug("testing log") })
+	outMsg := test.CaptureOutput(func() { logger.Debug("testing log") })
 
 	matches := re.FindStringSubmatch(outMsg)
 	assert.Equal(t, "DEBUG", matches[1])
 	assert.NotNil(t, matches[2])
 	assert.Equal(t, "testing log", matches[3])
 
-	outMsg = captureOutput(func() {
+	outMsg = test.CaptureOutput(func() {
 		logger.Warn("testing log")
 	})
 
@@ -291,7 +292,7 @@ func TestLogger_CorrectLogsFormattingDefaultEncoder(t *testing.T) {
 	assert.NotNil(t, matches[2])
 	assert.Equal(t, "testing log", matches[3])
 
-	outMsg = captureErrorOutput(func() {
+	outMsg = test.CaptureErrorOutput(func() {
 		logger.Error("testing log")
 	})
 
@@ -300,7 +301,7 @@ func TestLogger_CorrectLogsFormattingDefaultEncoder(t *testing.T) {
 	assert.NotNil(t, matches[2])
 	assert.Equal(t, "testing log", matches[3])
 
-	outMsg = captureOutput(func() {
+	outMsg = test.CaptureOutput(func() {
 		logger.Info("testing log")
 	})
 
@@ -387,7 +388,7 @@ func TestLogger_SetLogFile_ExistingFile(t *testing.T) {
 
 func TestLogger_SetLogFile_Nil(t *testing.T) {
 	logger := NewLogger()
-	warnOut := captureOutput(func() { logger.SetLogFile(nil) })
+	warnOut := test.CaptureOutput(func() { logger.SetLogFile(nil) })
 	assert.Equal(t, "WARN: the given log file is nil, skipping logs redirection\n", warnOut)
 	assert.Nil(t, logger.outFile)
 	assert.Nil(t, logger.GetLogFile())
@@ -416,7 +417,7 @@ func TestLogger_CloseLogFile_NoFileSet(t *testing.T) {
 	logger := NewLogger()
 
 	// Test closing when no file is set - should log warning and not crash
-	output := captureOutput(func() {
+	output := test.CaptureOutput(func() {
 		logger.CloseLogFile()
 	})
 
@@ -470,40 +471,6 @@ func TestLogger_LogsRedirectedToFile(t *testing.T) {
 	assert.Contains(t, contentStr, "info message")
 	assert.Contains(t, contentStr, "warn message")
 	assert.Contains(t, contentStr, "error message")
-}
-
-// captureOutput redirects os.Stdout to capture the output of the function f
-func captureOutput(f func()) string {
-	r, w, _ := os.Pipe()
-	defer r.Close()
-
-	origStdout := os.Stdout
-	os.Stdout = w
-
-	f()
-	w.Close()
-	os.Stdout = origStdout
-
-	var buf bytes.Buffer
-	_, _ = buf.ReadFrom(r)
-	return buf.String()
-}
-
-// captureErrorOutput redirects os.Stderr to capture the output of the function f
-func captureErrorOutput(f func()) string {
-	r, w, _ := os.Pipe()
-	defer r.Close()
-
-	origStderr := os.Stderr
-	os.Stderr = w
-
-	f()
-	w.Close()
-	os.Stderr = origStderr
-
-	var buf bytes.Buffer
-	_, _ = buf.ReadFrom(r)
-	return buf.String()
 }
 
 func createMockOutFile(fileName string) *os.File {

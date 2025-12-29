@@ -18,26 +18,27 @@ func TestDateTimePrinter_PrintDateTime(t *testing.T) {
 
 	t.Run("Return both date and time", func(t *testing.T) {
 		dateTimePrinter.UpdateDateTimeFormat(shared.IT)
-		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(true, true)
-		assert.Empty(t, dateRes)
-		assert.Empty(t, timeRes)
-		assert.Equal(t, "01/11/2023 15:30:45", dateTimeRes)
+		dateRes, timeRes, unixTs := dateTimePrinter.RetrieveDateTime(true, true)
+		assert.Empty(t, unixTs)
+		assert.NotEmpty(t, dateRes)
+		assert.NotEmpty(t, timeRes)
+		assert.Equal(t, "01/11/2023 15:30:45", dateRes+" "+timeRes)
 	})
 
 	t.Run("Return date only", func(t *testing.T) {
 		dateTimePrinter.UpdateDateTimeFormat(shared.IT)
-		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(true, false)
+		dateRes, timeRes, unixTs := dateTimePrinter.RetrieveDateTime(true, false)
 		assert.Equal(t, "01/11/2023", dateRes)
 		assert.Equal(t, "", timeRes)
-		assert.Equal(t, "", dateTimeRes)
+		assert.Equal(t, "", unixTs)
 	})
 
 	t.Run("Return time only", func(t *testing.T) {
 		dateTimePrinter.UpdateDateTimeFormat(shared.IT)
-		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(false, true)
+		dateRes, timeRes, unixTs := dateTimePrinter.RetrieveDateTime(false, true)
 		assert.Equal(t, "", dateRes)
 		assert.Equal(t, "15:30:45", timeRes)
-		assert.Equal(t, "", dateTimeRes)
+		assert.Equal(t, "", unixTs)
 	})
 
 	t.Run("Return empty string when both flags are false", func(t *testing.T) {
@@ -94,10 +95,11 @@ func TestDateTimePrinter_Formats(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			dateTimePrinter.UpdateDateTimeFormat(tt.format)
-			dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(true, true)
-			assert.Empty(t, dateRes)
-			assert.Empty(t, timeRes)
-			assert.Equal(t, tt.wantCombined, dateTimeRes)
+			dateRes, timeRes, unixTs := dateTimePrinter.RetrieveDateTime(true, true)
+			assert.NotEmpty(t, dateRes)
+			assert.NotEmpty(t, timeRes)
+			assert.Empty(t, unixTs)
+			assert.Equal(t, tt.wantCombined, dateRes+" "+timeRes)
 
 			// Also test individual components
 			d, tRes, _ := dateTimePrinter.RetrieveDateTime(true, false)
@@ -157,8 +159,8 @@ func TestDateTimePrinter_FullSecondUpdate(t *testing.T) {
 	t.Run("Return both date and time", func(t *testing.T) {
 		dateTimePrinter.UpdateDateTimeFormat(shared.IT)
 		dateRes, timeRes, _ := dateTimePrinter.RetrieveDateTime(true, true)
-		assert.Empty(t, dateRes)
-		assert.Empty(t, timeRes)
+		assert.NotEmpty(t, dateRes)
+		assert.NotEmpty(t, timeRes)
 
 		prevTime := dateTimePrinter.currentTime.Load()
 		time.Sleep(2 * time.Second)

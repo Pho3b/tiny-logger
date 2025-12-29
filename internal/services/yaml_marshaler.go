@@ -4,20 +4,17 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
-
-	s "github.com/pho3b/tiny-logger/shared"
 )
 
 // YamlLogEntry represents a structured log entry that can be marshaled to YAML format.
 // All fields except Message are optional and will be omitted if empty.
 type YamlLogEntry struct {
-	Level          string           `yaml:"level,omitempty"`
-	Date           string           `yaml:"date,omitempty"`
-	Time           string           `yaml:"time,omitempty"`
-	DateTime       string           `yaml:"datetime,omitempty"`
-	DateTimeFormat s.DateTimeFormat `yaml:"dateTimeFormat,omitempty"`
-	Message        string           `yaml:"msg"`
-	Extras         []any            `yaml:"extras,omitempty"`
+	Level   string `yaml:"level,omitempty"`
+	Date    string `yaml:"date,omitempty"`
+	Time    string `yaml:"time,omitempty"`
+	UnixTS  string `yaml:"unixTimestamp,omitempty"`
+	Message string `yaml:"msg"`
+	Extras  []any  `yaml:"extras,omitempty"`
 }
 
 // YamlMarshaler provides custom YAML marshaling functionality optimized for log entries.
@@ -31,7 +28,7 @@ func (y *YamlMarshaler) MarshalInto(buf *bytes.Buffer, logEntry YamlLogEntry) {
 	extrasLen := len(logEntry.Extras)
 	buf.Grow(yamlCharOverhead + (averageExtraLen * extrasLen))
 
-	y.writeLogEntryProperties(buf, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.DateTimeFormat)
+	y.writeLogEntryProperties(buf, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.UnixTS)
 
 	buf.WriteString("msg: ")
 	buf.WriteString(logEntry.Message)
@@ -109,7 +106,7 @@ func (y *YamlMarshaler) writeLogEntryProperties(
 	level string,
 	date string,
 	time string,
-	dateTimeFormat s.DateTimeFormat,
+	unixTS string,
 ) {
 	if level != "" {
 		buf.WriteString("level: ")
@@ -117,13 +114,16 @@ func (y *YamlMarshaler) writeLogEntryProperties(
 		buf.WriteByte('\n')
 	}
 
-	if date != "" && time != "" {
-		if dateTimeFormat == s.UnixTimestamp {
-			buf.WriteString("ts: ")
-		} else {
-			buf.WriteString("datetime: ")
-		}
+	if unixTS != "" {
+		buf.WriteString("ts: ")
+		buf.WriteString(unixTS)
+		buf.WriteByte('\n')
 
+		return
+	}
+
+	if date != "" && time != "" {
+		buf.WriteString("datetime: ")
 		buf.WriteString(date)
 		buf.WriteByte(' ')
 		buf.WriteString(time)

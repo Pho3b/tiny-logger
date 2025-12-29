@@ -71,12 +71,12 @@ terminal graphical visualization time.
 
 | Encoder             | Configuration      | ns/op | B/op | allocs/op |
 |---------------------|--------------------|-------|------|-----------|
-| **Default Encoder** | All Properties OFF | 484.0 | 80   | 1         |
-|                     | All Properties ON  | 540.1 | 104  | 2         |
-| **JSON Encoder**    | All Properties OFF | 507.3 | 80   | 1         |
-|                     | All Properties ON  | 553.6 | 104  | 2         |
-| **YAML Encoder**    | All Properties OFF | 531.3 | 80   | 1         |
-|                     | All Properties ON  | 588.2 | 104  | 2         |
+| **Default Encoder** | All Properties OFF | 490.3 | 80   | 1         |
+|                     | All Properties ON  | 511.2 | 104  | 1         |
+| **JSON Encoder**    | All Properties OFF | 513.3 | 80   | 1         |
+|                     | All Properties ON  | 536.5 | 104  | 1         |
+| **YAML Encoder**    | All Properties OFF | 535.3 | 80   | 1         |
+|                     | All Properties ON  | 557.1 | 104  | 1         |
 
 
 ## 🤝 Contributing

@@ -18,7 +18,7 @@ func TestLogDebug(t *testing.T) {
 	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
-	output := captureOutput(func() {
+	output := test.CaptureOutput(func() {
 		encoder.Log(loggerConfig, ll.DebugLvlName, s.StdOutput, "Test debug message")
 	})
 
@@ -30,7 +30,7 @@ func TestLogInfo(t *testing.T) {
 	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
-	output := captureOutput(func() {
+	output := test.CaptureOutput(func() {
 		encoder.Log(loggerConfig, ll.InfoLvlName, s.StdOutput, "Test info message")
 	})
 
@@ -42,7 +42,7 @@ func TestLogWarn(t *testing.T) {
 	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
-	output := captureOutput(func() {
+	output := test.CaptureOutput(func() {
 		encoder.Log(loggerConfig, ll.WarnLvlName, s.StdOutput, "Test warning message")
 	})
 
@@ -54,7 +54,7 @@ func TestLogError(t *testing.T) {
 	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
-	output := captureErrorOutput(func() {
+	output := test.CaptureErrorOutput(func() {
 		encoder.Log(loggerConfig, ll.ErrorLvlName, s.StdErrOutput, "Test error message")
 	})
 
@@ -82,23 +82,23 @@ func TestFormatDateTimeString(t *testing.T) {
 	b := bytes.NewBuffer([]byte{})
 	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 
-	encoder.addFormattedDateTime(b, "dateTest", "timeTest", "")
+	encoder.addFormattedDateTime(b, "dateTest", "timeTest")
 	assert.Contains(t, b.String(), "[")
 	assert.Contains(t, b.String(), "]")
 	assert.Contains(t, b.String(), " ")
 
 	b.Reset()
-	encoder.addFormattedDateTime(b, "", "timeTest", "")
+	encoder.addFormattedDateTime(b, "", "timeTest")
 	assert.Contains(t, b.String(), "[")
 	assert.Contains(t, b.String(), "]")
 
 	b.Reset()
-	encoder.addFormattedDateTime(b, "dateTest", "", "")
+	encoder.addFormattedDateTime(b, "dateTest", "")
 	assert.Contains(t, b.String(), "[")
 	assert.Contains(t, b.String(), "]")
 
 	b.Reset()
-	encoder.addFormattedDateTime(b, "", "", "")
+	encoder.addFormattedDateTime(b, "", "")
 	assert.NotContains(t, b.String(), "[")
 	assert.NotContains(t, b.String(), "]")
 	assert.NotContains(t, b.String(), " ")
@@ -108,7 +108,7 @@ func TestShowLogLevel(t *testing.T) {
 	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
-	output := captureOutput(func() {
+	output := test.CaptureOutput(func() {
 		encoder.Log(loggerConfig, ll.DebugLvlName, s.StdOutput, "Test my-test message")
 	})
 
@@ -117,7 +117,7 @@ func TestShowLogLevel(t *testing.T) {
 
 	loggerConfig = &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ShowLogLevel: false}
 
-	output = captureOutput(func() {
+	output = test.CaptureOutput(func() {
 		encoder.Log(loggerConfig, ll.DebugLvlName, s.StdOutput, "Test my-test message")
 	})
 
@@ -129,16 +129,16 @@ func TestCheckColorsInTheOutput(t *testing.T) {
 	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: false, TimeEnabled: false, ColorsEnabled: true, ShowLogLevel: true}
 
-	output := captureOutput(func() { encoder.Log(loggerConfig, ll.DebugLvlName, s.StdOutput, "Test msg") })
+	output := test.CaptureOutput(func() { encoder.Log(loggerConfig, ll.DebugLvlName, s.StdOutput, "Test msg") })
 	assert.Contains(t, output, colors.Gray.String())
 
-	output = captureOutput(func() { encoder.Log(loggerConfig, ll.InfoLvlName, s.StdOutput, "Test my-test message") })
+	output = test.CaptureOutput(func() { encoder.Log(loggerConfig, ll.InfoLvlName, s.StdOutput, "Test my-test message") })
 	assert.Contains(t, output, colors.Cyan.String())
 
-	output = captureOutput(func() { encoder.Log(loggerConfig, ll.WarnLvlName, s.StdOutput, "Test my-test message") })
+	output = test.CaptureOutput(func() { encoder.Log(loggerConfig, ll.WarnLvlName, s.StdOutput, "Test my-test message") })
 	assert.Contains(t, output, colors.Yellow.String())
 
-	output = captureErrorOutput(func() { encoder.Log(loggerConfig, ll.ErrorLvlName, s.StdErrOutput, "Test my-test message") })
+	output = test.CaptureErrorOutput(func() { encoder.Log(loggerConfig, ll.ErrorLvlName, s.StdErrOutput, "Test my-test message") })
 	assert.Contains(t, output, colors.Red.String())
 }
 
@@ -154,16 +154,16 @@ func TestDefaultEncoder_Color(t *testing.T) {
 		ShowLogLevel:  false,
 	}
 
-	output = captureOutput(func() { encoder.Color(&lConfig, colors.Magenta, testLog) })
+	output = test.CaptureOutput(func() { encoder.Color(&lConfig, colors.Magenta, testLog) })
 	assert.Contains(t, output, colors.Magenta.String()+testLog)
 
-	output = captureOutput(func() { encoder.Color(&lConfig, colors.Cyan, testLog) })
+	output = test.CaptureOutput(func() { encoder.Color(&lConfig, colors.Cyan, testLog) })
 	assert.Contains(t, output, colors.Cyan.String()+testLog+colors.Reset.String())
 
-	output = captureOutput(func() { encoder.Color(&lConfig, colors.Gray, testLog) })
+	output = test.CaptureOutput(func() { encoder.Color(&lConfig, colors.Gray, testLog) })
 	assert.Contains(t, output, colors.Gray.String()+testLog+colors.Reset.String())
 
-	output = captureOutput(func() { encoder.Color(&lConfig, colors.Blue, testLog) })
+	output = test.CaptureOutput(func() { encoder.Color(&lConfig, colors.Blue, testLog) })
 	assert.Contains(t, output, colors.Blue.String()+testLog+colors.Reset.String())
 
 	os.Stdout = originalStdOut

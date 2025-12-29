@@ -31,7 +31,7 @@ func (y *YamlMarshaler) MarshalInto(buf *bytes.Buffer, logEntry YamlLogEntry) {
 	extrasLen := len(logEntry.Extras)
 	buf.Grow(yamlCharOverhead + (averageExtraLen * extrasLen))
 
-	y.writeLogEntryProperties(buf, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.DateTime, logEntry.DateTimeFormat)
+	y.writeLogEntryProperties(buf, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.DateTimeFormat)
 
 	buf.WriteString("msg: ")
 	buf.WriteString(logEntry.Message)
@@ -109,7 +109,6 @@ func (y *YamlMarshaler) writeLogEntryProperties(
 	level string,
 	date string,
 	time string,
-	dateTime string,
 	dateTimeFormat s.DateTimeFormat,
 ) {
 	if level != "" {
@@ -118,14 +117,16 @@ func (y *YamlMarshaler) writeLogEntryProperties(
 		buf.WriteByte('\n')
 	}
 
-	if dateTime != "" || (date != "" && time != "") {
+	if date != "" && time != "" {
 		if dateTimeFormat == s.UnixTimestamp {
 			buf.WriteString("ts: ")
 		} else {
 			buf.WriteString("datetime: ")
 		}
 
-		buf.WriteString(dateTime)
+		buf.WriteString(date)
+		buf.WriteByte(' ')
+		buf.WriteString(time)
 		buf.WriteByte('\n')
 
 		return

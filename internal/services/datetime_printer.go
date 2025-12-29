@@ -32,8 +32,8 @@ type DateTimePrinter struct {
 	unixOnce      sync.Once
 }
 
-// RetrieveDateTime returns the current date, time, and combined/unix string based on the configuration.
-// Returns: (dateString, timeString, combinedOrUnixString).
+// RetrieveDateTime returns the current date, time, and unix string based on the configuration.
+// Returns: (dateString, timeString, unixTimeStamp).
 // If the format is UnixTimestamp, the timestamp is returned as the third value, ignoring the boolean flags.
 // Otherwise, 'addDate' and 'addTime' control which components are generated.
 func (d *DateTimePrinter) RetrieveDateTime(addDate, addTime bool) (string, string, string) {
@@ -65,10 +65,6 @@ func (d *DateTimePrinter) RetrieveDateTime(addDate, addTime bool) (string, strin
 		})
 
 		timeRes = d.currentTime.Load().(string)
-	}
-
-	if addDate && addTime {
-		return "", "", dateRes + " " + timeRes
 	}
 
 	return dateRes, timeRes, ""

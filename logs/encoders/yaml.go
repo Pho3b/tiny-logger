@@ -93,13 +93,12 @@ func (y *YAMLEncoder) composeMsgInto(
 	yamlMarshaler.MarshalInto(
 		buf,
 		services.YamlLogEntry{
-			Level:          logLevel.String(),
-			Date:           date,
-			Time:           time,
-			DateTime:       dateTime,
-			DateTimeFormat: dateTimeFormat,
-			Message:        msg,
-			Extras:         extras,
+			Level:    logLevel.String(),
+			Date:     date,
+			Time:     time,
+			DateTime: dateTime,
+			Message:  msg,
+			Extras:   extras,
 		},
 	)
 }

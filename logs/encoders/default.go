@@ -90,8 +90,8 @@ func (d *DefaultEncoder) composeMsgInto(
 	}
 
 	if isDateOrTimeEnabled {
-		dateStr, timeStr, dateTimeStr := d.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
-		d.addFormattedDateTime(buf, dateStr, timeStr, dateTimeStr)
+		dateStr, timeStr, _ := d.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
+		d.addFormattedDateTime(buf, dateStr, timeStr)
 	}
 
 	if showLogLevel || isDateOrTimeEnabled {
@@ -106,24 +106,19 @@ func (d *DefaultEncoder) composeMsgInto(
 // addFormattedDateTime correctly formats the dateTime string, adding and removing square brackets
 // and white spaces as needed.
 // While formatting, it adds the dateTime string to the given buffer.
-func (d *DefaultEncoder) addFormattedDateTime(buf *bytes.Buffer, dateStr, timeStr, dateTimeStr string) {
-	if dateStr == "" && timeStr == "" && dateTimeStr == "" {
+func (d *DefaultEncoder) addFormattedDateTime(buf *bytes.Buffer, dateStr, timeStr string) {
+	if dateStr == "" && timeStr == "" {
 		return
 	}
 
 	buf.WriteByte('[')
+	buf.WriteString(dateStr)
 
-	if dateTimeStr != "" {
-		buf.WriteString(dateTimeStr)
-	} else {
-		buf.WriteString(dateStr)
-
-		if dateStr != "" && timeStr != "" {
-			buf.WriteByte(' ')
-		}
-
-		buf.WriteString(timeStr)
+	if dateStr != "" && timeStr != "" {
+		buf.WriteByte(' ')
 	}
+
+	buf.WriteString(timeStr)
 
 	buf.WriteByte(']')
 }

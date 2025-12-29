@@ -84,7 +84,7 @@ func (j *JSONEncoder) composeMsgInto(
 	extras ...any,
 ) {
 	buf.Grow((averageWordLen * len(extras)) + len(msg) + 60)
-	dateStr, timeStr, dateTimeStr := j.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
+	dateStr, timeStr, _ := j.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
 
 	if !showLogLevel {
 		logLevel = ""
@@ -95,7 +95,6 @@ func (j *JSONEncoder) composeMsgInto(
 		services.JsonLogEntry{
 			Level:          logLevel.String(),
 			Date:           dateStr,
-			DateTime:       dateTimeStr,
 			Time:           timeStr,
 			DateTimeFormat: dateTimeFormat,
 			Message:        msg,

@@ -3,8 +3,6 @@ package services
 import (
 	"bytes"
 	"testing"
-
-	"github.com/pho3b/tiny-logger/shared"
 )
 
 func TestYamlMarshaler_Marshal(t *testing.T) {
@@ -31,13 +29,13 @@ func TestYamlMarshaler_Marshal(t *testing.T) {
 		{
 			name: "full log entry",
 			entry: YamlLogEntry{
-				Level:    "DEBUG",
-				Date:     "2024-03-21",
-				Time:     "15:04:05",
-				DateTime: "2024-03-21T15:04:05",
-				Message:  "full test message",
+				Level:   "DEBUG",
+				Date:    "2024-03-21",
+				Time:    "15:04:05",
+				UnixTS:  "",
+				Message: "full test message",
 			},
-			expected: "level: DEBUG\ndatetime: 2024-03-21T15:04:05\nmsg: full test message\n",
+			expected: "level: DEBUG\ndatetime: 2024-03-21 15:04:05\nmsg: full test message\n",
 		},
 		{
 			name: "with simple extras",
@@ -166,10 +164,9 @@ func TestYamlMarshaler_Marshal_UnixTimestamp(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := NewYamlMarshaler()
 	entry := YamlLogEntry{
-		Level:          "debug",
-		DateTime:       "1715421234", // Unix timestamp string
-		Message:        "unix timestamp test",
-		DateTimeFormat: shared.UnixTimestamp,
+		Level:   "debug",
+		UnixTS:  "1715421234", // Unix timestamp string
+		Message: "unix timestamp test",
 	}
 
 	// Pass pointer to m because MarshalInto is defined on *YamlMarshaler

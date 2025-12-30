@@ -14,6 +14,7 @@ type JSONEncoder struct {
 	baseEncoder
 	DateTimePrinter *services.DateTimePrinter
 	jsonMarshaler   services.JsonMarshaler
+	printer         services.Printer
 }
 
 // Log formats and prints a log message to the given output type.
@@ -40,7 +41,7 @@ func (j *JSONEncoder) Log(
 	)
 
 	msgBuffer.WriteByte('\n')
-	j.printLog(outType, msgBuffer, logger.GetLogFile())
+	j.printer.PrintLog(outType, msgBuffer, logger.GetLogFile())
 	j.putBuffer(msgBuffer)
 }
 
@@ -65,15 +66,9 @@ func (j *JSONEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 
 		msgBuffer.WriteString(c.Reset.String())
 		msgBuffer.WriteByte('\n')
-		j.printLog(s.StdOutput, msgBuffer, logger.GetLogFile())
+		j.printer.PrintLog(s.StdOutput, msgBuffer, logger.GetLogFile())
 		j.putBuffer(msgBuffer)
 	}
-}
-
-// SetDateTimeFormat updates the date and time format used by the encoder's DateTimePrinter.
-// This method triggers an immediate update of the cached date and time strings to match the new format.
-func (j *JSONEncoder) SetDateTimeFormat(format s.DateTimeFormat) {
-	j.DateTimePrinter.UpdateDateTimeFormat(format)
 }
 
 // composeMsgInto formats and writes the given 'msg' into the given buffer.
@@ -89,7 +84,7 @@ func (j *JSONEncoder) composeMsgInto(
 	extras ...any,
 ) {
 	buf.Grow((averageWordLen * len(extras)) + len(msg) + 60)
-	dateStr, timeStr, dateTimeStr := j.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
+	dateStr, timeStr, unixTs := j.DateTimePrinter.RetrieveDateTime(dateTimeFormat, dateEnabled, timeEnabled)
 
 	if !showLogLevel {
 		logLevel = ""
@@ -98,20 +93,23 @@ func (j *JSONEncoder) composeMsgInto(
 	jsonMarshaler.MarshalInto(
 		buf,
 		services.JsonLogEntry{
-			Level:          logLevel.String(),
-			Date:           dateStr,
-			DateTime:       dateTimeStr,
-			Time:           timeStr,
-			DateTimeFormat: dateTimeFormat,
-			Message:        msg,
-			Extras:         extras,
+			Level:   logLevel.String(),
+			Date:    dateStr,
+			Time:    timeStr,
+			UnixTS:  unixTs,
+			Message: msg,
+			Extras:  extras,
 		},
 	)
 }
 
 // NewJSONEncoder initializes and returns a new JSONEncoder instance.
-func NewJSONEncoder() *JSONEncoder {
-	encoder := &JSONEncoder{DateTimePrinter: services.NewDateTimePrinter(), jsonMarshaler: services.JsonMarshaler{}}
+func NewJSONEncoder(
+	printer services.Printer,
+	jsonMarshaler services.JsonMarshaler,
+	dateTimePrinter *services.DateTimePrinter,
+) *JSONEncoder {
+	encoder := &JSONEncoder{DateTimePrinter: dateTimePrinter, jsonMarshaler: jsonMarshaler, printer: printer}
 	encoder.encoderType = s.JsonEncoderType
 	encoder.bufferSyncPool = sync.Pool{
 		New: func() any {

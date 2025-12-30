@@ -3,7 +3,6 @@ package encoders
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"strconv"
 	"sync"
 
@@ -36,13 +35,13 @@ func (b *baseEncoder) castAndConcatenateInto(buf *bytes.Buffer, args ...any) {
 		case rune:
 			buf.WriteRune(v)
 		case int:
-			buf.WriteString(strconv.Itoa(v))
+			buf.Write(strconv.AppendInt(buf.AvailableBuffer(), int64(v), 10))
 		case int64:
-			buf.WriteString(strconv.FormatInt(v, 10))
+			buf.Write(strconv.AppendInt(buf.AvailableBuffer(), v, 10))
 		case float64:
-			buf.WriteString(strconv.FormatFloat(v, 'f', -1, 64))
+			buf.Write(strconv.AppendFloat(buf.AvailableBuffer(), v, 'f', -1, 64))
 		case bool:
-			buf.WriteString(strconv.FormatBool(v))
+			buf.Write(strconv.AppendBool(buf.AvailableBuffer(), v))
 		case fmt.Stringer:
 			buf.WriteString(v.String())
 		case error:
@@ -76,30 +75,6 @@ func (b *baseEncoder) castToString(arg any) string {
 	default:
 		// Using the slower fmt.Sprint only for unknown types
 		return fmt.Sprint(v)
-	}
-}
-
-// printLog prints the given msgBuffer to the given outputType (stdout or stderr).
-// If 'file' is not nil, the message is written to the file.
-func (b *baseEncoder) printLog(outType s.OutputType, msgBuffer *bytes.Buffer, file *os.File) {
-	var err error
-
-	switch outType {
-	case s.StdOutput:
-		_, err = os.Stdout.Write(msgBuffer.Bytes())
-	case s.StdErrOutput:
-		_, err = os.Stderr.Write(msgBuffer.Bytes())
-	case s.FileOutput:
-		if file == nil {
-			_, _ = os.Stderr.Write([]byte("tiny-logger-err: given out file is nil"))
-			return
-		}
-
-		_, err = file.Write(msgBuffer.Bytes())
-	}
-
-	if err != nil {
-		_, _ = os.Stderr.Write([]byte("tiny-logger-err: " + err.Error() + "\n"))
 	}
 }
 

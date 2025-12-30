@@ -4,20 +4,17 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
-
-	s "github.com/pho3b/tiny-logger/shared"
 )
 
 // JsonLogEntry represents a structured log entry that can be marshaled to JSON format.
 // All fields except Message are optional and will be omitted if empty.
 type JsonLogEntry struct {
-	Level          string           `json:"level,omitempty"`
-	Date           string           `json:"date,omitempty"`
-	Time           string           `json:"time,omitempty"`
-	DateTime       string           `json:"datetime,omitempty"`
-	Message        string           `json:"msg"`
-	DateTimeFormat s.DateTimeFormat `json:"dateTimeFormat,omitempty"`
-	Extras         []any            `json:"extras,omitempty"`
+	Level   string `json:"level,omitempty"`
+	Date    string `json:"date,omitempty"`
+	Time    string `json:"time,omitempty"`
+	Message string `json:"msg"`
+	UnixTS  string `json:"unixTimestamp,omitempty"`
+	Extras  []any  `json:"extras,omitempty"`
 }
 
 // JsonMarshaler provides custom JSON marshaling functionality optimized for log entries.
@@ -31,7 +28,7 @@ func (j *JsonMarshaler) MarshalInto(buf *bytes.Buffer, logEntry JsonLogEntry) {
 	buf.Grow(jsonCharOverhead + (averageExtraLen * extrasLen))
 
 	buf.WriteByte('{')
-	j.writeLogEntryProperties(buf, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.DateTime, logEntry.DateTimeFormat)
+	j.writeLogEntryProperties(buf, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.UnixTS)
 
 	buf.WriteString("\"msg\":\"")
 	buf.WriteString(logEntry.Message)
@@ -89,13 +86,13 @@ func (j *JsonMarshaler) writeValue(buf *bytes.Buffer, v any, isKey bool) {
 			buf.WriteByte('"')
 		}
 	case int:
-		buf.WriteString(strconv.Itoa(val))
+		buf.Write(strconv.AppendInt(buf.AvailableBuffer(), int64(val), 10))
 	case int64:
-		buf.WriteString(strconv.FormatInt(val, 10))
+		buf.Write(strconv.AppendInt(buf.AvailableBuffer(), val, 10))
 	case float64:
-		buf.WriteString(strconv.FormatFloat(val, 'f', -1, 64))
+		buf.Write(strconv.AppendFloat(buf.AvailableBuffer(), val, 'f', -1, 64))
 	case bool:
-		buf.WriteString(strconv.FormatBool(val))
+		buf.Write(strconv.AppendBool(buf.AvailableBuffer(), val))
 	default:
 		if isKey {
 			buf.WriteString(fmt.Sprint(val))
@@ -114,8 +111,7 @@ func (j *JsonMarshaler) writeLogEntryProperties(
 	level string,
 	date string,
 	time string,
-	dateTime string,
-	dateTimeFormat s.DateTimeFormat,
+	unixTS string,
 ) {
 	if level != "" {
 		buf.WriteString("\"level\":\"")
@@ -124,14 +120,20 @@ func (j *JsonMarshaler) writeLogEntryProperties(
 		buf.WriteByte(',')
 	}
 
-	if dateTime != "" || (date != "" && time != "") {
-		if dateTimeFormat == s.UnixTimestamp {
-			buf.WriteString("\"ts\":\"")
-		} else {
-			buf.WriteString("\"datetime\":\"")
-		}
+	if unixTS != "" {
+		buf.WriteString("\"ts\":\"")
+		buf.WriteString(unixTS)
+		buf.WriteByte('"')
+		buf.WriteByte(',')
 
-		buf.WriteString(dateTime)
+		return
+	}
+
+	if date != "" && time != "" {
+		buf.WriteString("\"datetime\":\"")
+		buf.WriteString(date)
+		buf.WriteByte(' ')
+		buf.WriteString(time)
 		buf.WriteByte('"')
 		buf.WriteByte(',')
 
@@ -151,4 +153,8 @@ func (j *JsonMarshaler) writeLogEntryProperties(
 		buf.WriteByte('"')
 		buf.WriteByte(',')
 	}
+}
+
+func NewJsonMarshaler() JsonMarshaler {
+	return JsonMarshaler{}
 }

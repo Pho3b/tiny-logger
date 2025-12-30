@@ -15,34 +15,32 @@ func TestDateTimePrinter_PrintDateTime(t *testing.T) {
 			return time.Date(2023, time.November, 1, 15, 30, 45, 0, time.UTC)
 		},
 	}
+	dateTimePrinter.init()
 
 	t.Run("Return both date and time", func(t *testing.T) {
-		dateTimePrinter.UpdateDateTimeFormat(shared.IT)
-		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(true, true)
-		assert.Empty(t, dateRes)
-		assert.Empty(t, timeRes)
-		assert.Equal(t, "01/11/2023 15:30:45", dateTimeRes)
+		dateRes, timeRes, unixTs := dateTimePrinter.RetrieveDateTime(shared.IT, true, true)
+		assert.Empty(t, unixTs)
+		assert.NotEmpty(t, dateRes)
+		assert.NotEmpty(t, timeRes)
+		assert.Equal(t, "01/11/2023 15:30:45", dateRes+" "+timeRes)
 	})
 
 	t.Run("Return date only", func(t *testing.T) {
-		dateTimePrinter.UpdateDateTimeFormat(shared.IT)
-		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(true, false)
+		dateRes, timeRes, unixTs := dateTimePrinter.RetrieveDateTime(shared.IT, true, false)
 		assert.Equal(t, "01/11/2023", dateRes)
 		assert.Equal(t, "", timeRes)
-		assert.Equal(t, "", dateTimeRes)
+		assert.Equal(t, "", unixTs)
 	})
 
 	t.Run("Return time only", func(t *testing.T) {
-		dateTimePrinter.UpdateDateTimeFormat(shared.IT)
-		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(false, true)
+		dateRes, timeRes, unixTs := dateTimePrinter.RetrieveDateTime(shared.IT, false, true)
 		assert.Equal(t, "", dateRes)
 		assert.Equal(t, "15:30:45", timeRes)
-		assert.Equal(t, "", dateTimeRes)
+		assert.Equal(t, "", unixTs)
 	})
 
 	t.Run("Return empty string when both flags are false", func(t *testing.T) {
-		dateTimePrinter.UpdateDateTimeFormat(shared.IT)
-		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(false, false)
+		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(shared.IT, false, false)
 		assert.Equal(t, "", dateRes)
 		assert.Equal(t, "", timeRes)
 		assert.Equal(t, "", dateTimeRes)
@@ -60,6 +58,7 @@ func TestDateTimePrinter_Formats(t *testing.T) {
 			return fixedFutureTime
 		},
 	}
+	dateTimePrinter.init()
 
 	tests := []struct {
 		name         string
@@ -93,18 +92,18 @@ func TestDateTimePrinter_Formats(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			dateTimePrinter.UpdateDateTimeFormat(tt.format)
-			dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(true, true)
-			assert.Empty(t, dateRes)
-			assert.Empty(t, timeRes)
-			assert.Equal(t, tt.wantCombined, dateTimeRes)
+			dateRes, timeRes, unixTs := dateTimePrinter.RetrieveDateTime(tt.format, true, true)
+			assert.NotEmpty(t, dateRes)
+			assert.NotEmpty(t, timeRes)
+			assert.Empty(t, unixTs)
+			assert.Equal(t, tt.wantCombined, dateRes+" "+timeRes)
 
 			// Also test individual components
-			d, tRes, _ := dateTimePrinter.RetrieveDateTime(true, false)
+			d, tRes, _ := dateTimePrinter.RetrieveDateTime(tt.format, true, false)
 			assert.Equal(t, tt.wantDate, d)
 			assert.Empty(t, tRes)
 
-			d, tRes, _ = dateTimePrinter.RetrieveDateTime(false, true)
+			d, tRes, _ = dateTimePrinter.RetrieveDateTime(tt.format, false, true)
 			assert.Empty(t, d)
 			assert.Equal(t, tt.wantTime, tRes)
 		})
@@ -121,25 +120,24 @@ func TestDateTimePrinter_UnixTimestamp(t *testing.T) {
 			return fixedFutureTime
 		},
 	}
-
-	dateTimePrinter.UpdateDateTimeFormat(shared.UnixTimestamp)
+	dateTimePrinter.init()
 
 	t.Run("Return unix timestamp combined", func(t *testing.T) {
-		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(true, true)
+		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(shared.UnixTimestamp, true, true)
 		assert.Empty(t, dateRes)
 		assert.Empty(t, timeRes)
 		assert.Equal(t, expectedUnix, dateTimeRes)
 	})
 
 	t.Run("Return unix timestamp with date flag only", func(t *testing.T) {
-		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(true, false)
+		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(shared.UnixTimestamp, true, false)
 		assert.Empty(t, dateRes)
 		assert.Empty(t, timeRes)
 		assert.Equal(t, expectedUnix, dateTimeRes)
 	})
 
 	t.Run("Return unix timestamp with time flag only", func(t *testing.T) {
-		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(false, true)
+		dateRes, timeRes, dateTimeRes := dateTimePrinter.RetrieveDateTime(shared.UnixTimestamp, false, true)
 		assert.Empty(t, dateRes)
 		assert.Empty(t, timeRes)
 		assert.Equal(t, expectedUnix, dateTimeRes)
@@ -147,22 +145,21 @@ func TestDateTimePrinter_UnixTimestamp(t *testing.T) {
 }
 
 func TestNewDateTimePrinter(t *testing.T) {
-	assert.NotNil(t, NewDateTimePrinter())
-	assert.IsType(t, &DateTimePrinter{}, NewDateTimePrinter())
+	assert.NotNil(t, GetDateTimePrinter())
+	assert.IsType(t, &DateTimePrinter{}, GetDateTimePrinter())
 }
 
 func TestDateTimePrinter_FullSecondUpdate(t *testing.T) {
-	dateTimePrinter := NewDateTimePrinter()
+	dateTimePrinter := GetDateTimePrinter()
 
 	t.Run("Return both date and time", func(t *testing.T) {
-		dateTimePrinter.UpdateDateTimeFormat(shared.IT)
-		dateRes, timeRes, _ := dateTimePrinter.RetrieveDateTime(true, true)
-		assert.Empty(t, dateRes)
-		assert.Empty(t, timeRes)
+		dateRes, timeRes, _ := dateTimePrinter.RetrieveDateTime(shared.IT, true, true)
+		assert.NotEmpty(t, dateRes)
+		assert.NotEmpty(t, timeRes)
 
-		prevTime := dateTimePrinter.currentTime.Load()
+		prevTime := dateTimePrinter.cachedTimes[shared.IT]
 		time.Sleep(2 * time.Second)
-		currTime := dateTimePrinter.currentTime.Load()
+		currTime := dateTimePrinter.cachedTimes[shared.IT]
 
 		assert.NotEqual(t, prevTime, currTime,
 			"The current %s time should have changed from previous time", currTime, prevTime)

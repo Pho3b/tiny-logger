@@ -13,7 +13,7 @@ import (
 type DefaultEncoder struct {
 	baseEncoder
 	dateTimeFormat  s.DateTimeFormat
-	ColorsPrinter   services.ColorsPrinter
+	printer         services.Printer
 	DateTimePrinter *services.DateTimePrinter
 }
 
@@ -34,41 +34,38 @@ func (d *DefaultEncoder) Log(
 		tEnabled,
 		logger.GetColorsEnabled(),
 		logger.GetShowLogLevel(),
+		logger.GetDateTimeFormat(),
 		args...,
 	)
 
 	msgBuffer.WriteByte('\n')
-	d.printLog(outType, msgBuffer, logger.GetLogFile())
+	d.printer.PrintLog(outType, msgBuffer, logger.GetLogFile())
 	d.putBuffer(msgBuffer)
 }
 
 // Color formats and prints a colored Log message using the specified color.
 func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...any) {
 	if len(args) > 0 {
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := d.getBuffer()
 		msgBuffer.WriteString(color.String())
 
 		d.composeMsgInto(
 			msgBuffer,
 			ll.InfoLvlName,
+			dEnabled,
+			tEnabled,
 			false,
 			false,
-			false,
-			false,
+			logger.GetDateTimeFormat(),
 			args...,
 		)
 
 		msgBuffer.WriteString(c.Reset.String())
 		msgBuffer.WriteByte('\n')
-		d.printLog(s.StdOutput, msgBuffer, logger.GetLogFile())
+		d.printer.PrintLog(s.StdOutput, msgBuffer, logger.GetLogFile())
 		d.putBuffer(msgBuffer)
 	}
-}
-
-// SetDateTimeFormat updates the date and time format used by the encoder's DateTimePrinter.
-// This method triggers an immediate update of the cached date and time strings to match the new format.
-func (d *DefaultEncoder) SetDateTimeFormat(format s.DateTimeFormat) {
-	d.DateTimePrinter.UpdateDateTimeFormat(format)
 }
 
 // composeMsgInto formats and writes the given 'msg' into the given buffer.
@@ -79,12 +76,13 @@ func (d *DefaultEncoder) composeMsgInto(
 	timeEnabled bool,
 	headerColorEnabled bool,
 	showLogLevel bool,
+	dateTimeFormat s.DateTimeFormat,
 	args ...any,
 ) {
 	buf.Grow(len(args)*averageWordLen + defaultCharOverhead)
 
 	isDateOrTimeEnabled := dateEnabled || timeEnabled
-	colors := d.ColorsPrinter.RetrieveColorsFromLogLevel(headerColorEnabled, ll.LogLvlNameToInt[logLevel])
+	colors := d.printer.RetrieveColorsFromLogLevel(headerColorEnabled, ll.LogLvlNameToInt[logLevel])
 	buf.WriteString(string(colors[0]))
 
 	if showLogLevel {
@@ -96,8 +94,8 @@ func (d *DefaultEncoder) composeMsgInto(
 	}
 
 	if isDateOrTimeEnabled {
-		dateStr, timeStr, dateTimeStr := d.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
-		d.addFormattedDateTime(buf, dateStr, timeStr, dateTimeStr)
+		dateStr, timeStr, unixTs := d.DateTimePrinter.RetrieveDateTime(dateTimeFormat, dateEnabled, timeEnabled)
+		d.addFormattedDateTime(buf, dateStr, timeStr, unixTs)
 	}
 
 	if showLogLevel || isDateOrTimeEnabled {
@@ -109,35 +107,37 @@ func (d *DefaultEncoder) composeMsgInto(
 	d.castAndConcatenateInto(buf, args...)
 }
 
-// addFormattedDateTime correctly formats the dateTime string, adding and removing square brackets
-// and white spaces as needed.
-// While formatting, it adds the dateTime string to the given buffer.
-func (d *DefaultEncoder) addFormattedDateTime(buf *bytes.Buffer, dateStr, timeStr, dateTimeStr string) {
-	if dateStr == "" && timeStr == "" && dateTimeStr == "" {
+// addFormattedDateTime formats and adds the date and time strings enclosed in square brackets to the given buffer.
+func (d *DefaultEncoder) addFormattedDateTime(buf *bytes.Buffer, dateStr, timeStr, unixTs string) {
+	if unixTs != "" {
+		buf.WriteByte('[')
+		buf.WriteString(unixTs)
+		buf.WriteByte(']')
+
 		return
 	}
 
-	buf.Grow(averageWordLen)
-	buf.WriteByte('[')
-
-	if dateTimeStr != "" {
-		buf.WriteString(dateTimeStr)
-	} else {
-		buf.WriteString(dateStr)
-
-		if dateStr != "" && timeStr != "" {
-			buf.WriteByte(' ')
-		}
-
-		buf.WriteString(timeStr)
+	if dateStr == "" && timeStr == "" {
+		return
 	}
 
+	buf.WriteByte('[')
+	buf.WriteString(dateStr)
+
+	if dateStr != "" && timeStr != "" {
+		buf.WriteByte(' ')
+	}
+
+	buf.WriteString(timeStr)
 	buf.WriteByte(']')
 }
 
 // NewDefaultEncoder initializes and returns a new DefaultEncoder instance.
-func NewDefaultEncoder() *DefaultEncoder {
-	encoder := &DefaultEncoder{DateTimePrinter: services.NewDateTimePrinter(), ColorsPrinter: services.ColorsPrinter{}}
+func NewDefaultEncoder(
+	printer services.Printer,
+	dateTimePrinter *services.DateTimePrinter,
+) *DefaultEncoder {
+	encoder := &DefaultEncoder{DateTimePrinter: dateTimePrinter, printer: printer}
 	encoder.encoderType = s.DefaultEncoderType
 	encoder.bufferSyncPool = sync.Pool{
 		New: func() any {

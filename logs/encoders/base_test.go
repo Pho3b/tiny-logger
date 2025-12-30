@@ -3,10 +3,10 @@ package encoders
 import (
 	"bytes"
 	"errors"
-	"os"
 	"sync"
 	"testing"
 
+	"github.com/pho3b/tiny-logger/internal/services"
 	s "github.com/pho3b/tiny-logger/shared"
 	"github.com/stretchr/testify/assert"
 )
@@ -87,13 +87,13 @@ func TestBuildMsgWithCastAndConcatenateInto(t *testing.T) {
 }
 
 func TestBaseEncoder_GetType(t *testing.T) {
-	encoder := NewDefaultEncoder()
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.GetDateTimePrinter())
 	assert.Equal(t, s.DefaultEncoderType, encoder.GetType())
 
-	jsonEncoder := NewJSONEncoder()
+	jsonEncoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.GetDateTimePrinter())
 	assert.Equal(t, s.JsonEncoderType, jsonEncoder.GetType())
 
-	yamlEncoder := NewYAMLEncoder()
+	yamlEncoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.GetDateTimePrinter())
 	assert.Equal(t, s.YamlEncoderType, yamlEncoder.GetType())
 
 	baseEncoder := newBaseEncoder()
@@ -110,38 +110,4 @@ func newBaseEncoder() *baseEncoder {
 	}
 
 	return encoder
-}
-
-// captureOutput redirects os.Stdout to capture the output of the function f
-func captureOutput(f func()) string {
-	r, w, _ := os.Pipe()
-	defer r.Close()
-
-	origStdout := os.Stdout
-	os.Stdout = w
-
-	f()
-	w.Close()
-	os.Stdout = origStdout
-
-	var buf bytes.Buffer
-	_, _ = buf.ReadFrom(r)
-	return buf.String()
-}
-
-// captureErrorOutput redirects os.Stderr to capture the output of the function f
-func captureErrorOutput(f func()) string {
-	r, w, _ := os.Pipe()
-	defer r.Close()
-
-	origStderr := os.Stderr
-	os.Stderr = w
-
-	f()
-	w.Close()
-	os.Stderr = origStderr
-
-	var buf bytes.Buffer
-	_, _ = buf.ReadFrom(r)
-	return buf.String()
 }

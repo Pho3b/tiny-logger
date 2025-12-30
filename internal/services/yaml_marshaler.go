@@ -4,20 +4,17 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
-
-	s "github.com/pho3b/tiny-logger/shared"
 )
 
 // YamlLogEntry represents a structured log entry that can be marshaled to YAML format.
 // All fields except Message are optional and will be omitted if empty.
 type YamlLogEntry struct {
-	Level          string           `yaml:"level,omitempty"`
-	Date           string           `yaml:"date,omitempty"`
-	Time           string           `yaml:"time,omitempty"`
-	DateTime       string           `yaml:"datetime,omitempty"`
-	DateTimeFormat s.DateTimeFormat `yaml:"dateTimeFormat,omitempty"`
-	Message        string           `yaml:"msg"`
-	Extras         []any            `yaml:"extras,omitempty"`
+	Level   string `yaml:"level,omitempty"`
+	Date    string `yaml:"date,omitempty"`
+	Time    string `yaml:"time,omitempty"`
+	UnixTS  string `yaml:"unixTimestamp,omitempty"`
+	Message string `yaml:"msg"`
+	Extras  []any  `yaml:"extras,omitempty"`
 }
 
 // YamlMarshaler provides custom YAML marshaling functionality optimized for log entries.
@@ -31,7 +28,7 @@ func (y *YamlMarshaler) MarshalInto(buf *bytes.Buffer, logEntry YamlLogEntry) {
 	extrasLen := len(logEntry.Extras)
 	buf.Grow(yamlCharOverhead + (averageExtraLen * extrasLen))
 
-	y.writeLogEntryProperties(buf, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.DateTime, logEntry.DateTimeFormat)
+	y.writeLogEntryProperties(buf, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.UnixTS)
 
 	buf.WriteString("msg: ")
 	buf.WriteString(logEntry.Message)
@@ -81,13 +78,13 @@ func (y *YamlMarshaler) writeStr(buf *bytes.Buffer, v any, isKey bool) {
 			buf.WriteByte('"')
 		}
 	case int:
-		buf.WriteString(strconv.Itoa(val))
+		buf.Write(strconv.AppendInt(buf.AvailableBuffer(), int64(val), 10))
 	case int64:
-		buf.WriteString(strconv.FormatInt(val, 10))
+		buf.Write(strconv.AppendInt(buf.AvailableBuffer(), val, 10))
 	case float64:
-		buf.WriteString(strconv.FormatFloat(val, 'f', -1, 64))
+		buf.Write(strconv.AppendFloat(buf.AvailableBuffer(), val, 'f', -1, 64))
 	case bool:
-		buf.WriteString(strconv.FormatBool(val))
+		buf.Write(strconv.AppendBool(buf.AvailableBuffer(), val))
 	default:
 		// Check if the string representation needs quotes
 		str := fmt.Sprint(val)
@@ -109,8 +106,7 @@ func (y *YamlMarshaler) writeLogEntryProperties(
 	level string,
 	date string,
 	time string,
-	dateTime string,
-	dateTimeFormat s.DateTimeFormat,
+	unixTS string,
 ) {
 	if level != "" {
 		buf.WriteString("level: ")
@@ -118,14 +114,19 @@ func (y *YamlMarshaler) writeLogEntryProperties(
 		buf.WriteByte('\n')
 	}
 
-	if dateTime != "" || (date != "" && time != "") {
-		if dateTimeFormat == s.UnixTimestamp {
-			buf.WriteString("ts: ")
-		} else {
-			buf.WriteString("datetime: ")
-		}
+	if unixTS != "" {
+		buf.WriteString("ts: ")
+		buf.WriteString(unixTS)
+		buf.WriteByte('\n')
 
-		buf.WriteString(dateTime)
+		return
+	}
+
+	if date != "" && time != "" {
+		buf.WriteString("datetime: ")
+		buf.WriteString(date)
+		buf.WriteByte(' ')
+		buf.WriteString(time)
 		buf.WriteByte('\n')
 
 		return

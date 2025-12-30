@@ -3,6 +3,7 @@ package logs
 import (
 	"os"
 
+	"github.com/pho3b/tiny-logger/internal/services"
 	"github.com/pho3b/tiny-logger/logs/colors"
 	"github.com/pho3b/tiny-logger/logs/encoders"
 	ll "github.com/pho3b/tiny-logger/logs/log_level"
@@ -10,14 +11,16 @@ import (
 )
 
 type Logger struct {
-	dateEnabled    bool
-	timeEnabled    bool
-	colorsEnabled  bool
-	showLogLevel   bool
-	encoder        s.EncoderInterface
-	logLvl         ll.LogLevel
-	outFile        *os.File
-	dateTimeFormat s.DateTimeFormat
+	dateEnabled     bool
+	timeEnabled     bool
+	colorsEnabled   bool
+	showLogLevel    bool
+	encoder         s.EncoderInterface
+	logLvl          ll.LogLevel
+	outFile         *os.File
+	dateTimeFormat  s.DateTimeFormat
+	printer         services.Printer
+	dateTimePrinter *services.DateTimePrinter
 }
 
 // Debug logs a debug-level message if the logger's log level allows it.
@@ -51,7 +54,7 @@ func (l *Logger) Error(args ...any) {
 // FatalError logs a fatal error message and terminates the application only if any given args is not NIl,
 // otherwise the method does nothing.
 func (l *Logger) FatalError(args ...any) {
-	if l.logLvl.Lvl >= ll.ErrorLvl && len(args) > 0 && !l.areAllNil(args...) {
+	if len(args) > 0 && !l.areAllNil(args...) {
 		l.encoder.Log(l, ll.FatalErrorLvlName, l.checkOutFile(s.StdErrOutput), args...)
 		os.Exit(1)
 	}
@@ -152,14 +155,13 @@ func (l *Logger) GetEncoderType() s.EncoderType {
 func (l *Logger) SetEncoder(encoderType s.EncoderType) *Logger {
 	switch encoderType {
 	case s.DefaultEncoderType:
-		l.encoder = encoders.NewDefaultEncoder()
+		l.encoder = encoders.NewDefaultEncoder(l.printer, l.dateTimePrinter)
 	case s.JsonEncoderType:
-		l.encoder = encoders.NewJSONEncoder()
+		l.encoder = encoders.NewJSONEncoder(l.printer, services.NewJsonMarshaler(), l.dateTimePrinter)
 	case s.YamlEncoderType:
-		l.encoder = encoders.NewYAMLEncoder()
+		l.encoder = encoders.NewYAMLEncoder(l.printer, services.NewYamlMarshaler(), l.dateTimePrinter)
 	}
 
-	l.encoder.SetDateTimeFormat(l.dateTimeFormat)
 	return l
 }
 
@@ -204,7 +206,6 @@ func (l *Logger) GetDateTimeFormat() s.DateTimeFormat {
 // SetDateTimeFormat sets the DateTimeFormat of the logger.
 func (l *Logger) SetDateTimeFormat(format s.DateTimeFormat) *Logger {
 	l.dateTimeFormat = format
-	l.encoder.SetDateTimeFormat(l.dateTimeFormat)
 
 	return l
 }
@@ -233,6 +234,8 @@ func (l *Logger) checkOutFile(outType s.OutputType) s.OutputType {
 func NewLogger() *Logger {
 	logger := &Logger{showLogLevel: true, dateTimeFormat: s.IT}
 	logger.SetLogLvlEnvVariable(ll.DefaultEnvLogLvlVar)
+	logger.printer = services.NewPrinter()
+	logger.dateTimePrinter = services.GetDateTimePrinter()
 	logger.SetEncoder(s.DefaultEncoderType)
 
 	return logger

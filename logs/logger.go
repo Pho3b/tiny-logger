@@ -54,7 +54,7 @@ func (l *Logger) Error(args ...any) {
 // FatalError logs a fatal error message and terminates the application only if any given args is not NIl,
 // otherwise the method does nothing.
 func (l *Logger) FatalError(args ...any) {
-	if l.logLvl.Lvl >= ll.ErrorLvl && len(args) > 0 && !l.areAllNil(args...) {
+	if len(args) > 0 && !l.areAllNil(args...) {
 		l.encoder.Log(l, ll.FatalErrorLvlName, l.checkOutFile(s.StdErrOutput), args...)
 		os.Exit(1)
 	}

@@ -46,14 +46,15 @@ func (d *DefaultEncoder) Log(
 // Color formats and prints a colored Log message using the specified color.
 func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...any) {
 	if len(args) > 0 {
+		dEnabled, tEnabled := logger.GetDateTimeEnabled()
 		msgBuffer := d.getBuffer()
 		msgBuffer.WriteString(color.String())
 
 		d.composeMsgInto(
 			msgBuffer,
 			ll.InfoLvlName,
-			false,
-			false,
+			dEnabled,
+			tEnabled,
 			false,
 			false,
 			logger.GetDateTimeFormat(),

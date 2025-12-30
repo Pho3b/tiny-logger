@@ -78,13 +78,13 @@ func (y *YamlMarshaler) writeStr(buf *bytes.Buffer, v any, isKey bool) {
 			buf.WriteByte('"')
 		}
 	case int:
-		buf.WriteString(strconv.Itoa(val))
+		buf.Write(strconv.AppendInt(buf.AvailableBuffer(), int64(val), 10))
 	case int64:
-		buf.WriteString(strconv.FormatInt(val, 10))
+		buf.Write(strconv.AppendInt(buf.AvailableBuffer(), val, 10))
 	case float64:
-		buf.WriteString(strconv.FormatFloat(val, 'f', -1, 64))
+		buf.Write(strconv.AppendFloat(buf.AvailableBuffer(), val, 'f', -1, 64))
 	case bool:
-		buf.WriteString(strconv.FormatBool(val))
+		buf.Write(strconv.AppendBool(buf.AvailableBuffer(), val))
 	default:
 		// Check if the string representation needs quotes
 		str := fmt.Sprint(val)

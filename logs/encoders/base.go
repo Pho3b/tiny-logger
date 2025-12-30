@@ -35,13 +35,13 @@ func (b *baseEncoder) castAndConcatenateInto(buf *bytes.Buffer, args ...any) {
 		case rune:
 			buf.WriteRune(v)
 		case int:
-			buf.WriteString(strconv.Itoa(v))
+			buf.Write(strconv.AppendInt(buf.AvailableBuffer(), int64(v), 10))
 		case int64:
-			buf.WriteString(strconv.FormatInt(v, 10))
+			buf.Write(strconv.AppendInt(buf.AvailableBuffer(), v, 10))
 		case float64:
-			buf.WriteString(strconv.FormatFloat(v, 'f', -1, 64))
+			buf.Write(strconv.AppendFloat(buf.AvailableBuffer(), v, 'f', -1, 64))
 		case bool:
-			buf.WriteString(strconv.FormatBool(v))
+			buf.Write(strconv.AppendBool(buf.AvailableBuffer(), v))
 		case fmt.Stringer:
 			buf.WriteString(v.String())
 		case error:

@@ -27,9 +27,7 @@ var (
 )
 
 type DateTimePrinter struct {
-	timeNow func() time.Time
-	// Arrays indexed by s.DateTimeFormat (int8)
-	// Assuming 0=IT, 1=JP, 2=US. UnixTimestamp is handled separately.
+	timeNow     func() time.Time
 	cachedDates [3]atomic.Value
 	cachedTimes [3]atomic.Value
 	currentUnix atomic.Value
@@ -54,6 +52,8 @@ func (d *DateTimePrinter) RetrieveDateTime(fmt s.DateTimeFormat, addDate, addTim
 	return dateRes, timeRes, ""
 }
 
+// init initializes the current timestamp and cached formatted strings,
+// then starts background goroutines to keep them updated.
 func (d *DateTimePrinter) init() {
 	now := d.timeNow()
 	d.currentUnix.Store(strconv.FormatInt(now.Unix(), 10))
@@ -66,17 +66,34 @@ func (d *DateTimePrinter) init() {
 
 	go d.loopUpdateDate()
 	go d.loopUpdateTime()
-	go d.loopUpdateUnix()
 }
 
-// loopUpdateTime updates all time formats every second
+// loopUpdateTime updates all time formats, the unix timestamp every second,
+// and refreshes the date format if the day has changed.
 func (d *DateTimePrinter) loopUpdateTime() {
+	// Initialize lastDay with a value that forces an update on the first iteration
+	lastDay := -1
+
 	for {
 		now := d.timeNow()
 
+		// 1. Update Time Formats (Always)
 		for i := 0; i < 3; i++ {
 			fmt := s.DateTimeFormat(i)
 			d.cachedTimes[i].Store(now.Format(timeFormat[fmt]))
+		}
+
+		// 2. Update Unix Timestamp (Always)
+		d.currentUnix.Store(strconv.FormatInt(now.Unix(), 10))
+
+		// 3. Update Date Formats (Only if day changed)
+		if currentDay := now.Day(); currentDay != lastDay {
+			for i := 0; i < 3; i++ {
+				fmt := s.DateTimeFormat(i)
+				d.cachedDates[i].Store(now.Format(dateFormat[fmt]))
+			}
+
+			lastDay = currentDay
 		}
 
 		nextSecond := now.Truncate(time.Second).Add(time.Second)
@@ -95,18 +112,6 @@ func (d *DateTimePrinter) loopUpdateDate() {
 		}
 
 		time.Sleep(time.Minute * 10)
-	}
-}
-
-// updateCurrentTime synchronizes with the system clock and updates the DateTimePrinter's
-// currentTime property every full second.
-func (d *DateTimePrinter) loopUpdateUnix() {
-	for {
-		now := d.timeNow()
-		d.currentUnix.Store(strconv.FormatInt(now.Unix(), 10))
-
-		nextSecond := now.Truncate(time.Second).Add(time.Second)
-		time.Sleep(time.Until(nextSecond))
 	}
 }
 

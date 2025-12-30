@@ -12,4 +12,4 @@ test-coverage:
 
 # Run benchmark tests
 test-benchmark:
-	CGO_ENABLED=1 GOARCH=${ARCH} go test ./test/benchmark_test.go -bench=. -benchmem -benchtime=5s -cpu=8 | grep /op
+	CGO_ENABLED=1 GOARCH=${ARCH} go test ./test/benchmark_test.go -bench=. -benchmem -benchtime=8s -cpu=8 | grep /op

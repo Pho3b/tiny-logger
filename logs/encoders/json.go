@@ -35,6 +35,7 @@ func (j *JSONEncoder) Log(
 		dEnabled,
 		tEnabled,
 		logger.GetShowLogLevel(),
+		logger.GetDateTimeFormat(),
 		j.castToString(args[0]),
 		args[1:]...,
 	)
@@ -58,6 +59,7 @@ func (j *JSONEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 			dEnabled,
 			tEnabled,
 			false,
+			logger.GetDateTimeFormat(),
 			j.castToString(args[0]),
 			args[1:]...,
 		)
@@ -77,11 +79,12 @@ func (j *JSONEncoder) composeMsgInto(
 	dateEnabled bool,
 	timeEnabled bool,
 	showLogLevel bool,
+	dateTimeFormat s.DateTimeFormat,
 	msg string,
 	extras ...any,
 ) {
 	buf.Grow((averageWordLen * len(extras)) + len(msg) + 60)
-	dateStr, timeStr, unixTs := j.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
+	dateStr, timeStr, unixTs := j.DateTimePrinter.RetrieveDateTime(dateTimeFormat, dateEnabled, timeEnabled)
 
 	if !showLogLevel {
 		logLevel = ""

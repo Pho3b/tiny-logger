@@ -206,7 +206,6 @@ func (l *Logger) GetDateTimeFormat() s.DateTimeFormat {
 // SetDateTimeFormat sets the DateTimeFormat of the logger.
 func (l *Logger) SetDateTimeFormat(format s.DateTimeFormat) *Logger {
 	l.dateTimeFormat = format
-	l.dateTimePrinter.UpdateDateTimeFormat(format)
 
 	return l
 }
@@ -236,7 +235,7 @@ func NewLogger() *Logger {
 	logger := &Logger{showLogLevel: true, dateTimeFormat: s.IT}
 	logger.SetLogLvlEnvVariable(ll.DefaultEnvLogLvlVar)
 	logger.printer = services.NewPrinter()
-	logger.dateTimePrinter = services.NewDateTimePrinter()
+	logger.dateTimePrinter = services.GetDateTimePrinter()
 	logger.SetEncoder(s.DefaultEncoderType)
 
 	return logger

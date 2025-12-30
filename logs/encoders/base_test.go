@@ -87,13 +87,13 @@ func TestBuildMsgWithCastAndConcatenateInto(t *testing.T) {
 }
 
 func TestBaseEncoder_GetType(t *testing.T) {
-	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.GetDateTimePrinter())
 	assert.Equal(t, s.DefaultEncoderType, encoder.GetType())
 
-	jsonEncoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.NewDateTimePrinter())
+	jsonEncoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.GetDateTimePrinter())
 	assert.Equal(t, s.JsonEncoderType, jsonEncoder.GetType())
 
-	yamlEncoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.NewDateTimePrinter())
+	yamlEncoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.GetDateTimePrinter())
 	assert.Equal(t, s.YamlEncoderType, yamlEncoder.GetType())
 
 	baseEncoder := newBaseEncoder()

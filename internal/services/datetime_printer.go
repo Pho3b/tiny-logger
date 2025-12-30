@@ -21,73 +21,78 @@ var timeFormat = map[s.DateTimeFormat]string{
 	s.JP: "03:04:05 PM",
 }
 
+var (
+	dateTimePrinterInstance *DateTimePrinter
+	dateTimePrinterOnce     sync.Once
+)
+
 type DateTimePrinter struct {
-	timeNow       func() time.Time // Function to get current time, allows mocking for tests
-	currentFormat atomic.Value
-	currentDate   atomic.Value
-	currentTime   atomic.Value
-	currentUnix   atomic.Value
-	dateOnce      sync.Once
-	timeOnce      sync.Once
-	unixOnce      sync.Once
+	timeNow func() time.Time
+	// Arrays indexed by s.DateTimeFormat (int8)
+	// Assuming 0=IT, 1=JP, 2=US. UnixTimestamp is handled separately.
+	cachedDates [3]atomic.Value
+	cachedTimes [3]atomic.Value
+	currentUnix atomic.Value
 }
 
-// RetrieveDateTime returns the current date, time, and unix string based on the configuration.
-// Returns: (dateString, timeString, unixTimeStamp).
-// If the format is UnixTimestamp, the timestamp is returned as the third value, ignoring the boolean flags.
-// Otherwise, 'addDate' and 'addTime' control which components are generated.
-func (d *DateTimePrinter) RetrieveDateTime(addDate, addTime bool) (string, string, string) {
-	var dateRes, timeRes string
-	currentFmt := d.currentFormat.Load().(s.DateTimeFormat)
-
-	if currentFmt == s.UnixTimestamp && (addDate || addTime) {
-		d.unixOnce.Do(func() {
-			d.currentUnix.Store(strconv.FormatInt(d.timeNow().Unix(), 10))
-			go d.updateCurrentUnix()
-		})
-
+// RetrieveDateTime now accepts the desired format
+func (d *DateTimePrinter) RetrieveDateTime(fmt s.DateTimeFormat, addDate, addTime bool) (string, string, string) {
+	if fmt == s.UnixTimestamp {
 		return "", "", d.currentUnix.Load().(string)
 	}
 
-	if addDate {
-		d.dateOnce.Do(func() {
-			d.currentDate.Store(d.timeNow().Format(dateFormat[currentFmt]))
-			go d.updateCurrentDate()
-		})
+	var dateRes, timeRes string
 
-		dateRes = d.currentDate.Load().(string)
+	if addDate {
+		dateRes = d.cachedDates[fmt].Load().(string)
 	}
 
 	if addTime {
-		d.timeOnce.Do(func() {
-			d.currentTime.Store(d.timeNow().Format(timeFormat[currentFmt]))
-			go d.updateCurrentTime()
-		})
-
-		timeRes = d.currentTime.Load().(string)
+		timeRes = d.cachedTimes[fmt].Load().(string)
 	}
 
 	return dateRes, timeRes, ""
 }
 
-// UpdateDateTimeFormat updates the DateTimePrinter's currentFormat property and updates the currentDate and
-// currentTime properties accordingly.
-func (d *DateTimePrinter) UpdateDateTimeFormat(format s.DateTimeFormat) {
+func (d *DateTimePrinter) init() {
 	now := d.timeNow()
+	d.currentUnix.Store(strconv.FormatInt(now.Unix(), 10))
 
-	d.currentFormat.Store(format)
-	d.currentDate.Store(now.Format(dateFormat[format]))
-	d.currentTime.Store(now.Format(timeFormat[format]))
+	for i := 0; i < 3; i++ {
+		fmt := s.DateTimeFormat(i)
+		d.cachedDates[i].Store(now.Format(dateFormat[fmt]))
+		d.cachedTimes[i].Store(now.Format(timeFormat[fmt]))
+	}
+
+	go d.loopUpdateDate()
+	go d.loopUpdateTime()
+	go d.loopUpdateUnix()
 }
 
-// updateCurrentDate periodically refreshes d.currentDate based on the latest time and
-// the current date format.
-// Updates the stored date every 10 minutes.
-func (d *DateTimePrinter) updateCurrentDate() {
+// loopUpdateTime updates all time formats every second
+func (d *DateTimePrinter) loopUpdateTime() {
 	for {
 		now := d.timeNow()
-		currentFmt := d.currentFormat.Load().(s.DateTimeFormat)
-		d.currentDate.Store(now.Format(dateFormat[currentFmt]))
+
+		for i := 0; i < 3; i++ {
+			fmt := s.DateTimeFormat(i)
+			d.cachedTimes[i].Store(now.Format(timeFormat[fmt]))
+		}
+
+		nextSecond := now.Truncate(time.Second).Add(time.Second)
+		time.Sleep(time.Until(nextSecond))
+	}
+}
+
+// loopUpdateDate updates all date formats every 10 mins
+func (d *DateTimePrinter) loopUpdateDate() {
+	for {
+		now := d.timeNow()
+
+		for i := 0; i < 3; i++ {
+			fmt := s.DateTimeFormat(i)
+			d.cachedDates[i].Store(now.Format(dateFormat[fmt]))
+		}
 
 		time.Sleep(time.Minute * 10)
 	}
@@ -95,20 +100,7 @@ func (d *DateTimePrinter) updateCurrentDate() {
 
 // updateCurrentTime synchronizes with the system clock and updates the DateTimePrinter's
 // currentTime property every full second.
-func (d *DateTimePrinter) updateCurrentTime() {
-	for {
-		now := d.timeNow()
-		currentFmt := d.currentFormat.Load().(s.DateTimeFormat)
-		d.currentTime.Store(now.Format(timeFormat[currentFmt]))
-
-		nextSecond := now.Truncate(time.Second).Add(time.Second)
-		time.Sleep(time.Until(nextSecond))
-	}
-}
-
-// updateCurrentUnix synchronizes with the system clock and updates the DateTimePrinter's
-// currentTime property every full second.
-func (d *DateTimePrinter) updateCurrentUnix() {
+func (d *DateTimePrinter) loopUpdateUnix() {
 	for {
 		now := d.timeNow()
 		d.currentUnix.Store(strconv.FormatInt(now.Unix(), 10))
@@ -118,10 +110,14 @@ func (d *DateTimePrinter) updateCurrentUnix() {
 	}
 }
 
-// NewDateTimePrinter initializes DateTimePrinter with the default timeNow function.
-func NewDateTimePrinter() *DateTimePrinter {
-	dateTimePrinter := &DateTimePrinter{timeNow: time.Now}
-	dateTimePrinter.currentFormat.Store(s.IT)
+// GetDateTimePrinter returns the singleton instance.
+func GetDateTimePrinter() *DateTimePrinter {
+	dateTimePrinterOnce.Do(
+		func() {
+			dateTimePrinterInstance = &DateTimePrinter{timeNow: time.Now}
+			dateTimePrinterInstance.init()
+		},
+	)
 
-	return dateTimePrinter
+	return dateTimePrinterInstance
 }

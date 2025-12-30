@@ -15,7 +15,7 @@ import (
 )
 
 func TestLogDebug(t *testing.T) {
-	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureOutput(func() {
@@ -27,7 +27,7 @@ func TestLogDebug(t *testing.T) {
 }
 
 func TestLogInfo(t *testing.T) {
-	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureOutput(func() {
@@ -39,7 +39,7 @@ func TestLogInfo(t *testing.T) {
 }
 
 func TestLogWarn(t *testing.T) {
-	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureOutput(func() {
@@ -51,7 +51,7 @@ func TestLogWarn(t *testing.T) {
 }
 
 func TestLogError(t *testing.T) {
-	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureErrorOutput(func() {
@@ -63,7 +63,7 @@ func TestLogError(t *testing.T) {
 }
 
 func TestLogFatalError(t *testing.T) {
-	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	if os.Getenv("BE_CRASHER") == "1" {
@@ -80,32 +80,32 @@ func TestLogFatalError(t *testing.T) {
 
 func TestFormatDateTimeString(t *testing.T) {
 	b := bytes.NewBuffer([]byte{})
-	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.GetDateTimePrinter())
 
-	encoder.addFormattedDateTime(b, "dateTest", "timeTest")
+	encoder.addFormattedDateTime(b, "dateTest", "timeTest", "")
 	assert.Contains(t, b.String(), "[")
 	assert.Contains(t, b.String(), "]")
 	assert.Contains(t, b.String(), " ")
 
 	b.Reset()
-	encoder.addFormattedDateTime(b, "", "timeTest")
+	encoder.addFormattedDateTime(b, "", "timeTest", "")
 	assert.Contains(t, b.String(), "[")
 	assert.Contains(t, b.String(), "]")
 
 	b.Reset()
-	encoder.addFormattedDateTime(b, "dateTest", "")
+	encoder.addFormattedDateTime(b, "dateTest", "", "")
 	assert.Contains(t, b.String(), "[")
 	assert.Contains(t, b.String(), "]")
 
 	b.Reset()
-	encoder.addFormattedDateTime(b, "", "")
+	encoder.addFormattedDateTime(b, "", "", "")
 	assert.NotContains(t, b.String(), "[")
 	assert.NotContains(t, b.String(), "]")
 	assert.NotContains(t, b.String(), " ")
 }
 
 func TestShowLogLevel(t *testing.T) {
-	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureOutput(func() {
@@ -126,7 +126,7 @@ func TestShowLogLevel(t *testing.T) {
 }
 
 func TestCheckColorsInTheOutput(t *testing.T) {
-	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: false, TimeEnabled: false, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureOutput(func() { encoder.Log(loggerConfig, ll.DebugLvlName, s.StdOutput, "Test msg") })
@@ -146,7 +146,7 @@ func TestDefaultEncoder_Color(t *testing.T) {
 	var output string
 	testLog := "my testing Log"
 	originalStdOut := os.Stdout
-	encoder := NewDefaultEncoder(services.NewPrinter(), services.NewDateTimePrinter())
+	encoder := NewDefaultEncoder(services.NewPrinter(), services.GetDateTimePrinter())
 	lConfig := test.LoggerConfigMock{
 		DateEnabled:   false,
 		TimeEnabled:   false,

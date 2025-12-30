@@ -25,7 +25,7 @@ func decodeLogEntry(t *testing.T, logOutput string) shared.JsonLog {
 }
 
 func TestJSONEncoder_LogDebug(t *testing.T) {
-	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.NewDateTimePrinter())
+	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureOutput(func() {
@@ -38,7 +38,7 @@ func TestJSONEncoder_LogDebug(t *testing.T) {
 }
 
 func TestJSONEncoder_LogInfo(t *testing.T) {
-	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.NewDateTimePrinter())
+	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureOutput(func() {
@@ -51,7 +51,7 @@ func TestJSONEncoder_LogInfo(t *testing.T) {
 }
 
 func TestJSONEncoder_LogInfoWithExtras(t *testing.T) {
-	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.NewDateTimePrinter())
+	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureOutput(func() {
@@ -76,7 +76,7 @@ func TestJSONEncoder_LogInfoWithExtras(t *testing.T) {
 }
 
 func TestJSONEncoder_LogWarn(t *testing.T) {
-	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.NewDateTimePrinter())
+	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureOutput(func() {
@@ -89,7 +89,7 @@ func TestJSONEncoder_LogWarn(t *testing.T) {
 }
 
 func TestJSONEncoder_LogError(t *testing.T) {
-	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.NewDateTimePrinter())
+	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureErrorOutput(func() {
@@ -102,7 +102,7 @@ func TestJSONEncoder_LogError(t *testing.T) {
 }
 
 func TestJSONEncoder_LogFatalError(t *testing.T) {
-	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.NewDateTimePrinter())
+	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	if os.Getenv("BE_CRASHER") == "1" {
@@ -118,7 +118,7 @@ func TestJSONEncoder_LogFatalError(t *testing.T) {
 }
 
 func TestJSONEncoder_DateTime(t *testing.T) {
-	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.NewDateTimePrinter())
+	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 	output := test.CaptureOutput(func() {
 		encoder.Log(loggerConfig, ll.WarnLvlName, shared.StdOutput, "Test msg")
@@ -154,7 +154,7 @@ func TestJSONEncoder_DateTime(t *testing.T) {
 }
 
 func TestJSONEncoder_ExtraMessages(t *testing.T) {
-	jsonEncoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.NewDateTimePrinter())
+	jsonEncoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.GetDateTimePrinter())
 	lConfig := &test.LoggerConfigMock{DateEnabled: false, TimeEnabled: false, ColorsEnabled: false, ShowLogLevel: false}
 
 	output := test.CaptureOutput(func() {
@@ -184,7 +184,7 @@ func TestJSONEncoder_ExtraMessages(t *testing.T) {
 }
 
 func TestJSONEncoder_ShowLogLevelLt(t *testing.T) {
-	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.NewDateTimePrinter())
+	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureOutput(func() {
@@ -210,7 +210,7 @@ func TestJSONEncoder_Color(t *testing.T) {
 
 	testLog := "my testing Log"
 	originalStdOut := os.Stdout
-	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.NewDateTimePrinter())
+	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.GetDateTimePrinter())
 	lConfig := test.LoggerConfigMock{
 		DateEnabled:   false,
 		TimeEnabled:   false,
@@ -249,7 +249,7 @@ func TestJSONEncoder_ValidJSONOutput(t *testing.T) {
 
 	originalStdOut := os.Stdout
 	testLog := "my testing Log"
-	jsonEncoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.NewDateTimePrinter())
+	jsonEncoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.GetDateTimePrinter())
 	lConfig := &test.LoggerConfigMock{
 		DateEnabled:   false,
 		TimeEnabled:   false,

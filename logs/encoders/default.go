@@ -34,6 +34,7 @@ func (d *DefaultEncoder) Log(
 		tEnabled,
 		logger.GetColorsEnabled(),
 		logger.GetShowLogLevel(),
+		logger.GetDateTimeFormat(),
 		args...,
 	)
 
@@ -55,6 +56,7 @@ func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, a
 			false,
 			false,
 			false,
+			logger.GetDateTimeFormat(),
 			args...,
 		)
 
@@ -73,6 +75,7 @@ func (d *DefaultEncoder) composeMsgInto(
 	timeEnabled bool,
 	headerColorEnabled bool,
 	showLogLevel bool,
+	dateTimeFormat s.DateTimeFormat,
 	args ...any,
 ) {
 	buf.Grow(len(args)*averageWordLen + defaultCharOverhead)
@@ -90,8 +93,8 @@ func (d *DefaultEncoder) composeMsgInto(
 	}
 
 	if isDateOrTimeEnabled {
-		dateStr, timeStr, _ := d.DateTimePrinter.RetrieveDateTime(dateEnabled, timeEnabled)
-		d.addFormattedDateTime(buf, dateStr, timeStr)
+		dateStr, timeStr, unixTs := d.DateTimePrinter.RetrieveDateTime(dateTimeFormat, dateEnabled, timeEnabled)
+		d.addFormattedDateTime(buf, dateStr, timeStr, unixTs)
 	}
 
 	if showLogLevel || isDateOrTimeEnabled {
@@ -104,7 +107,15 @@ func (d *DefaultEncoder) composeMsgInto(
 }
 
 // addFormattedDateTime formats and adds the date and time strings enclosed in square brackets to the given buffer.
-func (d *DefaultEncoder) addFormattedDateTime(buf *bytes.Buffer, dateStr, timeStr string) {
+func (d *DefaultEncoder) addFormattedDateTime(buf *bytes.Buffer, dateStr, timeStr, unixTs string) {
+	if unixTs != "" {
+		buf.WriteByte('[')
+		buf.WriteString(unixTs)
+		buf.WriteByte(']')
+
+		return
+	}
+
 	if dateStr == "" && timeStr == "" {
 		return
 	}

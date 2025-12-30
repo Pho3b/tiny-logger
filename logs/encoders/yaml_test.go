@@ -24,7 +24,7 @@ func decodeYamlLogEntry(t *testing.T, logOutput string) shared.YamlLog {
 }
 
 func TestYAMLEncoder_LogDebug(t *testing.T) {
-	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.NewDateTimePrinter())
+	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureOutput(func() {
@@ -37,7 +37,7 @@ func TestYAMLEncoder_LogDebug(t *testing.T) {
 }
 
 func TestYAMLEncoder_LogInfo(t *testing.T) {
-	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.NewDateTimePrinter())
+	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureOutput(func() {
@@ -50,7 +50,7 @@ func TestYAMLEncoder_LogInfo(t *testing.T) {
 }
 
 func TestYAMLEncoder_LogInfoWithExtras(t *testing.T) {
-	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.NewDateTimePrinter())
+	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureOutput(func() {
@@ -75,7 +75,7 @@ func TestYAMLEncoder_LogInfoWithExtras(t *testing.T) {
 }
 
 func TestYAMLEncoder_LogWarn(t *testing.T) {
-	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.NewDateTimePrinter())
+	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureOutput(func() {
@@ -88,7 +88,7 @@ func TestYAMLEncoder_LogWarn(t *testing.T) {
 }
 
 func TestYAMLEncoder_LogError(t *testing.T) {
-	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.NewDateTimePrinter())
+	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureErrorOutput(func() {
@@ -101,7 +101,7 @@ func TestYAMLEncoder_LogError(t *testing.T) {
 }
 
 func TestYAMLEncoder_LogFatalError(t *testing.T) {
-	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.NewDateTimePrinter())
+	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	if os.Getenv("BE_CRASHER") == "1" {
@@ -117,7 +117,7 @@ func TestYAMLEncoder_LogFatalError(t *testing.T) {
 }
 
 func TestYAMLEncoder_DateTime(t *testing.T) {
-	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.NewDateTimePrinter())
+	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 	output := test.CaptureOutput(func() {
 		encoder.Log(loggerConfig, ll.WarnLvlName, shared.StdOutput, "Test msg")
@@ -153,7 +153,7 @@ func TestYAMLEncoder_DateTime(t *testing.T) {
 }
 
 func TestYAMLEncoder_ExtraMessages(t *testing.T) {
-	yamlEncoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.NewDateTimePrinter())
+	yamlEncoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.GetDateTimePrinter())
 	lConfig := &test.LoggerConfigMock{DateEnabled: false, TimeEnabled: false, ColorsEnabled: false, ShowLogLevel: false}
 
 	output := test.CaptureOutput(func() {
@@ -183,7 +183,7 @@ func TestYAMLEncoder_ExtraMessages(t *testing.T) {
 }
 
 func TestYAMLEncoder_ShowLogLevelLt(t *testing.T) {
-	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.NewDateTimePrinter())
+	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.GetDateTimePrinter())
 	loggerConfig := &test.LoggerConfigMock{DateEnabled: true, TimeEnabled: true, ColorsEnabled: true, ShowLogLevel: true}
 
 	output := test.CaptureOutput(func() {
@@ -208,7 +208,7 @@ func TestYAMLEncoder_Color(t *testing.T) {
 	var output string
 	testLog := "my testing Log"
 	originalStdOut := os.Stdout
-	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.NewDateTimePrinter())
+	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.GetDateTimePrinter())
 	lConfig := test.LoggerConfigMock{
 		DateEnabled:   false,
 		TimeEnabled:   false,
@@ -247,7 +247,7 @@ func TestYAMLEncoder_ValidYAMLOutput(t *testing.T) {
 
 	originalStdOut := os.Stdout
 	testLog := "my testing Log"
-	yamlEncoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.NewDateTimePrinter())
+	yamlEncoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.GetDateTimePrinter())
 	lConfig := &test.LoggerConfigMock{
 		DateEnabled:   false,
 		TimeEnabled:   false,

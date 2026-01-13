@@ -64,13 +64,12 @@ func (d *DateTimePrinter) init() {
 		d.cachedTimes[i].Store(now.Format(timeFormat[fmt]))
 	}
 
-	go d.loopUpdateDate()
-	go d.loopUpdateTime()
+	go d.loopUpdateDateTime()
 }
 
-// loopUpdateTime updates all time formats, the unix timestamp every second,
+// loopUpdateDateTime updates all time formats, the unix timestamp every second,
 // and refreshes the date format if the day has changed.
-func (d *DateTimePrinter) loopUpdateTime() {
+func (d *DateTimePrinter) loopUpdateDateTime() {
 	// Initialize lastDay with a value that forces an update on the first iteration
 	lastDay := -1
 
@@ -98,20 +97,6 @@ func (d *DateTimePrinter) loopUpdateTime() {
 
 		nextSecond := now.Truncate(time.Second).Add(time.Second)
 		time.Sleep(time.Until(nextSecond))
-	}
-}
-
-// loopUpdateDate updates all date formats every 10 mins
-func (d *DateTimePrinter) loopUpdateDate() {
-	for {
-		now := d.timeNow()
-
-		for i := 0; i < 3; i++ {
-			fmt := s.DateTimeFormat(i)
-			d.cachedDates[i].Store(now.Format(dateFormat[fmt]))
-		}
-
-		time.Sleep(time.Minute * 10)
 	}
 }
 

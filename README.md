@@ -25,7 +25,7 @@ Compatible with Go version 1.18.x and above
 /******************** Basic Logging methods usage ********************/
 logger := logs.NewLogger()
 logger.Warn("my warning test") // stdout: 'WARN: my warning test'
-logger.Info("my", "into", "test", 2) // stdout: 'INFO: my info test 2'
+logger.Info("my", "info", "test", 2) // stdout: 'INFO: my info test 2'
 logger.Debug("hey", "check this", "debug") // stdout: 'DEBUG: hey check this debug'
 logger.Error("here is the error") // stderr: 'ERROR: here is the error'
 
@@ -36,13 +36,13 @@ logger := logs.NewLogger().
     AddTime(true).
     AddDate(true)
 
-logger.Warn("This is my Warn log", "Test arg") // stdout: WARN[03/11/2024 18:35:43]: This is my Warn log Test arg
+logger.Warn("This is my Warn log") // stdout: WARN[03/11/2024 18:35:43]: This is my Warn log
 
 logger.SetEncoder(shared.JsonEncoderType)
-logger.Debug("This is my Debug log", "Test arg") // stdout: {"level":"DEBUG","date":"03/11/2024","time":"18:35:43","message":"This is my Debug log Test arg"}
+logger.Debug("This is my Debug log") // stdout: {"level":"DEBUG","datetime":"03/11/2024 18:35:43","message":"This is my Debug log"}
 
 logger.AddTime(false)
-logger.Debug("This is my Debug log", "Test arg") // stdout: {"level":"DEBUG","date":"03/11/2024","message":"This is my Debug log Test second arg"}
+logger.Debug("This is my Debug log") // stdout: {"level":"DEBUG","date":"03/11/2024","message":"This is my Debug log"}
 
 /******************** Logging to a file example ********************/
 file, err := os.OpenFile("./my-out-file.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
@@ -100,7 +100,7 @@ Contributions are welcome, Here's how you can help:
 - **Testing**
     - Run tests: `make test`
     - Run benchmarks: `make test-benchmark`
-    - Ensure test coverage remains high, it can be checked using `make test-coverage`
+    - Ensure test coverage remains high; it can be checked using `make test-coverage`
 
 ## 📝 License
 

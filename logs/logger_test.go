@@ -473,6 +473,53 @@ func TestLogger_LogsRedirectedToFile(t *testing.T) {
 	assert.Contains(t, contentStr, "error message")
 }
 
+func TestLogger_NestedStructParameterCorrectLogging(t *testing.T) {
+	type Address struct {
+		Street string
+		City   string
+		Zip    int
+	}
+
+	type Contact struct {
+		Email string
+		Phone string
+		ad    Address
+	}
+
+	type User struct {
+		ID      int
+		Name    string
+		Address Address // Named field
+		Contact         // Embedded (Promoted) field
+	}
+
+	user := User{
+		ID:   1,
+		Name: "Alice",
+		Address: Address{
+			Street: "123 Go Lane",
+			City:   "Tech City",
+			Zip:    90210,
+		},
+		Contact: Contact{
+			Email: "alice@example.com",
+			Phone: "555-0199",
+			ad: Address{
+				Street: "123 Go Lane",
+				City:   "Tech City",
+				Zip:    90210,
+			},
+		},
+	}
+
+	logger := NewLogger().SetEncoder(shared.JsonEncoderType)
+	outMsg := test.CaptureOutput(func() { logger.Debug(user) })
+	assert.Contains(t,
+		outMsg,
+		"{1 Alice {123 Go Lane Tech City 90210} {alice@example.com 555-0199 {123 Go Lane Tech City 90210}}}",
+	)
+}
+
 func createMockOutFile(fileName string) *os.File {
 	file, err := os.OpenFile(fmt.Sprintf("./%s", fileName), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {

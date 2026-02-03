@@ -4,6 +4,8 @@ A fast, lightweight, zero-dependency logging solution for Go applications that p
 simplicity.    
 Compatible with Go version 1.18.x and above
 
+"TinyLogger is the fastest way to log loosely typed data (interfaces)"
+
 ## ✅ Key Features
 
 - **Lightweight**: No external dependencies mean faster builds and smaller binaries <br>

@@ -38,3 +38,14 @@ func CaptureErrorOutput(f func()) string {
 	_, _ = buf.ReadFrom(r)
 	return buf.String()
 }
+
+func initDevNullFile() *os.File {
+	var err error
+	// Open /dev/null (or NUL on Windows) to discard output for tiny-logger
+	devNullFile, err := os.OpenFile(os.DevNull, os.O_WRONLY, 0)
+	if err != nil {
+		panic(err)
+	}
+
+	return devNullFile
+}

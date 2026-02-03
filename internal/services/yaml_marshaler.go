@@ -6,6 +6,8 @@ import (
 	"strconv"
 )
 
+const yamlCharOverhead = 70
+
 // YamlLogEntry represents a structured log entry that can be marshaled to YAML format.
 // All fields except Message are optional and will be omitted if empty.
 type YamlLogEntry struct {

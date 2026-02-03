@@ -19,7 +19,9 @@ type baseEncoder struct {
 	bufferSyncPool sync.Pool
 }
 
-// castAndConcatenateInto writes all the given arguments cast to string and concatenated by a white space into the given buffer.
+// castAndConcatenateInto writes all the given arguments cast to string and concatenated by a white space
+// into the given buffer.
+// The function uses the slower fmt.Sprint only for unknown types
 func (b *baseEncoder) castAndConcatenateInto(buf *bytes.Buffer, args ...any) {
 	argsLen := len(args)
 	buf.Grow(averageWordLen * argsLen)
@@ -61,31 +63,50 @@ func (b *baseEncoder) castAndConcatenateInto(buf *bytes.Buffer, args ...any) {
 		case bool:
 			if v {
 				buf.WriteString("true")
-			} else {
-				buf.WriteString("false")
+				break
 			}
+
+			buf.WriteString("false")
 		case fmt.Stringer:
 			buf.WriteString(v.String())
 		case error:
 			buf.WriteString(v.Error())
 		default:
-			// Using the slower fmt.Sprint only for unknown types
 			buf.WriteString(fmt.Sprint(v))
 		}
 	}
 }
 
 // castToString is a fast casting method that returns the given argument as a string.
+// It uses the slow fmt.Sprint only for unknown types
 func (b *baseEncoder) castToString(arg any) string {
 	switch v := arg.(type) {
 	case string:
 		return v
-	case rune:
+	case []byte:
 		return string(v)
 	case int:
 		return strconv.Itoa(v)
+	case int8:
+		return strconv.FormatInt(int64(v), 10)
+	case int16:
+		return strconv.FormatInt(int64(v), 10)
+	case int32:
+		return strconv.FormatInt(int64(v), 10)
 	case int64:
 		return strconv.FormatInt(v, 10)
+	case uint:
+		return strconv.FormatUint(uint64(v), 10)
+	case uint8:
+		return strconv.FormatUint(uint64(v), 10)
+	case uint16:
+		return strconv.FormatUint(uint64(v), 10)
+	case uint32:
+		return strconv.FormatUint(uint64(v), 10)
+	case uint64:
+		return strconv.FormatUint(v, 10)
+	case float32:
+		return strconv.FormatFloat(float64(v), 'f', -1, 32)
 	case float64:
 		return strconv.FormatFloat(v, 'f', -1, 64)
 	case bool:
@@ -99,7 +120,6 @@ func (b *baseEncoder) castToString(arg any) string {
 	case error:
 		return v.Error()
 	default:
-		// Using the slower fmt.Sprint only for unknown types
 		return fmt.Sprint(v)
 	}
 }

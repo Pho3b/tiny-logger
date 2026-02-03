@@ -6,6 +6,11 @@ import (
 	"strconv"
 )
 
+const (
+	jsonCharOverhead = 80
+	averageExtraLen  = 30
+)
+
 // JsonLogEntry represents a structured log entry that can be marshaled to JSON format.
 // All fields except Message are optional and will be omitted if empty.
 type JsonLogEntry struct {

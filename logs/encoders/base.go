@@ -32,16 +32,38 @@ func (b *baseEncoder) castAndConcatenateInto(buf *bytes.Buffer, args ...any) {
 		switch v := arg.(type) {
 		case string:
 			buf.WriteString(v)
-		case rune:
-			buf.WriteRune(v)
+		case []byte:
+			buf.Write(v)
 		case int:
+			buf.Write(strconv.AppendInt(buf.AvailableBuffer(), int64(v), 10))
+		case int8:
+			buf.Write(strconv.AppendInt(buf.AvailableBuffer(), int64(v), 10))
+		case int16:
+			buf.Write(strconv.AppendInt(buf.AvailableBuffer(), int64(v), 10))
+		case int32:
 			buf.Write(strconv.AppendInt(buf.AvailableBuffer(), int64(v), 10))
 		case int64:
 			buf.Write(strconv.AppendInt(buf.AvailableBuffer(), v, 10))
+		case uint:
+			buf.Write(strconv.AppendUint(buf.AvailableBuffer(), uint64(v), 10))
+		case uint8:
+			buf.Write(strconv.AppendUint(buf.AvailableBuffer(), uint64(v), 10))
+		case uint16:
+			buf.Write(strconv.AppendUint(buf.AvailableBuffer(), uint64(v), 10))
+		case uint32:
+			buf.Write(strconv.AppendUint(buf.AvailableBuffer(), uint64(v), 10))
+		case uint64:
+			buf.Write(strconv.AppendUint(buf.AvailableBuffer(), v, 10))
+		case float32:
+			buf.Write(strconv.AppendFloat(buf.AvailableBuffer(), float64(v), 'f', -1, 32))
 		case float64:
 			buf.Write(strconv.AppendFloat(buf.AvailableBuffer(), v, 'f', -1, 64))
 		case bool:
-			buf.Write(strconv.AppendBool(buf.AvailableBuffer(), v))
+			if v {
+				buf.WriteString("true")
+			} else {
+				buf.WriteString("false")
+			}
 		case fmt.Stringer:
 			buf.WriteString(v.String())
 		case error:
@@ -67,7 +89,11 @@ func (b *baseEncoder) castToString(arg any) string {
 	case float64:
 		return strconv.FormatFloat(v, 'f', -1, 64)
 	case bool:
-		return strconv.FormatBool(v)
+		if v {
+			return "true"
+		}
+
+		return "false"
 	case fmt.Stringer:
 		return v.String()
 	case error:

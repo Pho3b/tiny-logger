@@ -2,11 +2,11 @@
 
 A fast, lightweight, zero-dependency logging solution for Go applications that prioritizes performance and simplicity.  
 
-The library is extremely optimized to log loosely typed data (interfaces), so you won't have to specify the correct data type before logging them.  
-I know you can reach more raw speed using other Go logging libray and specifying the type of the data to log beforehead, but when I created the tiny-logger i wanted to make it as fast as possible while keeping it very compact and simple to use.  
-In my experience there are cases where the only thing you know is raw speed yes, but majority of projects benefits from having something that is really small, easy to use and also perform very fast.  
+The library is extremely optimized for loggging loosely-typed data (interfaces), so you don't need to specify concrete types before logging.  
+I know you can get higher raw speed using other Go logging libraries and specifying the type of the data to log beforehead, but when I created the tiny-logger I wanted to make it as fast as possible while keeping it compact and simple to use.  
+I think that a lot of projects can benefit from having a logging library that is compact, fast, easy to use, and simple to modify at will. Since the codebase is so small, it won't take days for you to understand it.
 
-Compatible with Go version 1.18.x and above
+The project is compatible with **Go version 1.18.x** and above
 
 ## Key Features
 
@@ -66,47 +66,59 @@ logger.SetDateTimeFormat(shared.UnixTimestamp)
 logger.Debug("This is my Debug log", "Test arg") // stdout: 1690982143.000000 This is my Debug log Test arg
 ````
 
-## 📊 Benchmark Results
-
-This is the result of running the `./test/benchmark_test.go` benchmark on my machine, (ns/op)times do not include the
-terminal graphical visualization time.
-
-| Encoder             | Configuration      | ns/op | B/op | allocs/op |
-|---------------------|--------------------|-------|------|-----------|
-| **Default Encoder** | All Properties OFF | 490.3 | 80   | 1         |
-|                     | All Properties ON  | 511.2 | 104  | 1         |
-| **JSON Encoder**    | All Properties OFF | 513.3 | 80   | 1         |
-|                     | All Properties ON  | 536.5 | 104  | 1         |
-| **YAML Encoder**    | All Properties OFF | 535.3 | 80   | 1         |
-|                     | All Properties ON  | 557.1 | 104  | 1         |
-
 ## Benchmark Results
 
-**System Environment:**
+1. Benchmarks of the **loggers-comparison-benchmark** command contained in the [makefile](./makefile)
 
-- **OS:** Linux
-- **Arch:** AMD64
-- **CPU:** 12th Gen Intel(R) Core(TM) i9-12900K
+    - **OS:** Linux
+    - **Arch:** AMD64
+    - **CPU:** 12th Gen Intel(R) Core(TM) i9-12900K
 
-| Logger | Iterations | Time / Op | Bytes / Op | Allocs / Op |
-| :--- | :--- | :--- | :--- | :--- |
-| **TinyLogger** | 17,625,723 | **339.9 ns** | **88 B** | **2** |
-| Zerolog | 12,983,034 | 460.2 ns | 232 B | 5 |
-| Zap | 10,391,967 | 578.3 ns | 136 B | 2 |
-| Logrus | 3,607,248 | 1692 ns | 1241 B | 21 |
+    | Logger | Iterations | Time / Op | Bytes / Op | Allocs / Op |
+    | :--- | :--- | :--- | :--- | :--- |
+    | **TinyLogger** | 17,625,723 | **339.9 ns** | **88 B** | **2** |
+    | Zerolog | 12,983,034 | 460.2 ns | 232 B | 5 |
+    | Zap | 10,391,967 | 578.3 ns | 136 B | 2 |
+    | Logrus | 3,607,248 | 1692 ns | 1241 B | 21 |
+
+    - **OS:** Darwin (macOS)
+    - **Arch:** AMD64
+    - **CPU:** VirtualApple @ 2.50GHz
+
+    | Logger | Iterations | Time / Op | Bytes / Op | Allocs / Op |
+    | :--- | :--- | :--- | :--- | :--- |
+    | **TinyLogger** | 6,091,185 | **972.9 ns** | **88 B** | **2** |
+    | Zerolog | 4,922,115 | 1220 ns | 232 B | 5 |
+    | Zap | 3,938,301 | 1517 ns | 136 B | 2 |
+    | Logrus | 1,814,809 | 3291 ns | 1241 B | 21 |
+
+2. Benchmarks of the **encoders-benchmark** command contained in the [makefile](./makefile)
+
+    - **OS:** Linux
+    - **Arch:** AMD64
+    - **CPU:** 12th Gen Intel(R) Core(TM) i9-12900K
+
+    | Logger | Iterations | Time / Op | Bytes / Op | Allocs / Op |
+    | :--- | :--- | :--- | :--- | :--- |
+    | DefaultEncoder DisabledProperties | 18336217 | 298.7 ns | 88 B | 2 |
+    | DefaultEncoder EnabledProperties | 18336217 | 334.3 ns | 88 B | 2 |
+    | JsonEncoder DisabledProperties | 17974824 | 316.0 ns | 88 B | 2 |
+    | JsonEncoder EnabledProperties | 17488896 | 344.2 ns | 88 B | 2 |
+    | YamlEncoder DisabledProperties | 17625220 | 342.8 ns | 88 B | 2 |
+    | YamlEncoder EnabledProperties | 16005187 | 373.3 ns | 88 B | 2 |
 
 ## Contributing
 
-Contributes to this project are really welcome, here's how you can do it
+Contributions to this project are really welcome, here's how you can do it:
 
   1. Fork the repository
   2. Clone your fork
   3. Create a new branch
     ```bash git checkout -b your-feature-name```
-  4. Testing  
+  4. Local Tests  
     Take a look at the [makefile](./makefile).  
     You can use the contained commands to run `unit-test`, check the `testing coverage` and monitor the `benchamrks` of the library.
 
-## 📝 License
+## License
 
 MIT License—see [LICENSE](https://mit-license.org/) file for details  

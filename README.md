@@ -2,11 +2,11 @@
 
 A fast, lightweight, zero-dependency logging solution for Go applications that prioritizes performance and simplicity.  
 
-The library is extremely optimized to log loosely-typed data (interfaces), so you won't have to specify concrete types before logging.  
+This library is extremely optimized to log loosely-typed data (interfaces), so you won't have to specify concrete types before logging.  
 
 I know that higher raw speed can be reached using other Go logging solutions, but when I created tiny-logger, I wanted to build something as fast as possible without compromising on simplicity of use.  
 There are many projects that can benefit from having a logging library that is compact, fast, easy to use, and simple to modify.  
-Since the codebase is so small, it won't take long for you to understand it.
+Since the codebase is so small, it won't take long for you to understand it and modify it at will.
 
 The project is compatible with **Go version 1.18.x** and above.
 
@@ -19,9 +19,10 @@ The project is compatible with **Go version 1.18.x** and above.
   specifically optimized for logging
   - Up to 1.4x faster JSON marshaling than `encoding/json`
   - Up to 5x faster YAML marshaling than `gopkg.in/yaml.v3`
-- **Color Support**: Built-in ANSI color support for terminal output
-- **Thread-Safe**: Concurrent-safe logging with atomic operations
-- **Time-Optimized**: Efficient date/time formatting with minimal allocations
+- **Color Support**: Built-in ANSI color support for terminal output.
+- **Thread-Safe**: Concurrent-safe logging with atomic operations.
+- **Time-Optimized**: Efficient date/time formatting with minimal allocations.
+- **Memory-Efficient**: Heap allocations and log sizes are kept to a minimum to avoid triggering the garbage collector.
 
 ## Use Examples
 
@@ -68,9 +69,14 @@ logger.SetDateTimeFormat(shared.UnixTimestamp)
 logger.Debug("This is my Debug log", "Test arg") // stdout: 1690982143.000000 This is my Debug log Test arg
 ````
 
-## Benchmark Results
+## Benchmarks
 
-1. Benchmarks of the **loggers-comparison-benchmark** command contained in the [makefile](./makefile)
+1. Benchmarks of the **loggers-comparison-benchmark** in  [Makefile](./Makefile)  
+
+    **NOTE:** These benchmarks intentionally log loosely-typed data across all four compared libraries.  
+    As mentioned above, libraries like **zerolog** can achieve higher performance when logging strictly-defined data types.  
+    However, since high-speed typed logging was not the primary goal of **tiny-logger**, I wanted to evaluate how it performs against industry-standard libraries when handling arbitrary data types.
+
 
     - **OS:** Linux
     - **Arch:** AMD64
@@ -94,7 +100,7 @@ logger.Debug("This is my Debug log", "Test arg") // stdout: 1690982143.000000 Th
     | Zap | 3,938,301 | 1517 ns | 136 B | 2 |
     | Logrus | 1,814,809 | 3291 ns | 1241 B | 21 |
 
-2. Benchmarks of the **encoders-benchmark** command contained in the [makefile](./makefile)
+2. Benchmarks of the **encoders-benchmark** command contained in the [Makefile](./Makefile)
 
     - **OS:** Linux
     - **Arch:** AMD64
@@ -111,15 +117,15 @@ logger.Debug("This is my Debug log", "Test arg") // stdout: 1690982143.000000 Th
 
 ## Contributing
 
-Contributions to this project are really welcome, here's how you can do it:
+Contributions to this project are very welcome, here's how you can do it:
 
   1. Fork the repository
   2. Clone your fork
   3. Create a new branch
     ```bash git checkout -b your-feature-name```
   4. Local Tests  
-    Take a look at the [makefile](./makefile).  
-    You can use the contained commands to run `unit-test`, check the `testing coverage` and monitor the `benchamrks` of the library.
+    Take a look at the [Makefile](./Makefile).  
+    You can use the commands provided to run `test`, check the `test-coverage` and monitor the library's `benchmarks`.
 
 ## License
 

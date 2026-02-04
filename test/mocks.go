@@ -25,6 +25,7 @@ func (m *LoggerConfigMock) GetLogLvlIntValue() int8 {
 func (m *LoggerConfigMock) GetDateTimeEnabled() (dateEnabled bool, timeEnabled bool) {
 	return m.DateEnabled, m.TimeEnabled
 }
+
 func (m *LoggerConfigMock) GetColorsEnabled() bool {
 	return m.ColorsEnabled
 }

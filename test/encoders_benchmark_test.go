@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/pho3b/tiny-logger/logs"
@@ -12,13 +11,11 @@ func BenchmarkDefaultEncoderAllPropertiesDisabled(b *testing.B) {
 	b.ReportAllocs()
 
 	logger := logs.NewLogger().
-		SetEncoder(shared.DefaultEncoderType).ShowLogLevel(false)
+		SetEncoder(shared.DefaultEncoderType).ShowLogLevel(false).SetLogFile(initDevNullFile())
 
 	for i := 0; i < b.N; i++ {
-		logger.Debug("DEFAULT encoder", "all-properties-enabled", false, "id", 2)
+		logger.Debug("DEFAULT encoder", "all-properties-enabled", false, "id", i)
 	}
-
-	fmt.Print("Default_Encoder_All_Properties_Disabled:")
 }
 
 func BenchmarkDefaultEncoderAllPropertiesEnabled(b *testing.B) {
@@ -28,26 +25,23 @@ func BenchmarkDefaultEncoderAllPropertiesEnabled(b *testing.B) {
 		SetEncoder(shared.DefaultEncoderType).
 		ShowLogLevel(true).
 		AddDateTime(true).
-		EnableColors(true)
+		EnableColors(true).
+		SetLogFile(initDevNullFile())
 
 	for i := 0; i < b.N; i++ {
-		logger.Debug("DEFAULT encoder", "all-properties-enabled", true, "id", 2)
+		logger.Debug("DEFAULT encoder", "all-properties-enabled", true, "id", i)
 	}
-
-	fmt.Print("Default_Encoder_All_Properties_Enabled: ")
 }
 
 func BenchmarkJsonEncoderAllPropertiesDisabled(b *testing.B) {
 	b.ReportAllocs()
 
 	logger := logs.NewLogger().
-		SetEncoder(shared.JsonEncoderType).ShowLogLevel(false)
+		SetEncoder(shared.JsonEncoderType).ShowLogLevel(false).SetLogFile(initDevNullFile())
 
 	for i := 0; i < b.N; i++ {
-		logger.Debug("JSON encoder", "all-properties-enabled", false, "id", 2)
+		logger.Debug("JSON encoder", "all-properties-enabled", false, "id", i)
 	}
-
-	fmt.Print("Json_Encoder_All_Properties_Disabled: ")
 }
 
 func BenchmarkJsonEncoderAllPropertiesEnabled(b *testing.B) {
@@ -56,26 +50,23 @@ func BenchmarkJsonEncoderAllPropertiesEnabled(b *testing.B) {
 	logger := logs.NewLogger().
 		SetEncoder(shared.JsonEncoderType).
 		ShowLogLevel(true).
-		AddDateTime(true)
+		AddDateTime(true).
+		SetLogFile(initDevNullFile())
 
 	for i := 0; i < b.N; i++ {
-		logger.Debug("JSON encoder", "all-properties-enabled", true, "id", 2)
+		logger.Debug("JSON encoder", "all-properties-enabled", true, "id", i)
 	}
-
-	fmt.Print("Json_Encoder_All_Properties_Enabled: ")
 }
 
 func BenchmarkYamlEncoderAllPropertiesDisabled(b *testing.B) {
 	b.ReportAllocs()
 
 	logger := logs.NewLogger().
-		SetEncoder(shared.YamlEncoderType).ShowLogLevel(false)
+		SetEncoder(shared.YamlEncoderType).ShowLogLevel(false).SetLogFile(initDevNullFile())
 
 	for i := 0; i < b.N; i++ {
-		logger.Debug("YAML encoder", "all-properties-enabled", false, "id", 2)
+		logger.Debug("YAML encoder", "all-properties-enabled", false, "id", i)
 	}
-
-	fmt.Print("Yaml_Encoder_All_Properties_Disabled: ")
 }
 
 func BenchmarkYamlEncoderAllPropertiesEnabled(b *testing.B) {
@@ -84,11 +75,10 @@ func BenchmarkYamlEncoderAllPropertiesEnabled(b *testing.B) {
 	logger := logs.NewLogger().
 		SetEncoder(shared.YamlEncoderType).
 		ShowLogLevel(true).
-		AddDateTime(true)
+		AddDateTime(true).
+		SetLogFile(initDevNullFile())
 
 	for i := 0; i < b.N; i++ {
-		logger.Debug("YAML encoder", "all-properties-enabled", true, "id", 2)
+		logger.Debug("YAML encoder", "all-properties-enabled", true, "id", i)
 	}
-
-	fmt.Print("Yaml_Encoder_All_Properties_Enabled: ")
 }

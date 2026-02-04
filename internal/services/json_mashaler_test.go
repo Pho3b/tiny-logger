@@ -143,7 +143,6 @@ func TestJsonMarshaler_Marshal_OnlyTime(t *testing.T) {
 
 	m.MarshalInto(buf, entry)
 	got := buf.String()
-	// Expecting "ts" key instead of "datetime"
 	want := `{"level":"info","time":"16:00","msg":"only time"}`
 	if got != want {
 		t.Errorf("Marshal() = %q, want %q", got, want)

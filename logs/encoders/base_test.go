@@ -40,6 +40,8 @@ func TestBuildMsg(t *testing.T) {
 	result = encoder.castToString(int64(43))
 	assert.Equal(t, "43", result)
 	result = encoder.castToString(int32(32234))
+	assert.Equal(t, "32234", result)
+	result = encoder.castToString("緪")
 	assert.Equal(t, "緪", result)
 	result = encoder.castToString(int8(3))
 	assert.Equal(t, "3", result)
@@ -56,7 +58,7 @@ func TestBuildMsgWithCastAndConcatenateInto(t *testing.T) {
 	buf := &bytes.Buffer{}
 
 	// Test with multiple arguments
-	encoder.castAndConcatenateInto(buf, "This", "is", 'a', "test")
+	encoder.castAndConcatenateInto(buf, "This", "is", "a", "test")
 	assert.Equal(t, "This is a test", buf.String())
 	buf.Reset()
 
@@ -67,7 +69,7 @@ func TestBuildMsgWithCastAndConcatenateInto(t *testing.T) {
 
 	// Test with various argument types
 	encoder.castAndConcatenateInto(buf, "str", '\n', 2, 2.3, true, nil)
-	assert.Equal(t, "str \n 2 2.3 true <nil>", buf.String())
+	assert.Equal(t, "str 10 2 2.3 true <nil>", buf.String())
 	buf.Reset()
 
 	// Test with no arguments
@@ -81,7 +83,7 @@ func TestBuildMsgWithCastAndConcatenateInto(t *testing.T) {
 	buf.Reset()
 
 	// Test with rune and int64 types and struct
-	encoder.castAndConcatenateInto(buf, 'A', int64(43), errors.New("my error"))
+	encoder.castAndConcatenateInto(buf, "A", int64(43), errors.New("my error"))
 	assert.Equal(t, "A 43 my error", buf.String())
 	buf.Reset()
 }

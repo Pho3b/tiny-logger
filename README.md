@@ -2,24 +2,26 @@
 
 A fast, lightweight, zero-dependency logging solution for Go applications that prioritizes performance and simplicity.  
 
-The library is extremely optimized for loggging loosely-typed data (interfaces), so you don't need to specify concrete types before logging.  
-I know you can get higher raw speed using other Go logging libraries and specifying the type of the data to log beforehead, but when I created the tiny-logger I wanted to make it as fast as possible while keeping it compact and simple to use.  
-I think that a lot of projects can benefit from having a logging library that is compact, fast, easy to use, and simple to modify at will. Since the codebase is so small, it won't take days for you to understand it.
+The library is extremely optimized to log loosely-typed data (interfaces), so you won't have to specify concrete types before logging.  
 
-The project is compatible with **Go version 1.18.x** and above
+I know that higher raw speed can be reached using other Go logging solutions, but when I created tiny-logger, I wanted to build something as fast as possible without compromising on simplicity of use.  
+There are many projects that can benefit from having a logging library that is compact, fast, easy to use, and simple to modify.  
+Since the codebase is so small, it won't take long for you to understand it.
+
+The project is compatible with **Go version 1.18.x** and above.
 
 ## Key Features
 
 - **Lightweight**: The library has no dependencies, the code you see is all that runs.  
-  NOTE: The only dpes you'll see in the `go.mod` file are not included in the final binary since they are only used in `_test` files.
-- **Simplicity**: I made the API to have a minimal learning curve. You'll set it up in seconds.
+    NOTE: The only dependencies you'll see in the `go.mod` file are not included in the final binary since they are only used in `_test` files.
+- **Simplicity**: I designed the API to have a minimal learning curve. You'll set it up in seconds.
 - **Performance**: The library is benchmarked to be very fast. It implements custom JSON and YAML marshaling
   specifically optimized for logging
   - Up to 1.4x faster JSON marshaling than `encoding/json`
   - Up to 5x faster YAML marshaling than `gopkg.in/yaml.v3`
 - **Color Support**: Built-in ANSI color support for terminal output
 - **Thread-Safe**: Concurrent-safe logging with atomic operations
-- **Time-Optimized**: Efficient date/time print built-int logic with minimal allocations
+- **Time-Optimized**: Efficient date/time formatting with minimal allocations
 
 ## Use Examples
 

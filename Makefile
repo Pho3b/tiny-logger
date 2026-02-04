@@ -14,6 +14,6 @@ test-coverage:
 encoders-benchmark:
 	CGO_ENABLED=1 GOARCH=${ARCH} go test ./test/encoders_benchmark_test.go ./test/functions.go -bench=. -benchmem -benchtime=5s -cpu=8
 
-# Run benchmark tests
+# Run commercial loggers benchmark comparison tests
 loggers-comparison-benchmark:
 	CGO_ENABLED=1 GOARCH=${ARCH} go test ./test/loggers_comparison_test.go ./test/functions.go -bench=. -benchmem -benchtime=5s -cpu=8

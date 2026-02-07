@@ -3,8 +3,8 @@ package test
 import (
 	"os"
 
-	"github.com/pho3b/tiny-logger/logs/log_level"
-	"github.com/pho3b/tiny-logger/shared"
+	"github.com/Pho3b/tiny-logger/logs/log_level"
+	"github.com/Pho3b/tiny-logger/shared"
 )
 
 type LoggerConfigMock struct {

@@ -9,10 +9,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/pho3b/tiny-logger/logs/colors"
-	"github.com/pho3b/tiny-logger/logs/log_level"
-	"github.com/pho3b/tiny-logger/shared"
-	"github.com/pho3b/tiny-logger/test"
+	"github.com/Pho3b/tiny-logger/logs/colors"
+	"github.com/Pho3b/tiny-logger/logs/log_level"
+	"github.com/Pho3b/tiny-logger/shared"
+	"github.com/Pho3b/tiny-logger/test"
 	"github.com/stretchr/testify/assert"
 )
 

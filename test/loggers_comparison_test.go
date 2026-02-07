@@ -3,8 +3,8 @@ package test
 import (
 	"testing"
 
-	"github.com/pho3b/tiny-logger/logs"
-	"github.com/pho3b/tiny-logger/shared"
+	"github.com/Pho3b/tiny-logger/logs"
+	"github.com/Pho3b/tiny-logger/shared"
 	"github.com/rs/zerolog"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/zap"

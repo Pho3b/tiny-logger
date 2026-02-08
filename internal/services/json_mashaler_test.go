@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/pho3b/tiny-logger/shared"
+	"github.com/Pho3b/tiny-logger/shared"
 	"github.com/stretchr/testify/assert"
 )
 

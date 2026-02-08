@@ -3,8 +3,8 @@ package shared
 import (
 	"os"
 
-	"github.com/pho3b/tiny-logger/logs/colors"
-	"github.com/pho3b/tiny-logger/logs/log_level"
+	"github.com/Pho3b/tiny-logger/logs/colors"
+	"github.com/Pho3b/tiny-logger/logs/log_level"
 )
 
 type LoggerInterface interface {

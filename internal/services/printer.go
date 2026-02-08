@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"os"
 
-	c "github.com/pho3b/tiny-logger/logs/colors"
-	"github.com/pho3b/tiny-logger/logs/log_level"
-	s "github.com/pho3b/tiny-logger/shared"
+	c "github.com/Pho3b/tiny-logger/logs/colors"
+	"github.com/Pho3b/tiny-logger/logs/log_level"
+	s "github.com/Pho3b/tiny-logger/shared"
 )
 
 type Printer struct {

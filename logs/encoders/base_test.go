@@ -6,8 +6,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/pho3b/tiny-logger/internal/services"
-	s "github.com/pho3b/tiny-logger/shared"
+	"github.com/Pho3b/tiny-logger/internal/services"
+	s "github.com/Pho3b/tiny-logger/shared"
 	"github.com/stretchr/testify/assert"
 )
 

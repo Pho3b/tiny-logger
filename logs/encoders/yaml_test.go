@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pho3b/tiny-logger/internal/services"
-	"github.com/pho3b/tiny-logger/logs/colors"
-	ll "github.com/pho3b/tiny-logger/logs/log_level"
-	"github.com/pho3b/tiny-logger/shared"
-	"github.com/pho3b/tiny-logger/test"
+	"github.com/Pho3b/tiny-logger/internal/services"
+	"github.com/Pho3b/tiny-logger/logs/colors"
+	ll "github.com/Pho3b/tiny-logger/logs/log_level"
+	"github.com/Pho3b/tiny-logger/shared"
+	"github.com/Pho3b/tiny-logger/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )

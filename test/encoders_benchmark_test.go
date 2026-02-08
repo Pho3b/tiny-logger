@@ -3,8 +3,8 @@ package test
 import (
 	"testing"
 
-	"github.com/pho3b/tiny-logger/logs"
-	"github.com/pho3b/tiny-logger/shared"
+	"github.com/Pho3b/tiny-logger/logs"
+	"github.com/Pho3b/tiny-logger/shared"
 )
 
 func BenchmarkDefaultEncoderAllPropertiesDisabled(b *testing.B) {

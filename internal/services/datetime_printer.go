@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	s "github.com/pho3b/tiny-logger/shared"
+	s "github.com/Pho3b/tiny-logger/shared"
 )
 
 var dateFormat = map[s.DateTimeFormat]string{

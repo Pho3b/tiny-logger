@@ -8,6 +8,12 @@ import (
 
 const yamlCharOverhead = 70
 
+var yamlSpecialChars = map[rune]struct{}{
+	':': {}, '{': {}, '}': {}, '[': {}, ']': {}, ',': {}, '&': {},
+	'*': {}, '#': {}, '?': {}, '|': {}, '-': {}, '<': {}, '>': {},
+	'=': {}, '!': {}, '%': {}, '@': {}, '`': {}, ' ': {},
+}
+
 // YamlLogEntry represents a structured log entry that can be marshaled to YAML format.
 // All fields except Message are optional and will be omitted if empty.
 type YamlLogEntry struct {
@@ -21,7 +27,6 @@ type YamlLogEntry struct {
 
 // YamlMarshaler provides custom YAML marshaling functionality optimized for log entries.
 type YamlMarshaler struct {
-	specialCharsSet map[rune]any
 }
 
 // MarshalInto converts a YamlLogEntry into a YAML-formatted byte slice and adds it to the given buffer
@@ -237,7 +242,7 @@ func writeYAMLEscaped(buf *bytes.Buffer, s string) {
 // containsSpecialChars checks if a string contains characters that require quoting in YAML
 func (y *YamlMarshaler) containsSpecialChars(s string) bool {
 	for _, c := range s {
-		if _, ok := y.specialCharsSet[c]; ok {
+		if _, ok := yamlSpecialChars[c]; ok {
 			return true
 		}
 	}
@@ -246,10 +251,5 @@ func (y *YamlMarshaler) containsSpecialChars(s string) bool {
 }
 
 func NewYamlMarshaler() YamlMarshaler {
-	return YamlMarshaler{
-		specialCharsSet: map[rune]any{':': nil, '{': nil, '}': nil, '[': nil, ']': nil, ',': nil, '&': nil,
-			'*': nil, '#': nil, '?': nil, '|': nil, '-': nil, '<': nil, '>': nil, '=': nil, '!': nil, '%': nil,
-			'@': nil, '`': nil, ' ': nil,
-		},
-	}
+	return YamlMarshaler{}
 }

@@ -26,6 +26,7 @@ func (y *YAMLEncoder) Log(
 	args ...any,
 ) {
 	dEnabled, tEnabled := logger.GetDateTimeEnabled()
+	msg, extras := splitMsgAndExtras(y.castToString, args...)
 	msgBuffer := y.getBuffer()
 
 	y.composeMsgInto(
@@ -36,8 +37,8 @@ func (y *YAMLEncoder) Log(
 		tEnabled,
 		logger.GetShowLogLevel(),
 		logger.GetDateTimeFormat(),
-		y.castToString(args[0]),
-		args[1:]...,
+		msg,
+		extras...,
 	)
 
 	msgBuffer.WriteByte('\n')
@@ -50,6 +51,7 @@ func (y *YAMLEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 	if len(args) > 0 {
 		msgBuffer := y.getBuffer()
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
+		msg, extras := splitMsgAndExtras(y.castToString, args...)
 		msgBuffer.WriteString(color.String())
 
 		y.composeMsgInto(
@@ -60,13 +62,13 @@ func (y *YAMLEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 			tEnabled,
 			false,
 			logger.GetDateTimeFormat(),
-			y.castToString(args[0]),
-			args[1:]...,
+			msg,
+			extras...,
 		)
 
 		msgBuffer.WriteString(c.Reset.String())
 		msgBuffer.WriteByte('\n')
-		y.printer.PrintLog(s.StdOutput, msgBuffer, logger.GetLogFile())
+		y.printer.PrintLog(colorOutput(logger), msgBuffer, logger.GetLogFile())
 		y.putBuffer(msgBuffer)
 	}
 }

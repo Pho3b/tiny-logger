@@ -242,6 +242,19 @@ func TestYAMLEncoder_Color(t *testing.T) {
 	os.Stdout = originalStdOut
 }
 
+func TestYAMLEncoder_LogNoArgsDoesNotPanic(t *testing.T) {
+	encoder := NewYAMLEncoder(services.NewPrinter(), services.NewYamlMarshaler(), services.GetDateTimePrinter())
+	lConfig := &test.LoggerConfigMock{ShowLogLevel: true}
+
+	output := test.CaptureOutput(func() {
+		assert.NotPanics(t, func() {
+			encoder.Log(lConfig, ll.InfoLvlName, shared.StdOutput)
+		})
+	})
+
+	assert.NoError(t, yaml.Unmarshal([]byte(output), &shared.YamlLog{}))
+}
+
 func TestYAMLEncoder_ValidYAMLOutput(t *testing.T) {
 	var yamlMsg string
 

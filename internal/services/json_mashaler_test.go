@@ -132,6 +132,25 @@ func TestJsonMarshaler_Marshal_OnlyDate(t *testing.T) {
 	}
 }
 
+func TestJsonMarshaler_Marshal_EscapesSpecialChars(t *testing.T) {
+	buf := &bytes.Buffer{}
+	m := &JsonMarshaler{}
+	entry := JsonLogEntry{
+		Level:   "INFO",
+		Message: "he said \"hi\"\n\tand left\\done",
+		Extras:  []any{"quote\"key", "a\"b\\c\nd"},
+	}
+
+	m.MarshalInto(buf, entry)
+	got := buf.String()
+
+	// The produced output must be valid JSON that round-trips the original values.
+	var decoded shared.JsonLog
+	assert.NoError(t, json.Unmarshal(buf.Bytes(), &decoded), "output is not valid JSON: %s", got)
+	assert.Equal(t, "he said \"hi\"\n\tand left\\done", decoded.Message)
+	assert.Equal(t, "a\"b\\c\nd", decoded.Extras["quote\"key"])
+}
+
 func TestJsonMarshaler_Marshal_OnlyTime(t *testing.T) {
 	buf := &bytes.Buffer{}
 	m := &JsonMarshaler{}

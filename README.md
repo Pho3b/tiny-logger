@@ -8,7 +8,12 @@ I know that higher raw speed can be reached using other Go logging solutions, bu
 There are many projects that can benefit from having a logging library that is compact, fast, easy to use, and simple to modify.  
 Since the codebase is so small, it won't take long for you to understand it and modify it at will.
 
-The project is compatible with **Go version 1.18.x** and above.
+The library itself is dependency-free and compatible with **Go version 1.21.x** and above
+(it relies on `bytes.Buffer.AvailableBuffer`, introduced in Go 1.21).
+
+> The third-party benchmark comparison lives in its own module under [test/comparison](./test/comparison)
+> so that `zerolog`/`zap`/`logrus` never leak into the main module's dependency graph. Running that
+> comparison requires a more recent Go toolchain (see its `go.mod`).
 
 ## Key Features
 
@@ -20,7 +25,10 @@ The project is compatible with **Go version 1.18.x** and above.
   - Up to 1.4x faster JSON marshaling than `encoding/json`
   - Up to 5x faster YAML marshaling than `gopkg.in/yaml.v3`
 - **Color Support**: Built-in ANSI color support for terminal output.
-- **Thread-Safe**: Concurrent-safe logging with atomic operations.
+- **Concurrent logging**: A single configured logger can be shared across goroutines and used to log
+  concurrently. The cached date/time is kept up to date through atomic operations.
+  NOTE: configuration setters (`SetEncoder`, `AddDateTime`, `SetLogFile`, ...) are not synchronized,
+  so configure the logger before sharing it across goroutines rather than reconfiguring it while logging.
 - **Time-Optimized**: Efficient date/time formatting with minimal allocations.
 - **Memory-Efficient**: Heap allocations and log sizes are kept to a minimum to avoid triggering the garbage collector.
 
@@ -36,18 +44,18 @@ logger.Error("here is the error") // stderr: 'ERROR: here is the error'
 
 /******************** Configuration setup example ********************/
 logger := logs.NewLogger().
-    SetLogLvl(ll.WarnLvlName).
+    SetLogLvl(ll.DebugLvlName).
     EnableColors(true).
     AddTime(true).
     AddDate(true)
 
-logger.Warn("This is my Warn log") // stdout: WARN[03/11/2024 18:35:43]: This is my Warn log
+logger.Warn("This is my Warn log") // stdout: WARN [03/11/2024 18:35:43]: This is my Warn log
 
 logger.SetEncoder(shared.JsonEncoderType)
-logger.Debug("This is my Debug log") // stdout: {"level":"DEBUG","datetime":"03/11/2024 18:35:43","message":"This is my Debug log"}
+logger.Debug("This is my Debug log") // stdout: {"level":"DEBUG","datetime":"03/11/2024 18:35:43","msg":"This is my Debug log"}
 
 logger.AddTime(false)
-logger.Debug("This is my Debug log") // stdout: {"level":"DEBUG","date":"03/11/2024","message":"This is my Debug log"}
+logger.Debug("This is my Debug log") // stdout: {"level":"DEBUG","date":"03/11/2024","msg":"This is my Debug log"}
 
 /******************** Logging to a file example ********************/
 file, err := os.OpenFile("./my-out-file.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
@@ -61,12 +69,13 @@ logger.Debug("This is my Debug log", "Test arg")
 logger.CloseLogFile()
 
 /******************** Date Time Formatting example ********************/
-logger := logs.NewLogger().SetDateTimeFormat(shared.IT)
-logger.Debug("This is my Debug log", "Test arg") // stdout: 03/11/2024 18:35:43: This is my Debug log Test arg
+// Date/time are only rendered when enabled via AddDate / AddTime / AddDateTime.
+logger := logs.NewLogger().AddDateTime(true).ShowLogLevel(false).SetDateTimeFormat(shared.IT)
+logger.Debug("This is my Debug log", "Test arg") // stdout: [03/11/2024 18:35:43]: This is my Debug log Test arg
 logger.SetDateTimeFormat(shared.US)
-logger.Debug("This is my Debug log", "Test arg") // stdout: 11/03/2024 18:35:43: This is my Debug log Test arg
+logger.Debug("This is my Debug log", "Test arg") // stdout: [11/03/2024 06:35:43 PM]: This is my Debug log Test arg
 logger.SetDateTimeFormat(shared.UnixTimestamp)
-logger.Debug("This is my Debug log", "Test arg") // stdout: 1690982143.000000 This is my Debug log Test arg
+logger.Debug("This is my Debug log", "Test arg") // stdout: [1690982143]: This is my Debug log Test arg
 ````
 
 ## Benchmarks

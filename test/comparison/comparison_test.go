@@ -1,6 +1,11 @@
-package test
+// Package comparison hosts the benchmarks that compare tiny-logger against third-party loggers.
+// It lives in its own Go module so that zerolog/zap/logrus (and their transitive requirements)
+// never become dependencies of the main tiny-logger module, keeping the library at its real
+// minimum Go version and dependency-free.
+package comparison
 
 import (
+	"os"
 	"testing"
 
 	"github.com/Pho3b/tiny-logger/logs"
@@ -10,6 +15,16 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
+
+// initDevNullFile opens os.DevNull to discard output, isolating logger overhead from real I/O.
+func initDevNullFile() *os.File {
+	devNullFile, err := os.OpenFile(os.DevNull, os.O_WRONLY, 0)
+	if err != nil {
+		panic(err)
+	}
+
+	return devNullFile
+}
 
 // 1. Tiny Logger (Project)
 func BenchmarkTinyLogger(b *testing.B) {

@@ -11,6 +11,9 @@ const (
 	averageExtraLen  = 30
 )
 
+// hexDigits is used to render control characters as escape sequences.
+const hexDigits = "0123456789abcdef"
+
 // JsonLogEntry represents a structured log entry that can be marshaled to JSON format.
 // All fields except Message are optional and will be omitted if empty.
 type JsonLogEntry struct {
@@ -18,7 +21,7 @@ type JsonLogEntry struct {
 	Date    string `json:"date,omitempty"`
 	Time    string `json:"time,omitempty"`
 	Message string `json:"msg"`
-	UnixTS  string `json:"unixTimestamp,omitempty"`
+	UnixTS  string `json:"ts,omitempty"`
 	Extras  []any  `json:"extras,omitempty"`
 }
 
@@ -36,7 +39,7 @@ func (j *JsonMarshaler) MarshalInto(buf *bytes.Buffer, logEntry JsonLogEntry) {
 	j.writeLogEntryProperties(buf, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.UnixTS)
 
 	buf.WriteString("\"msg\":\"")
-	buf.WriteString(logEntry.Message)
+	writeJSONEscaped(buf, logEntry.Message)
 	buf.WriteByte('"')
 
 	if extrasLen > 0 {
@@ -76,18 +79,18 @@ func (j *JsonMarshaler) writeValue(buf *bytes.Buffer, v any, isKey bool) {
 	switch val := v.(type) {
 	case string:
 		if isKey {
-			buf.WriteString(val)
+			writeJSONEscaped(buf, val)
 		} else {
 			buf.WriteByte('"')
-			buf.WriteString(val)
+			writeJSONEscaped(buf, val)
 			buf.WriteByte('"')
 		}
 	case rune:
 		if isKey {
-			buf.WriteRune(val)
+			writeJSONEscaped(buf, string(val))
 		} else {
 			buf.WriteByte('"')
-			buf.WriteRune(val)
+			writeJSONEscaped(buf, string(val))
 			buf.WriteByte('"')
 		}
 	case int:
@@ -100,12 +103,53 @@ func (j *JsonMarshaler) writeValue(buf *bytes.Buffer, v any, isKey bool) {
 		buf.Write(strconv.AppendBool(buf.AvailableBuffer(), val))
 	default:
 		if isKey {
-			buf.WriteString(fmt.Sprint(val))
+			writeJSONEscaped(buf, fmt.Sprint(val))
 		} else {
 			buf.WriteByte('"')
-			buf.WriteString(fmt.Sprint(val))
+			writeJSONEscaped(buf, fmt.Sprint(val))
 			buf.WriteByte('"')
 		}
+	}
+}
+
+// writeJSONEscaped writes s into the buffer escaping the characters that would
+// otherwise produce invalid JSON (double quotes, backslashes and control chars).
+// It keeps a fast path that writes the whole string in one shot when no escaping is needed.
+func writeJSONEscaped(buf *bytes.Buffer, s string) {
+	start := 0
+
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if c != '"' && c != '\\' && c >= 0x20 {
+			continue
+		}
+
+		if start < i {
+			buf.WriteString(s[start:i])
+		}
+
+		switch c {
+		case '"':
+			buf.WriteString(`\"`)
+		case '\\':
+			buf.WriteString(`\\`)
+		case '\n':
+			buf.WriteString(`\n`)
+		case '\r':
+			buf.WriteString(`\r`)
+		case '\t':
+			buf.WriteString(`\t`)
+		default:
+			buf.WriteString(`\u00`)
+			buf.WriteByte(hexDigits[c>>4])
+			buf.WriteByte(hexDigits[c&0x0F])
+		}
+
+		start = i + 1
+	}
+
+	if start < len(s) {
+		buf.WriteString(s[start:])
 	}
 }
 

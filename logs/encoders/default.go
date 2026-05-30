@@ -63,7 +63,7 @@ func (d *DefaultEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, a
 
 		msgBuffer.WriteString(c.Reset.String())
 		msgBuffer.WriteByte('\n')
-		d.printer.PrintLog(s.StdOutput, msgBuffer, logger.GetLogFile())
+		d.printer.PrintLog(colorOutput(logger), msgBuffer, logger.GetLogFile())
 		d.putBuffer(msgBuffer)
 	}
 }

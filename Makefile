@@ -14,6 +14,8 @@ test-coverage:
 encoders-benchmark:
 	CGO_ENABLED=1 GOARCH=${ARCH} go test ./test/encoders_benchmark_test.go ./test/functions.go -bench=. -benchmem -benchtime=5s -cpu=8
 
-# Run commercial loggers benchmark comparison tests
+# Run commercial loggers benchmark comparison tests.
+# These live in their own module (test/comparison) so that zerolog/zap/logrus never become
+# dependencies of the main, zero-dependency tiny-logger module.
 loggers-comparison-benchmark:
-	CGO_ENABLED=1 GOARCH=${ARCH} go test ./test/loggers_comparison_test.go ./test/functions.go -bench=. -benchmem -benchtime=5s -cpu=8
+	cd test/comparison && CGO_ENABLED=1 GOARCH=${ARCH} go test ./... -bench=. -benchmem -benchtime=5s -cpu=8

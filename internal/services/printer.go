@@ -38,20 +38,20 @@ func (p *Printer) PrintLog(outType s.OutputType, msgBuffer *bytes.Buffer, file *
 
 // RetrieveColorsFromLogLevel returns an array of colors as strings to be used in log output based on a given log level.
 // if enableColors is false, it returns an array of empty strings.
-func (p *Printer) RetrieveColorsFromLogLevel(enableColors bool, logLevelInt int8) []c.Color {
-	var res = []c.Color{"", ""}
+func (p *Printer) RetrieveColorsFromLogLevel(enableColors bool, logLevelName log_level.LogLvlName) [2]c.Color {
+	var res = [2]c.Color{"", ""}
 
 	if enableColors {
-		switch logLevelInt {
-		case log_level.FatalErrorLvl:
+		switch logLevelName {
+		case log_level.FatalErrorLvlName:
 			res[0] = c.Magenta
-		case log_level.ErrorLvl:
+		case log_level.ErrorLvlName:
 			res[0] = c.Red
-		case log_level.WarnLvl:
+		case log_level.WarnLvlName:
 			res[0] = c.Yellow
-		case log_level.InfoLvl:
+		case log_level.InfoLvlName:
 			res[0] = c.Cyan
-		case log_level.DebugLvl:
+		case log_level.DebugLvlName:
 			res[0] = c.Gray
 		}
 

@@ -82,7 +82,7 @@ func (d *DefaultEncoder) composeMsgInto(
 	buf.Grow(len(args)*averageWordLen + defaultCharOverhead)
 
 	isDateOrTimeEnabled := dateEnabled || timeEnabled
-	colors := d.printer.RetrieveColorsFromLogLevel(headerColorEnabled, ll.LogLvlNameToInt[logLevel])
+	colors := d.printer.RetrieveColorsFromLogLevel(headerColorEnabled, logLevel)
 	buf.WriteString(string(colors[0]))
 
 	if showLogLevel {

@@ -26,7 +26,7 @@ The library itself is dependency-free and compatible with **Go version 1.21.x** 
   - Up to 5x faster YAML marshaling than `gopkg.in/yaml.v3`
 - **Color Support**: Built-in ANSI color support for terminal output.
 - **Concurrent logging**: A single configured logger can be shared across goroutines and used to log
-  concurrently. The cached date/time is kept up to date through atomic operations.
+  concurrently. The cached date/time is kept up to date through atomic operations.     
   NOTE: configuration setters (`SetEncoder`, `AddDateTime`, `SetLogFile`, ...) are not synchronized,
   so configure the logger before sharing it across goroutines rather than reconfiguring it while logging.
 - **Time-Optimized**: Efficient date/time formatting with minimal allocations.

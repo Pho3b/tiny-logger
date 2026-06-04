@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/Pho3b/tiny-logger/internal/services"
 	s "github.com/Pho3b/tiny-logger/shared"
 )
 
@@ -34,7 +33,7 @@ func (b *baseEncoder) castAndConcatenateInto(buf *bytes.Buffer, args ...any) {
 
 		switch v := arg.(type) {
 		case string:
-			services.WriteEscaped(buf, v)
+			buf.WriteString(v)
 		case []byte:
 			buf.Write(v)
 		case int:

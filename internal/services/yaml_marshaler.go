@@ -98,7 +98,7 @@ func (y *YamlMarshaler) writeStr(buf *bytes.Buffer, v any, isKey bool) {
 
 		if y.containsSpecialChars(str) {
 			buf.WriteByte('"')
-			buf.WriteString(str)
+			writeYAMLEscaped(buf, str)
 			buf.WriteByte('"')
 		} else {
 			buf.WriteString(str)
@@ -239,9 +239,15 @@ func writeYAMLEscaped(buf *bytes.Buffer, s string) {
 	}
 }
 
-// containsSpecialChars checks if a string contains characters that require quoting in YAML
+// containsSpecialChars checks if a string contains characters that require quoting in YAML.
+// Besides the YAML indicator characters it also flags control chars, double quotes and
+// backslashes, which must be double-quoted and escaped to keep the output valid.
 func (y *YamlMarshaler) containsSpecialChars(s string) bool {
 	for _, c := range s {
+		if c < 0x20 || c == '"' || c == '\\' {
+			return true
+		}
+
 		if _, ok := yamlSpecialChars[c]; ok {
 			return true
 		}

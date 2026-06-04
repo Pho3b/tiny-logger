@@ -122,6 +122,34 @@ func TestYamlMarshaler_Marshal_EscapesSpecialChars(t *testing.T) {
 	}
 }
 
+// TestYamlMarshaler_Marshal_EscapesControlCharsInExtras guards against control characters in
+// extras keys/values being written raw (unquoted, unescaped), which produced invalid YAML.
+func TestYamlMarshaler_Marshal_EscapesControlCharsInExtras(t *testing.T) {
+	buf := &bytes.Buffer{}
+	m := NewYamlMarshaler()
+	entry := YamlLogEntry{
+		Message: "test",
+		Extras:  []any{"\r4", true},
+	}
+
+	m.MarshalInto(buf, entry)
+	got := buf.String()
+
+	// The carriage return must be escaped, never emitted raw.
+	if bytes.ContainsRune(buf.Bytes(), '\r') {
+		t.Errorf("output contains a raw carriage return: %q", got)
+	}
+
+	// The produced output must be valid YAML that round-trips the original key.
+	var decoded shared.YamlLog
+	if err := yaml.Unmarshal(buf.Bytes(), &decoded); err != nil {
+		t.Fatalf("output is not valid YAML: %v\n%s", err, got)
+	}
+	if _, ok := decoded.Extras["\r4"]; !ok {
+		t.Errorf("extra key not round-tripped, got %#v", decoded.Extras)
+	}
+}
+
 func TestYamlMarshaler_ContainsSpecialChars(t *testing.T) {
 	yamlMarshaler := NewYamlMarshaler()
 	tests := []struct {
@@ -140,6 +168,11 @@ func TestYamlMarshaler_ContainsSpecialChars(t *testing.T) {
 		{"with@at", true},
 		{"with!exclamation", true},
 		{"with?question", true},
+		{"with\rcarriage", true},
+		{"with\nnewline", true},
+		{"with\ttab", true},
+		{"with\"quote", true},
+		{"with\\backslash", true},
 	}
 
 	for _, tt := range tests {

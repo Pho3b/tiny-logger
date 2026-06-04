@@ -9,7 +9,14 @@ import (
 const (
 	jsonCharOverhead = 80
 	averageExtraLen  = 30
+	// firstPrintableASCII is the first printable ASCII byte; bytes below it are
+	// control characters that must be escaped in JSON output.
+	firstPrintableASCII = 0x20
 )
+
+// hexDigits is the lookup table used to render control characters as hex escapes.
+// It is shared by the JSON and YAML escapers (writeJSONEscaped and writeYAMLEscaped).
+const hexDigits = "0123456789abcdef"
 
 // JsonLogEntry represents a structured log entry that can be marshaled to JSON format.
 // All fields except Message are optional and will be omitted if empty.
@@ -36,7 +43,7 @@ func (j *JsonMarshaler) MarshalInto(buf *bytes.Buffer, logEntry JsonLogEntry) {
 	j.writeLogEntryProperties(buf, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.UnixTS)
 
 	buf.WriteString("\"msg\":\"")
-	WriteEscaped(buf, logEntry.Message)
+	writeJSONEscaped(buf, logEntry.Message)
 	buf.WriteByte('"')
 
 	if extrasLen > 0 {
@@ -76,18 +83,18 @@ func (j *JsonMarshaler) writeValue(buf *bytes.Buffer, v any, isKey bool) {
 	switch val := v.(type) {
 	case string:
 		if isKey {
-			WriteEscaped(buf, val)
+			writeJSONEscaped(buf, val)
 		} else {
 			buf.WriteByte('"')
-			WriteEscaped(buf, val)
+			writeJSONEscaped(buf, val)
 			buf.WriteByte('"')
 		}
 	case rune:
 		if isKey {
-			WriteEscaped(buf, string(val))
+			writeJSONEscaped(buf, string(val))
 		} else {
 			buf.WriteByte('"')
-			WriteEscaped(buf, string(val))
+			writeJSONEscaped(buf, string(val))
 			buf.WriteByte('"')
 		}
 	case int:
@@ -100,15 +107,14 @@ func (j *JsonMarshaler) writeValue(buf *bytes.Buffer, v any, isKey bool) {
 		buf.Write(strconv.AppendBool(buf.AvailableBuffer(), val))
 	default:
 		if isKey {
-			WriteEscaped(buf, fmt.Sprint(val))
+			writeJSONEscaped(buf, fmt.Sprint(val))
 		} else {
 			buf.WriteByte('"')
-			WriteEscaped(buf, fmt.Sprint(val))
+			writeJSONEscaped(buf, fmt.Sprint(val))
 			buf.WriteByte('"')
 		}
 	}
 }
-
 
 // writeLogEntryProperties writes the standard log entry properties to the buffer.
 // Only non-empty properties are written, each followed by a comma.
@@ -158,6 +164,47 @@ func (j *JsonMarshaler) writeLogEntryProperties(
 		buf.WriteString(time)
 		buf.WriteByte('"')
 		buf.WriteByte(',')
+	}
+}
+
+// writeJSONEscaped writes s into the buffer escaping characters that would produce
+// invalid JSON: double quotes, backslashes, and control chars below 0x20.
+// It keeps a fast path that writes the whole string in one shot when no escaping is needed.
+func writeJSONEscaped(buf *bytes.Buffer, s string) {
+	start := 0
+
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if c != '"' && c != '\\' && c >= firstPrintableASCII {
+			continue
+		}
+
+		if start < i {
+			buf.WriteString(s[start:i])
+		}
+
+		switch c {
+		case '"':
+			buf.WriteString(`\"`)
+		case '\\':
+			buf.WriteString(`\\`)
+		case '\n':
+			buf.WriteString(`\n`)
+		case '\r':
+			buf.WriteString(`\r`)
+		case '\t':
+			buf.WriteString(`\t`)
+		default:
+			buf.WriteString(`\u00`)
+			buf.WriteByte(hexDigits[c>>4])
+			buf.WriteByte(hexDigits[c&0x0F])
+		}
+
+		start = i + 1
+	}
+
+	if start < len(s) {
+		buf.WriteString(s[start:])
 	}
 }
 

@@ -3,6 +3,9 @@ package services
 import (
 	"bytes"
 	"testing"
+
+	"github.com/Pho3b/tiny-logger/shared"
+	"gopkg.in/yaml.v3"
 )
 
 func TestYamlMarshaler_Marshal(t *testing.T) {
@@ -91,6 +94,31 @@ func TestYamlMarshaler_Marshal(t *testing.T) {
 			}
 			buf.Reset()
 		})
+	}
+}
+
+func TestYamlMarshaler_Marshal_EscapesSpecialChars(t *testing.T) {
+	buf := &bytes.Buffer{}
+	m := NewYamlMarshaler()
+	entry := YamlLogEntry{
+		Level:   "INFO",
+		Message: "value: with colon\nand newline",
+		Extras:  []any{"quote\"key", "a\"b: c"},
+	}
+
+	m.MarshalInto(buf, entry)
+	got := buf.String()
+
+	// The produced output must be valid YAML that round-trips the original values.
+	var decoded shared.YamlLog
+	if err := yaml.Unmarshal(buf.Bytes(), &decoded); err != nil {
+		t.Fatalf("output is not valid YAML: %v\n%s", err, got)
+	}
+	if decoded.Message != "value: with colon\nand newline" {
+		t.Errorf("message not round-tripped, got %q", decoded.Message)
+	}
+	if decoded.Extras["quote\"key"] != "a\"b: c" {
+		t.Errorf("extra not round-tripped, got %q", decoded.Extras["quote\"key"])
 	}
 }
 

@@ -26,6 +26,7 @@ func (j *JSONEncoder) Log(
 	args ...any,
 ) {
 	dEnabled, tEnabled := logger.GetDateTimeEnabled()
+	msg, extras := splitMsgAndExtras(j.castToString, args...)
 	msgBuffer := j.getBuffer()
 
 	j.composeMsgInto(
@@ -36,8 +37,8 @@ func (j *JSONEncoder) Log(
 		tEnabled,
 		logger.GetShowLogLevel(),
 		logger.GetDateTimeFormat(),
-		j.castToString(args[0]),
-		args[1:]...,
+		msg,
+		extras...,
 	)
 
 	msgBuffer.WriteByte('\n')
@@ -49,6 +50,7 @@ func (j *JSONEncoder) Log(
 func (j *JSONEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args ...any) {
 	if len(args) > 0 {
 		dEnabled, tEnabled := logger.GetDateTimeEnabled()
+		msg, extras := splitMsgAndExtras(j.castToString, args...)
 		msgBuffer := j.getBuffer()
 		msgBuffer.WriteString(color.String())
 
@@ -60,13 +62,13 @@ func (j *JSONEncoder) Color(logger s.LoggerConfigsInterface, color c.Color, args
 			tEnabled,
 			false,
 			logger.GetDateTimeFormat(),
-			j.castToString(args[0]),
-			args[1:]...,
+			msg,
+			extras...,
 		)
 
 		msgBuffer.WriteString(c.Reset.String())
 		msgBuffer.WriteByte('\n')
-		j.printer.PrintLog(s.StdOutput, msgBuffer, logger.GetLogFile())
+		j.printer.PrintLog(colorOutput(logger), msgBuffer, logger.GetLogFile())
 		j.putBuffer(msgBuffer)
 	}
 }

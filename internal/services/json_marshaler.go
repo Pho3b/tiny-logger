@@ -18,7 +18,7 @@ type JsonLogEntry struct {
 	Date    string `json:"date,omitempty"`
 	Time    string `json:"time,omitempty"`
 	Message string `json:"msg"`
-	UnixTS  string `json:"unixTimestamp,omitempty"`
+	UnixTS  string `json:"ts,omitempty"`
 	Extras  []any  `json:"extras,omitempty"`
 }
 
@@ -36,7 +36,7 @@ func (j *JsonMarshaler) MarshalInto(buf *bytes.Buffer, logEntry JsonLogEntry) {
 	j.writeLogEntryProperties(buf, logEntry.Level, logEntry.Date, logEntry.Time, logEntry.UnixTS)
 
 	buf.WriteString("\"msg\":\"")
-	buf.WriteString(logEntry.Message)
+	WriteEscaped(buf, logEntry.Message)
 	buf.WriteByte('"')
 
 	if extrasLen > 0 {
@@ -76,18 +76,18 @@ func (j *JsonMarshaler) writeValue(buf *bytes.Buffer, v any, isKey bool) {
 	switch val := v.(type) {
 	case string:
 		if isKey {
-			buf.WriteString(val)
+			WriteEscaped(buf, val)
 		} else {
 			buf.WriteByte('"')
-			buf.WriteString(val)
+			WriteEscaped(buf, val)
 			buf.WriteByte('"')
 		}
 	case rune:
 		if isKey {
-			buf.WriteRune(val)
+			WriteEscaped(buf, string(val))
 		} else {
 			buf.WriteByte('"')
-			buf.WriteRune(val)
+			WriteEscaped(buf, string(val))
 			buf.WriteByte('"')
 		}
 	case int:
@@ -100,14 +100,15 @@ func (j *JsonMarshaler) writeValue(buf *bytes.Buffer, v any, isKey bool) {
 		buf.Write(strconv.AppendBool(buf.AvailableBuffer(), val))
 	default:
 		if isKey {
-			buf.WriteString(fmt.Sprint(val))
+			WriteEscaped(buf, fmt.Sprint(val))
 		} else {
 			buf.WriteByte('"')
-			buf.WriteString(fmt.Sprint(val))
+			WriteEscaped(buf, fmt.Sprint(val))
 			buf.WriteByte('"')
 		}
 	}
 }
+
 
 // writeLogEntryProperties writes the standard log entry properties to the buffer.
 // Only non-empty properties are written, each followed by a comma.

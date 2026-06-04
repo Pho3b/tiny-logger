@@ -6,6 +6,7 @@ type JsonLog struct {
 	Date     string         `json:"date,omitempty"`
 	Time     string         `json:"time,omitempty"`
 	DateTime string         `json:"datetime,omitempty"`
+	UnixTS   string         `json:"ts,omitempty"`
 	Message  string         `json:"msg"`
 	Extras   map[string]any `json:"extras,omitempty"`
 }
@@ -16,6 +17,7 @@ type YamlLog struct {
 	Date     string         `yaml:"date,omitempty"`
 	Time     string         `yaml:"time,omitempty"`
 	DateTime string         `yaml:"datetime,omitempty"`
+	UnixTS   string         `yaml:"ts,omitempty"`
 	Message  string         `yaml:"msg"`
 	Extras   map[string]any `yaml:"extras,omitempty"`
 }

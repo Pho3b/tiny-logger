@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/Pho3b/tiny-logger/internal/services"
 	s "github.com/Pho3b/tiny-logger/shared"
 )
 
@@ -33,7 +34,7 @@ func (b *baseEncoder) castAndConcatenateInto(buf *bytes.Buffer, args ...any) {
 
 		switch v := arg.(type) {
 		case string:
-			buf.WriteString(v)
+			services.WriteEscaped(buf, v)
 		case []byte:
 			buf.Write(v)
 		case int:
@@ -122,6 +123,28 @@ func (b *baseEncoder) castToString(arg any) string {
 	default:
 		return fmt.Sprint(v)
 	}
+}
+
+// splitMsgAndExtras splits the variadic args into the first element (the message, cast to string
+// through the given cast function) and the remaining elements (the extras).
+// It returns an empty message and no extras when no args are given, avoiding an out-of-range panic
+// for callers that invoke the encoder directly with no arguments.
+func splitMsgAndExtras(cast func(any) string, args ...any) (string, []any) {
+	if len(args) == 0 {
+		return "", nil
+	}
+
+	return cast(args[0]), args[1:]
+}
+
+// colorOutput returns the output type a Color log should be written to, honoring a configured
+// log file the same way the standard log methods do.
+func colorOutput(logger s.LoggerConfigsInterface) s.OutputType {
+	if logger.GetLogFile() != nil {
+		return s.FileOutput
+	}
+
+	return s.StdOutput
 }
 
 // getBuffer returns a new bytes buffer from the pool.

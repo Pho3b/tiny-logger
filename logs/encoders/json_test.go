@@ -244,6 +244,19 @@ func TestJSONEncoder_Color(t *testing.T) {
 	os.Stdout = originalStdOut
 }
 
+func TestJSONEncoder_LogNoArgsDoesNotPanic(t *testing.T) {
+	encoder := NewJSONEncoder(services.NewPrinter(), services.NewJsonMarshaler(), services.GetDateTimePrinter())
+	lConfig := &test.LoggerConfigMock{ShowLogLevel: true}
+
+	output := test.CaptureOutput(func() {
+		assert.NotPanics(t, func() {
+			encoder.Log(lConfig, ll.InfoLvlName, shared.StdOutput)
+		})
+	})
+
+	assert.NoError(t, json.Unmarshal([]byte(output), &shared.JsonLog{}))
+}
+
 func TestJSONEncoder_ValidJSONOutput(t *testing.T) {
 	var jsonMsg string
 
